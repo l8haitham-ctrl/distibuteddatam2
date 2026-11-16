@@ -4,9 +4,10 @@ from unittest.mock import patch
 import pyodbc
 from fastapi.testclient import TestClient
 
-from app.database import configured_source, connect, connection_string, rows
+from app.core.config import configured_source
+from app.connectors.sqlserver_connection import connect, connection_string, rows
 from app.main import app
-from app.models import ConnectionConfig
+from app.schemas.connections import ConnectionConfig
 
 
 class ErrorHandlingTests(unittest.TestCase):
@@ -25,7 +26,7 @@ class ErrorHandlingTests(unittest.TestCase):
 
     def test_driver_errors_do_not_leak_credentials(self):
         secret = "never-echo-this-password"
-        with patch("app.database.open_connection", side_effect=pyodbc.Error("28000", secret)):
+        with patch("app.connectors.sqlserver_connection.open_connection", side_effect=pyodbc.Error("28000", secret)):
             response = self.client.post("/connections/test", json={
                 "host": "sqlserver", "database": "BusinessDB", "username": "someone", "password": secret,
             })

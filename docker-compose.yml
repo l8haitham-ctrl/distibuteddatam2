@@ -45,7 +45,7 @@ services:
     environment:
       MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD:?Define MSSQL_SA_PASSWORD in .env}
       SOURCE_PASSWORD: ${LAKE_READER_PASSWORD:?Define LAKE_READER_PASSWORD in .env}
-    command: ["python", "-m", "app.provision"]
+    command: ["python", "-m", "app.scripts.provision"]
     restart: "no"
 
   backend:

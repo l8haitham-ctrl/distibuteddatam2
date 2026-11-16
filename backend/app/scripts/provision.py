@@ -3,8 +3,8 @@ import os
 
 import pyodbc
 
-from app.database import open_connection
-from app.models import ConnectionConfig
+from app.connectors.sqlserver_connection import open_connection
+from app.schemas.connections import ConnectionConfig
 
 
 def main():

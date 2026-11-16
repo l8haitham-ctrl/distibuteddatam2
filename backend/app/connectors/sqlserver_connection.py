@@ -1,20 +1,8 @@
-import os
 from contextlib import contextmanager
 
 import pyodbc
-from fastapi import HTTPException
-
-from app.models import ConnectionConfig
-
-
-def configured_source() -> ConnectionConfig:
-    return ConnectionConfig(
-        host=os.getenv("SOURCE_HOST", "sqlserver"),
-        database=os.getenv("SOURCE_DATABASE", "BusinessDB"),
-        username=os.getenv("SOURCE_USERNAME", "lake_reader"),
-        password=os.environ["SOURCE_PASSWORD"],
-        trust_server_certificate=True,
-    )
+from app.core.errors import AuthenticationFailed, DatabaseUnavailable, DatabaseOperationFailed
+from app.schemas.connections import ConnectionConfig
 
 
 def odbc_value(value: str) -> str:
@@ -52,10 +40,10 @@ def connect(config: ConnectionConfig):
         # Never expose driver messages, connection strings or submitted credentials.
         state = str(exc.args[0]) if exc.args else ""
         if state == "28000":
-            raise HTTPException(400, "Authentification refusee : verifier les identifiants et la base.") from None
+            raise AuthenticationFailed() from None
         if state.startswith("08") or state in {"HYT00", "HYT01"}:
-            raise HTTPException(503, "Connexion impossible : verifier le serveur, le port et le certificat.") from None
-        raise HTTPException(502, "La base a refuse l'operation. Verifier les droits de lecture.") from None
+            raise DatabaseUnavailable() from None
+        raise DatabaseOperationFailed() from None
     finally:
         if connection is not None:
             connection.close()

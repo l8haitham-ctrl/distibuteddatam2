@@ -1,6 +1,5 @@
-from fastapi import HTTPException
-
-from app.database import rows
+from app.core.errors import TableNotFound
+from app.connectors.sqlserver_connection import rows
 
 
 def list_tables(connection) -> list[dict]:
@@ -18,7 +17,7 @@ def describe_table(connection, schema: str, table: str) -> dict:
         WHERE s.name = ? AND t.name = ? AND t.is_ms_shipped = 0
     """, schema, table)
     if not found:
-        raise HTTPException(404, "Table introuvable ou non accessible.")
+        raise TableNotFound()
     object_id = found[0]["object_id"]
     columns = rows(connection, """
         SELECT c.name AS name, ty.name AS data_type, c.column_id AS position,

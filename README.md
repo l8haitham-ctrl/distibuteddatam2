@@ -212,3 +212,40 @@ Documentation technique : [FastAPI](https://fastapi.tiangolo.com/tutorial/first-
 
 Construire le formulaire de connexion et l'explorateur visuel des tables
 au-dessus de cette API. Puis ajouter les jobs d'extraction par lots vers MinIO.
+
+## Organisation modulaire du backend
+
+```text
+backend/app/
+  main.py          Construction de l'application et montage des routes
+  api/
+    routes/        Endpoints : connexions, sources, exploration, sante
+    dependencies.py  Injection des services
+    errors.py      Traduction des erreurs en reponses HTTP
+  services/        Cas d'utilisation, independants de FastAPI
+  connectors/      Contrat commun, fabrique et implementation SQL Server
+  schemas/         Validation des donnees de connexion
+  core/            Configuration et erreurs metier
+  scripts/         Initialisation administrative du compte lecteur
+```
+
+Le parcours d'une requete est `route -> service -> connecteur -> SQL Server`.
+Les requetes SQL et le pilote ODBC restent dans `connectors/`. Ajouter un
+moteur necessitera un nouvel adaptateur respectant `DatabaseConnector`,
+son enregistrement dans la fabrique et l'extension du modele de connexion.
+Les routes et services seront reutilisables.
+
+## Branches de fonctionnalites
+
+Chaque nouvelle fonctionnalite backend est developpee, testee, commitee et
+poussee sur une branche `codex/<fonctionnalite>` distincte. Les regles sont
+conservees dans `AGENTS.md`. Les fusions vers la branche principale sont
+effectuees sur demande.
+
+Le commit initial conserve la version fonctionnelle precedente sur `master`.
+La reorganisation modulaire se trouve sur `codex/backend-modularization`.
+Les fonctionnalites suivantes partiront de la version validee la plus recente ;
+si la branche precedente n'est pas encore fusionnee, leur dependance sera
+indiquee pour permettre une revue dans le bon ordre.
+
+Depot distant : [distibuteddatam2](https://github.com/l8haitham-ctrl/distibuteddatam2).
