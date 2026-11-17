@@ -1,0 +1,461 @@
+@media(min-width:1550px) {
+  .main-shell main {
+  padding-top:48px
+}
+.page-heading {
+  margin-bottom:15px
+}
+.explorer-workspace {
+  min-height:520px
+}
+.column-table td,.column-table th {
+  height:57px
+}
+.table-heading {
+  padding-top:29px
+}
+.table-title {
+  margin-top:24px
+}
+.table-metrics {
+  margin-top:20px
+}
+.structure-tabs {
+  margin-top:26px
+}
+.sidebar {
+  padding-top:35px
+}
+
+}
+
+@media(max-width:1190px) {
+  .app-shell {
+  grid-template-columns:195px minmax(0,1fr)
+}
+.sidebar {
+  padding-left:13px;
+  padding-right:13px
+}
+.profile {
+  margin-left:-13px;
+  margin-right:-13px;
+  padding:20px 14px
+}
+.nav-item {
+  font-size:10px;
+  gap:7px
+}
+.nav-item small {
+  display:none
+}
+.topbar {
+  padding:0 24px
+}
+.main-shell main {
+  padding:28px 24px
+}
+.page-heading {
+  align-items:flex-start
+}
+.page-actions {
+  flex-direction:column
+}
+.journey {
+  gap:13px
+}
+.explorer-workspace {
+  grid-template-columns:195px minmax(0,1fr)
+}
+.table-heading {
+  padding-left:19px;
+  padding-right:19px
+}
+.structure-tabs {
+  padding:0 19px
+}
+.column-table th,.column-table td {
+  padding-left:10px;
+  padding-right:10px
+}
+.column-table .column-number {
+  padding-left:19px
+}
+.source-strip {
+  padding:17px 19px
+}
+.source-strip-right {
+  gap:10px
+}
+.source-strip-right>span:not(.read-only) {
+  display:none
+}
+.table-metrics {
+  gap:10px
+}
+.topbar-right {
+  gap:16px
+}
+.footnote-right {
+  display:none
+}
+
+}
+
+@media(max-width:940px) {
+  .app-shell {
+  grid-template-columns:70px minmax(0,1fr)
+}
+.sidebar {
+  padding:27px 10px 0;
+  align-items:center
+}
+.brand {
+  padding:0;
+  font-size:0
+}
+.brand>span:last-child,.workspace-label,.nav-label,.nav-item small,.nav-count,.project-source,.sidebar-note,.sidebar-link,.profile {
+  display:none
+}
+.main-nav {
+  margin-top:47px;
+  gap:15px;
+  width:100%
+}
+.nav-item {
+  font-size:0;
+  justify-content:center;
+  padding:12px 0;
+  gap:0
+}
+.sidebar-bottom {
+  padding-top:0
+}
+.sidebar {
+  position:relative
+}
+.sidebar::after {
+  content:'A';
+  font:700 13px 'Manrope Variable',sans-serif;
+  position:absolute;
+  bottom:24px;
+  border:1px solid #688975;
+  color:#cce0ad;
+  width:30px;
+  height:30px;
+  border-radius:50%;
+  display:grid;
+  place-items:center
+}
+.source-strip-right {
+  display:none
+}
+.journey {
+  gap:10px;
+  font-size:9px;
+  padding:12px
+}
+.journey small {
+  display:none
+}
+.explorer-workspace {
+  grid-template-columns:185px minmax(0,1fr)
+}
+.column-table .column-number {
+  display:none
+}
+.table-metrics {
+  gap:8px;
+  font-size:8px
+}
+.column-table th,.column-table td {
+  padding-left:11px;
+  padding-right:11px
+}
+.section-note {
+  font-size:9px
+}
+.topbar-right .environment {
+  display:none
+}
+.column-name {
+  gap:5px
+}
+.nullable-label {
+  font-size:8px
+}
+.data-type {
+  padding:4px
+}
+.mockup-banner {
+  flex-wrap:wrap
+}
+.mockup-banner a {
+  margin-left:0
+}
+.source-name p {
+  flex-wrap:wrap
+}
+
+}
+
+@media(max-width:700px) {
+  .topbar {
+  height:58px;
+  padding:0 18px
+}
+.topbar-right {
+  display:none
+}
+.main-shell main {
+  padding:25px 16px
+}
+.page-heading {
+  flex-direction:column;
+  gap:20px
+}
+.page-actions {
+  flex-direction:row;
+  flex-wrap:wrap;
+  width:100%
+}
+.page-actions .button {
+  flex:1
+}
+.page-heading p {
+  font-size:11px;
+  line-height:1.8
+}
+.eyebrow {
+  font-size:8px;
+  letter-spacing:1.2px
+}
+h1 {
+  font-size:28px
+}
+.journey {
+  gap:8px;
+  flex-wrap:wrap;
+  margin-top:23px;
+  margin-bottom:26px
+}
+.journey li:last-child,.journey>svg:last-of-type {
+  display:none
+}
+.section-note {
+  display:none
+}
+.section-heading h2 {
+  font-size:14px
+}
+.explorer-workspace {
+  grid-template-columns:1fr
+}
+.table-tree {
+  border-right:0;
+  border-bottom:1px solid var(--line);
+  padding:17px 16px 0
+}
+.tree-heading {
+  margin-bottom:12px
+}
+.tree-root {
+  margin-top:17px
+}
+.schema-group {
+  margin-left:8px
+}
+.table-list {
+  display:flex;
+  flex-wrap:wrap;
+  padding:3px 0 0 7px;
+  margin-left:2px;
+  gap:4px
+}
+.table-item {
+  width:auto;
+  padding:8px 10px;
+  font-size:10px
+}
+.selected-dot {
+  display:none
+}
+.tree-footer {
+  margin-top:10px;
+  padding:11px 2px
+}
+.table-heading {
+  padding-top:20px
+}
+.column-table td,.column-table th {
+  height:48px;
+  font-size:9px;
+  padding:0 10px
+}
+.nullable-label {
+  font-size:8px
+}
+.column-name {
+  font-size:9px;
+  gap:5px
+}
+.data-type {
+  font-size:8px
+}
+.column-mark {
+  width:10px
+}
+.column-name svg {
+  width:11px
+}
+.table-heading p {
+  line-height:1.7
+}
+.table-metrics {
+  gap:13px
+}
+.structure-bottom {
+  font-size:8px;
+  padding:13px 19px
+}
+.page-footnote {
+  align-items:flex-start;
+  font-size:8px
+}
+.source-strip {
+  padding:16px;
+  gap:10px
+}
+.source-icon {
+  width:38px;
+  height:38px
+}
+.source-name h3 {
+  font-size:13px
+}
+.source-name p {
+  font-size:9px
+}
+.source-name code {
+  font-size:9px
+}
+.source-name>div {
+  flex-wrap:wrap;
+  gap:6px
+}
+.session-note {
+  align-items:flex-start;
+  line-height:1.7;
+  padding:12px 16px
+}
+.relation-path {
+  gap:13px;
+  flex-wrap:wrap
+}
+.mockup-banner {
+  font-size:9px;
+  line-height:1.7
+}
+.mockup-banner>span {
+  flex-basis:100%
+}
+.mockup-banner a {
+  flex-basis:100%
+}
+.connection-dialog {
+  padding:23px
+}
+.dialog-actions .button {
+  padding:0 11px;
+  font-size:10px
+}
+
+}
+
+@media(max-width:420px) {
+  .app-shell {
+  grid-template-columns:1fr
+}
+.sidebar {
+  display:none
+}
+.main-shell main {
+  padding:24px 13px
+}
+.topbar {
+  padding:0 14px
+}
+.topbar-breadcrumb {
+  font-size:10px;
+  gap:10px
+}
+.page-heading {
+  gap:17px
+}
+.page-actions {
+  gap:7px
+}
+.button {
+  padding:0 11px;
+  font-size:10px
+}
+.journey {
+  font-size:8px;
+  gap:8px
+}
+.step-number {
+  width:18px;
+  height:18px;
+  font-size:8px
+}
+.table-heading,.structure-tabs {
+  padding-left:16px;
+  padding-right:16px
+}
+.table-metrics {
+  gap:10px
+}
+.column-name {
+  font-size:8px
+}
+.data-type {
+  font-size:8px
+}
+.column-table td,.column-table th {
+  padding:0 7px
+}
+.column-legend {
+  padding:16px
+}
+.column-name .column-mark {
+  display:none
+}
+.column-name svg {
+  width:10px
+}
+.nullable-label {
+  font-size:7px;
+  gap:4px
+}
+.column-table thead {
+  font-size:8px
+}
+.connection-dialog {
+  padding:21px
+}
+.relation-card {
+  padding:13px
+}
+.relations-panel {
+  padding:20px 16px
+}
+
+}
+
+@media(prefers-reduced-motion:reduce) {
+  * {
+  animation-duration:.01ms!important;
+  transition:none!important
+}
+
+}

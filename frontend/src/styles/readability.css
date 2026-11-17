@@ -1,0 +1,64 @@
+/* Keep operational labels readable at every breakpoint, including mobile. */
+.schema-group:not([open]) > summary > app-icon:first-child { transform: rotate(-90deg); }
+.sidebar-note > app-icon { margin-bottom: 10px; }
+.topbar { font-size: 12px; }
+.page-heading p { font-size: 13px; color: #6b7b72; }
+.button { font-size: 12px; }
+.journey { font-size: 11px; }
+.section-heading p, .section-note { font-size: 11px; color: #70816f; }
+.source-name h3 { font-size: 15px; }
+.source-name p, .source-name code { font-size: 11px; color: #6e806f; }
+.source-strip-right, .read-only { font-size: 11px; color: #687d60; }
+.connected-badge { font-size: 10px; color: #486a40; }
+.tree-heading h2 { font-size: 12px; }
+.search-field input { font-size: 11px; color: #4b6445; }
+.search-field input::placeholder { color: #75846e; }
+.tree-root, .table-item { font-size: 12px; }
+.schema-group { font-size: 12px; }
+.table-item { color: #64785b; }
+.schema-group > summary { color: #6a7d5d; }
+.tree-footer { font-size: 10px; color: #73856a; }
+.breadcrumbs { font-size: 10px; color: #73836a; }
+.table-heading p { font-size: 12px; color: #73826b; }
+.table-metrics { font-size: 11px; color: #738467; }
+.structure-tabs button { font-size: 12px; color: #718264; }
+.structure-tabs button span { font-size: 10px; }
+.column-table { min-width: 520px; }
+.column-table thead, .column-table thead th { font-size: 11px; color: #6d7e5f; }
+.column-table tbody th, .column-name { font-size: 12px; }
+.data-type { font-size: 11px; color: #647653; }
+.nullable-label { font-size: 11px; color: #6f7f62; }
+.key-label { font-size: 10px; }
+.key-label.primary { color: #8b752c; }
+.key-label.foreign { color: #557437; }
+.column-legend { font-size: 10px; color: #748565; }
+.structure-bottom { font-size: 10px; color: #758568; }
+.page-footnote { font-size: 10px; color: #75856a; }
+.relations-panel > p, .relation-label, .relation-path code { font-size: 11px; color: #718461; }
+.relation-path > span, .relation-path > button { font-size: 13px; }
+.dialog-description { color: #74876a; }
+.field-label { font-size: 12px; }
+.connection-dialog input:not([type=checkbox]), .connection-dialog select { font-size: 13px; }
+.field-hint { font-size: 11px; color: #73866a; }
+.checkbox-label { font-size: 12px; color: #637e52; }
+.checkbox-label small, .credential-note { font-size: 11px; color: #798b6d; }
+.mockup-banner { font-size: 11px; }
+.session-note { font-size: 11px; color: #6b805a; }
+@media (min-width: 941px) {
+  .nav-item { font-size: 12px; white-space: normal; }
+  .workspace-label, .project-source { font-size: 12px; }
+  .sidebar-note strong, .sidebar-note p, .sidebar-link { font-size: 11px; }
+  .profile { font-size: 11px; }
+}
+@media (max-width: 700px) {
+  .journey > app-icon:last-of-type { display: none; }
+  .journey { font-size: 10px; }
+  .column-table { min-width: 505px; }
+  .column-name { font-size: 11px; }
+  .button { font-size: 11px; }
+  .mockup-banner { font-size: 10px; }
+}
+@media (pointer: coarse) {
+  .button, .table-item, .icon-button { min-height: 44px; }
+  .connection-dialog input:not([type=checkbox]), .connection-dialog select { font-size: 16px; min-height: 44px; }
+}

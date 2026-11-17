@@ -1,0 +1,67 @@
+:root {
+  font-family:'DM Sans Variable',sans-serif;
+  color:#253a3b;
+  background:#f5f7f6;
+  font-synthesis:none;
+  text-rendering:optimizeLegibility;
+  -webkit-font-smoothing:antialiased;
+  font-weight:400;
+  --green:#246b5e;
+  --dark:#142e32;
+  --muted:#75817f;
+  --line:#e6ebe8;
+  --lime:#d6edab
+}
+
+* {
+  box-sizing:border-box
+}
+body {
+  margin:0
+}
+button,input,select {
+  font:inherit
+}
+button,a,input,select {
+  -webkit-tap-highlight-color:transparent
+}
+button,a {
+  touch-action:manipulation
+}
+button {
+  cursor:pointer
+}
+button:disabled {
+  cursor:not-allowed
+}
+button {
+  color:inherit
+}
+a {
+  color:inherit;
+  text-decoration:none
+}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible {
+  outline:3px solid #75b5a8;
+  outline-offset:3px
+}
+button,input,select {
+  border-radius:7px
+}
+button {
+  border:0;
+  background:none
+}
+svg {
+  flex-shrink:0
+}
+h1,h2,h3,p {
+  margin:0
+}
+code {
+  font-family:ui-monospace,'Cascadia Code',Consolas,monospace;
+  font-size:.88em
+}
+button:disabled {
+  opacity:.5
+}

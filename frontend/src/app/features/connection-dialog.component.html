@@ -1,0 +1,17 @@
+<dialog #dialog class="connection-dialog" aria-labelledby="connection-title" (cancel)="$event.preventDefault();close()" (click)="$event.target === dialog && close()">
+  <div class="dialog-heading"><span class="dialog-icon"><app-icon name="Database" [size]="23"/></span><button type="button" class="icon-button" aria-label="Fermer la fenêtre" (click)="close()"><app-icon name="X" [size]="20"/></button></div>
+  <h2 id="connection-title">Nouvelle connexion</h2><p class="dialog-description">Connectez votre base et découvrez sa structure.</p>
+  <form #nativeForm #form="ngForm" (ngSubmit)="run('connect',form)" (input)="changed()">
+    <label class="field-label" for="engine">Type de base</label><select id="engine"><option>Microsoft SQL Server</option><option disabled>Oracle — à venir</option><option disabled>PostgreSQL — à venir</option></select>
+    <div class="form-grid server-grid"><div><label class="field-label" for="host">Serveur</label><input id="host" name="host" autofocus required maxlength="255" pattern="[a-zA-Z0-9_.:\-]+" [(ngModel)]="config.host" autocomplete="off" spellcheck="false"/></div><div><label class="field-label" for="port">Port</label><input id="port" name="port" type="number" required min="1" max="65535" [(ngModel)]="config.port"/></div></div>
+    <p class="field-hint">Projet local : <code>sqlserver</code>. Serveur sur Windows : <code>host.docker.internal</code>.</p>
+    <label class="field-label" for="database">Base de données</label><input id="database" name="database" required maxlength="128" [(ngModel)]="config.database" autocomplete="off"/>
+    <label class="field-label" for="username">Utilisateur</label><input id="username" name="username" required maxlength="128" [(ngModel)]="config.username" autocomplete="username"/>
+    <label class="field-label" for="password">Mot de passe</label><div class="password-field"><input id="password" name="password" [type]="visible() ? 'text' : 'password'" required maxlength="128" [(ngModel)]="config.password" autocomplete="off"/><button type="button" class="icon-button" [attr.aria-label]="visible() ? 'Masquer le mot de passe' : 'Afficher le mot de passe'" [attr.aria-pressed]="visible()" (click)="visible.set(!visible())"><app-icon [name]="visible() ? 'EyeOff' : 'Eye'" [size]="18"/></button></div>
+    <label class="checkbox-label"><input type="checkbox" name="trust" [(ngModel)]="config.trust_server_certificate" (change)="changed()"/><span>Accepter le certificat auto-signé<small>Pour un serveur local de confiance uniquement.</small></span></label>
+    <div class="credential-note"><app-icon name="LockKeyhole" [size]="14"/>Vos identifiants ne sont pas enregistrés dans le navigateur.</div>
+    @if(error()){<div class="message error-message" role="alert">{{error()}}</div>}
+    @if(tested()){<div class="message success-message" role="status">Connexion réussie. Vous pouvez explorer cette base.</div>}
+    <div class="dialog-actions"><button type="button" class="button secondary" [disabled]="!!busy()" (click)="run('test',form)"><app-icon [name]="busy()==='test' ? 'LoaderCircle' : 'FlaskConical'" [class.spin]="busy()==='test'"/>Tester</button><button type="submit" class="button primary" [disabled]="!!busy()"><app-icon [name]="busy()==='connect' ? 'LoaderCircle' : 'Link2'" [class.spin]="busy()==='connect'"/>{{busy()==='connect' ? 'Exploration…' : 'Connecter et explorer'}}</button></div>
+  </form>
+</dialog>

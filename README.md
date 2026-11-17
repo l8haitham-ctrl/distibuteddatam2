@@ -14,6 +14,7 @@ automatiquement la branche principale :
 | `feature/springboot-foundation` | Socle Java, configuration, sante, Docker, documentation API | Version precedente |
 | `feature/database-connections` | Connexions, sources, compte de lecture | Socle Spring Boot |
 | `feature/schema-exploration` | Tables, colonnes, types, cles et relations | Connexions |
+| `feature/angular-database-explorer` | Maquette et interface Angular connectee | Exploration |
 
 Le socle expose `/health`, `/actuator/health/readiness` et `/docs`.
 La fonctionnalite de connexion ajoute `GET /sources`,
@@ -133,9 +134,22 @@ Les noms de schemas et tables sont lies en parametres SQL. La structure est
 lue dans les catalogues SQL Server ; les relations sont celles declarees dans
 la base, pas des liens inférés a partir des noms de colonnes.
 
-L'interface Angular est developpee sur sa propre branche. Sa version finale
-sera servie par Nginx dans Docker ; `/api` sera transmis au backend Compose.
-La maquette et le mode connecte seront clairement distingues.
+L'interface Angular est disponible sur [http://localhost:3000](http://localhost:3000).
+Nginx la sert depuis un conteneur non root et transmet `/api` au backend.
+La [maquette interactive](http://localhost:3000/?maquette=1) utilise des
+metadonnees illustratives et n'effectue aucune connexion reelle.
+
+Le mode connecte charge BusinessDB, permet de rechercher une table, de
+consulter ses colonnes et de suivre ses relations. **Nouvelle connexion**
+ouvre le formulaire SQL Server avec test et exploration. Les identifiants
+ne sont pas conserves dans le navigateur ; une connexion personnalisee
+charge les metadonnees puis abandonne le mot de passe. Pour actualiser cette
+source, il faut le saisir a nouveau.
+
+La compilation TypeScript et les tests Angular sont executes pendant
+`docker compose build frontend`. Les sources sont organisees dans
+`frontend/src/app/core` (API et etat), `features` (composants fonctionnels)
+et `shared` (composants communs). Les polices sont embarquees dans l'image.
 
 Le [backlog](docs/roadmap.md) comprend le glossaire metier lie aux tables et
 colonnes, puis l'extraction, MinIO, le catalogue, Trino et les benchmarks.

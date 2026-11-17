@@ -1,0 +1,32 @@
+<div class="table-heading">
+  <div class="breadcrumbs">{{database()}}<span>/</span>{{table().schema_name}}<span>/</span><strong>{{table().table_name}}</strong></div>
+  <div class="table-title"><span class="table-title-icon"><app-icon name="Table2" [size]="23"/></span><h2>{{table().table_name}}</h2><span class="table-badge">TABLE</span></div>
+  <p>Découvrez les colonnes et les relations de votre table.</p>
+  <div class="table-metrics"><span><app-icon name="Columns3" [size]="14"/>{{table().columns.length}} colonnes</span><span><app-icon name="KeyRound" [size]="14"/>{{table().primary_key.length ? '1 clé primaire' : 'Aucune clé primaire'}}</span><span><app-icon name="GitBranch" [size]="14"/>{{relations().length}} relation{{relations().length !== 1 ? 's' : ''}} sortante{{relations().length !== 1 ? 's' : ''}}</span></div>
+</div>
+<div class="structure-tabs" role="tablist" aria-label="Détails de la table" (keydown)="tabKey($event)">
+  <button id="tab-columns" role="tab" aria-controls="panel-columns" [attr.aria-selected]="tab() === 'columns'" [tabIndex]="tab() === 'columns' ? 0 : -1" [class.active]="tab() === 'columns'" (click)="tab.set('columns')"><app-icon name="Columns3"/>Colonnes<span>{{table().columns.length}}</span></button>
+  <button id="tab-relations" role="tab" aria-controls="panel-relations" [attr.aria-selected]="tab() === 'relations'" [tabIndex]="tab() === 'relations' ? 0 : -1" [class.active]="tab() === 'relations'" (click)="tab.set('relations')"><app-icon name="GitBranch"/>Relations<span>{{relations().length}}</span></button>
+</div>
+<div id="panel-columns" role="tabpanel" aria-labelledby="tab-columns" [hidden]="tab() !== 'columns'">
+  <div class="column-table-wrapper"><table class="column-table"><caption class="sr-only">Colonnes de {{table().schema_name}}.{{table().table_name}}</caption>
+    <thead><tr><th scope="col" class="column-number">#</th><th scope="col">Nom de la colonne</th><th scope="col">Type de données</th><th scope="col">Valeur nulle</th><th scope="col">Clé</th></tr></thead>
+    <tbody>@for(column of table().columns; track column.name){<tr>
+      <td class="column-number">{{column.position.toString().padStart(2,'0')}}</td>
+      <th scope="row"><span class="column-name">@if(primary().has(column.name)){<app-icon class="key-primary" name="KeyRound" [size]="14"/>}@else if(foreign().has(column.name)){<app-icon class="key-foreign" name="Link2" [size]="14"/>}@else{<span class="column-mark"></span>}{{column.name}}</span>@if(column.is_identity){<small class="identity-label">Identité</small>}</th>
+      <td><code class="data-type">{{formatType(column)}}</code></td>
+      <td><span class="nullable-label">@if(!column.nullable){<span class="not-null-dot"></span>}{{column.nullable ? 'Autorisée' : 'Non autorisée'}}</span></td>
+      <td>@if(primary().has(column.name)){<span class="key-label primary">PK</span>}@else if(foreign().has(column.name)){<span class="key-label foreign">FK</span>}@else{<span class="no-key">—</span>}</td>
+    </tr>}</tbody>
+  </table></div>
+  <div class="column-legend"><span><span class="key-label primary">PK</span>Clé primaire</span><span><span class="key-label foreign">FK</span>Clé étrangère</span></div>
+</div>
+<div id="panel-relations" role="tabpanel" aria-labelledby="tab-relations" [hidden]="tab() !== 'relations'" class="relations-panel">
+  @if(relations().length){<h3>Relations sortantes</h3><p>Clés étrangères déclarées vers les autres tables.</p>
+    @for(name of relations(); track name){<div class="relation-card"><div class="relation-label"><app-icon name="GitBranch" [size]="15"/><code>{{name}}</code></div>
+      @for(key of relationKeys(name); track key.position){<div class="relation-path"><span><strong>{{table().table_name}}</strong><code>{{key.column_name}}</code></span><app-icon name="ArrowRight" [size]="20"/>
+        <button [attr.aria-label]="'Ouvrir la table ' + key.referenced_schema + '.' + key.referenced_table + ', colonne ' + key.referenced_column" (click)="select.emit({schema_name:key.referenced_schema,table_name:key.referenced_table})"><strong>{{key.referenced_table}}</strong><code>{{key.referenced_column}}</code></button></div>}
+    </div>}
+  }@else{<div class="empty-relations"><app-icon name="GitBranch" [size]="28"/><h3>Aucune relation sortante</h3><p>Aucune clé étrangère n’est déclarée sur cette table.</p></div>}
+</div>
+<div class="structure-bottom"><span><app-icon name="ShieldCheck" [size]="15"/>{{mockup() ? 'Métadonnées illustratives' : 'Métadonnées lues depuis SQL Server'}}</span><span><app-icon name="Check" [size]="13"/>Structure consultée en lecture seule</span></div>
