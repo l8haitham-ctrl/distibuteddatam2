@@ -58,16 +58,6 @@ services:
       start_period: 10s
     restart: unless-stopped
 
-  frontend:
-    image: distributed-data-frontend:local
-    build: ./frontend
-    depends_on:
-      backend:
-        condition: service_healthy
-    ports:
-      - "127.0.0.1:3000:80"
-    restart: unless-stopped
-
   backend-tests:
     profiles: ["tools"]
     build:
