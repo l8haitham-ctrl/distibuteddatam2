@@ -94,7 +94,7 @@ backend/src/main/java/com/atlas/explorer/
   features/
     health/          Sante du service
     connection/      Connexion, sources, DTO, services et connecteurs JDBC
-    exploration/     Structure des bases (branche suivante)
+    exploration/     Exploration des schemas, tables, colonnes et relations
   shared/            Erreurs communes et traduction HTTP
 ```
 
@@ -120,6 +120,18 @@ Les tests d'integration sont actives par `RUN_DB_TESTS=true` dans le service
 `backend-tests` et verifient une vraie connexion ainsi que les privileges limites.
 
 ## Interface et prochaines etapes
+
+L'exploration ajoute :
+
+- `GET /sources/{id}/tables` : tables par schema.
+- `GET /sources/{id}/tables/{table}?schema=dbo` : colonnes, types, precision,
+  echelle, nullabilite, cle primaire et cles etrangeres.
+- `POST /connections/explore` : meme configuration que le test de connexion,
+  avec retour de la structure complete accessible au compte soumis.
+
+Les noms de schemas et tables sont lies en parametres SQL. La structure est
+lue dans les catalogues SQL Server ; les relations sont celles declarees dans
+la base, pas des liens inférés a partir des noms de colonnes.
 
 L'interface Angular est developpee sur sa propre branche. Sa version finale
 sera servie par Nginx dans Docker ; `/api` sera transmis au backend Compose.
