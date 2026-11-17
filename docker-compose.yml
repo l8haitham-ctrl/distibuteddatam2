@@ -36,38 +36,56 @@ services:
       - bash /scripts/init.sh
     restart: "no"
 
-  backend-init:
+  backend:
     image: distributed-data-backend:local
     build: ./backend
     depends_on:
       sqlserver-init:
         condition: service_completed_successfully
     environment:
-      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD:?Define MSSQL_SA_PASSWORD in .env}
-      SOURCE_PASSWORD: ${LAKE_READER_PASSWORD:?Define LAKE_READER_PASSWORD in .env}
-    command: ["python", "-m", "app.scripts.provision"]
-    restart: "no"
-
-  backend:
-    image: distributed-data-backend:local
-    build: ./backend
-    depends_on:
-      backend-init:
-        condition: service_completed_successfully
-    environment:
       SOURCE_HOST: sqlserver
       SOURCE_DATABASE: BusinessDB
       SOURCE_USERNAME: lake_reader
       SOURCE_PASSWORD: ${LAKE_READER_PASSWORD:?Define LAKE_READER_PASSWORD in .env}
+      SOURCE_TRUST_SERVER_CERTIFICATE: "true"
     ports:
       - "127.0.0.1:8000:8000"
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=3)"]
+      test: ["CMD", "curl", "-fsS", "http://localhost:8000/actuator/health/readiness"]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 10s
     restart: unless-stopped
 
+  frontend:
+    image: distributed-data-frontend:local
+    build: ./frontend
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:3000:80"
+    restart: unless-stopped
+
+  backend-tests:
+    profiles: ["tools"]
+    build:
+      context: ./backend
+      target: development
+    depends_on:
+      backend:
+        condition: service_healthy
+    environment:
+      RUN_DB_TESTS: "false"
+      SOURCE_HOST: sqlserver
+      SOURCE_PASSWORD: ${LAKE_READER_PASSWORD:?Define LAKE_READER_PASSWORD in .env}
+      SOURCE_TRUST_SERVER_CERTIFICATE: "true"
+    volumes:
+      - ./backend:/workspace
+      - maven-cache:/root/.m2
+    command: ["mvn", "-B", "test"]
+
 volumes:
   sqlserver-data:
+  maven-cache:

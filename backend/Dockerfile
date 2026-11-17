@@ -1,18 +1,17 @@
-FROM python:3.12-slim-bookworm
+FROM maven:3.9-eclipse-temurin-21 AS development
+WORKDIR /workspace
+CMD ["mvn", "spring-boot:run"]
 
-ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
+FROM development AS build
+COPY pom.xml .
+RUN mvn -B dependency:go-offline
+COPY src ./src
+RUN mvn -B verify
+
+FROM eclipse-temurin:21-jre-alpine AS runtime
+RUN apk add --no-cache curl && addgroup -S atlas && adduser -S atlas -G atlas
 WORKDIR /app
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends curl ca-certificates \
-    && curl -fsSLo /tmp/msprod.deb https://packages.microsoft.com/config/debian/12/packages-microsoft-prod.deb \
-    && dpkg -i /tmp/msprod.deb \
-    && apt-get update \
-    && ACCEPT_EULA=Y apt-get install -y --no-install-recommends msodbcsql18 unixodbc \
-    && rm -rf /var/lib/apt/lists/* /tmp/msprod.deb
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-COPY app ./app
-COPY tests ./tests
-USER 10001:10001
+COPY --from=build --chown=atlas:atlas /workspace/target/data-explorer-0.3.0.jar app.jar
+USER atlas
 EXPOSE 8000
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+ENTRYPOINT ["java", "-XX:MaxRAMPercentage=75", "-jar", "/app/app.jar"]

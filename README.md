@@ -1,251 +1,115 @@
-# Plateforme de donnees — SQL Server et API d'exploration
+# Atlas — plateforme de donnees
 
-Cette premiere etape fournit une base SQL Server locale, persistante et prete
-pour developper la connexion et l'exploration depuis une future interface.
+Projet pedagogique : connecter une base relationnelle, explorer sa structure,
+puis construire un pipeline analytique Parquet / MinIO / catalogue / Trino.
+La stack retenue est **Angular + Java 21 / Spring Boot**, entierement conteneurisee.
 
-## Prerequis
+## Branches de fonctionnalites
 
-- Docker Desktop demarre, avec le moteur de conteneurs Linux.
-- Une machine x86-64 et suffisamment de memoire pour SQL Server et Docker.
-- Le port local 1433 disponible, ou un autre port configure dans `.env`.
+Les branches sont empilees pour conserver leurs dependances sans fusionner
+automatiquement la branche principale :
 
-SQL Server Developer est utilise pour ce projet de developpement et de test.
-SQL Server est proprietaire ; il constitue la source imposee par le sujet.
-L'image est celle de Microsoft : `mcr.microsoft.com/mssql/server:2022-latest`.
-Ce tag suit les mises a jour de SQL Server 2022. Pour les benchmarks futurs,
-il faudra figer le digest de l'image et consigner la version du serveur.
+| Branche | Contenu | Base de revue |
+| --- | --- | --- |
+| `feature/springboot-foundation` | Socle Java, configuration, sante, Docker, documentation API | Version precedente |
+| `feature/database-connections` | Connexions, sources, compte de lecture | Socle Spring Boot |
+| `feature/schema-exploration` | Tables, colonnes, types, cles et relations | Connexions |
 
-Documentation : [SQL Server dans Docker](https://learn.microsoft.com/sql/linux/quickstart-install-connect-docker).
+Cette branche de socle expose `/health`, `/actuator/health/readiness` et `/docs`.
+Les endpoints de connexion et d'exploration sont ajoutes dans les branches suivantes.
 
-## Demarrage (PowerShell)
+## Demarrer sans SDK sur Windows
 
-Depuis le dossier du projet :
+Seul Docker Desktop (conteneurs Linux) est necessaire. Aucun Java ou Maven
+local n'est requis : la compilation et les tests unitaires sont dans le Dockerfile.
+
+Pour une premiere installation :
 
 ```powershell
-if (-not (Test-Path -LiteralPath .env)) {
-    Copy-Item .env.example .env
-}
+if (-not (Test-Path -LiteralPath .env)) { Copy-Item .env.example .env }
 ```
 
-Uniquement avant la premiere initialisation : choisir un mot de passe fort
-dans `.env`. Si la base existe deja, conserver son mot de passe actuel ; ne
-pas remplacer `.env` par le fichier d'exemple. Puis executer :
+Definir des mots de passe forts dans `.env` **avant la premiere initialisation**.
+Si la base existe deja, conserver `MSSQL_SA_PASSWORD` : changer le fichier ne
+change pas le mot de passe enregistre dans le volume SQL Server.
 
 ```powershell
-docker compose up -d
+docker compose up -d --build
 docker compose ps -a
-docker compose logs sqlserver-init
 ```
 
-Le premier demarrage telecharge l'image. Le service `sqlserver-init` attend que
-SQL Server soit sain, puis cree la base et les donnees. Il reessaie jusqu'a
-12 fois si une base persistante est encore en cours de recuperation.
-Un etat `Exited (0)`
-pour ce service est normal : c'est une initialisation ponctuelle. SQL Server
-doit rester `healthy`.
+- API : [http://localhost:8000/health](http://localhost:8000/health).
+- Documentation : [http://localhost:8000/docs](http://localhost:8000/docs).
+- SQL Server : `localhost,1433`, base `BusinessDB`, utilisateur administratif `sa`.
 
-Le fichier `.env` est ignore par Git. Le compte `sa` sert ici a l'administration
-locale. Le backend utilise `lake_reader`, qui a seulement les droits de lecture
-et de consultation de la structure dans BusinessDB. Son mot de passe distinct
-est `LAKE_READER_PASSWORD` dans `.env` ; il faut definir cette variable pour
-un ancien `.env`, sans modifier `MSSQL_SA_PASSWORD`.
+Les ports sont accessibles uniquement en local. Le conteneur Java s'execute
+sans utilisateur root, ferme ses connexions et supporte l'arret gracieux.
+La configuration est externalisee dans les variables d'environnement.
 
-## Base disponible
-
-| Parametre | Valeur |
-| --- | --- |
-| Serveur depuis Windows | `localhost` |
-| Port | `1433` (ou `SQLSERVER_PORT` dans `.env`) |
-| Serveur depuis un futur conteneur backend | `sqlserver:1433` |
-| Base | `BusinessDB` |
-| Schema | `dbo` |
-| Authentification | SQL Server |
-| Utilisateur d'administration | `sa` |
-| Mot de passe | `MSSQL_SA_PASSWORD` dans `.env` |
-| Certificat local | Accepter le certificat autosigne pour ce developpement local |
+## Base de test persistante
 
 | Table | Lignes initiales | Relation |
 | --- | ---: | --- |
 | Customer | 1 000 | Un client a plusieurs factures |
-| Invoice | 5 000 | `customer_id` reference Customer |
-| Payment | 8 000 | `invoice_id` reference Invoice |
+| Invoice | 5 000 | customer_id reference Customer |
+| Payment | 8 000 | invoice_id reference Invoice |
 
-Les factures couvrent 2025 et 2026 : 3 500 sont payees en deux versements,
-1 000 sont partiellement payees et 500 sont impayees. Les montants utilisent
-`DECIMAL(12,2)`. Le jeu est deterministe et volontairement petit pour cette
-premiere etape ; un generateur de plus gros volumes sera necessaire pour les
-mesures de performance.
+Les factures couvrent 2025 et 2026 : 3 500 payees en deux versements, 1 000
+partiellement payees et 500 impayees. Les montants sont en `DECIMAL(12,2)`.
+Ce petit jeu deterministe sert au developpement ; les benchmarks utiliseront
+plus tard des volumes plus importants.
 
-## Verification
+`sqlserver-init` attend SQL Server, puis reessaie l'initialisation si une base
+persistante termine sa recuperation. `Exited (0)` est son etat final normal.
+Les relances ne dupliquent pas les donnees. `docker compose down` conserve
+le volume : ne pas utiliser `down -v` pour un simple redemarrage.
 
-Ce controle verifie les relations, les dates et la coherence des paiements,
-puis affiche les volumes, colonnes et cles etrangeres :
+Verifier les relations, dates et paiements :
 
 ```powershell
 docker compose run --rm --no-deps sqlserver-init '/opt/mssql-tools18/bin/sqlcmd -S sqlserver -U sa -C -b -i /scripts/02-verify.sql'
 ```
 
-Pour ouvrir une session SQL interactive (le mot de passe sera demande) :
+Si les logs indiquent `Password did not match`, remettre dans `.env` le mot
+de passe qui a initialise la base. S'il est perdu, une recuperation hors ligne
+avec `mssql-conf --noprompt set-sa-password` peut conserver les donnees.
+Arreter le service et sauvegarder le volume avant cette operation. `backups/`
+est ignore par Git et les sauvegardes anterieures conservent les anciens identifiants.
+
+## Tests dans Docker
 
 ```powershell
-docker compose exec sqlserver /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -C -d BusinessDB
+docker compose --profile tools run --rm backend-tests
 ```
 
-Exemple de requete, suivi de `GO` pour l'executer :
+Le socle utilise JUnit et Spring MVC Test. Les branches fonctionnelles ajoutent
+leurs tests de connexion et d'integration SQL Server au meme parcours.
 
-```sql
-SELECT TOP (10) * FROM dbo.Invoice ORDER BY invoice_id;
-GO
-```
-
-## Arret et relance
-
-```powershell
-docker compose down
-docker compose up -d
-```
-
-Le volume nomme conserve la base. Le script ne reinjecte pas les donnees si
-une des trois tables contient deja des lignes. Ne pas ajouter `-v` a `down`
-si vous souhaitez conserver les donnees. Changer le mot de passe dans `.env`
-ne change pas celui d'une base deja initialisee.
-
-En cas d'erreur : `docker compose logs sqlserver` et
-`docker compose logs sqlserver-init`. Si le port est deja occupe, modifier
-`SQLSERVER_PORT` dans `.env`, puis relancer `docker compose up -d`.
-
-Si SQL Server est `unhealthy` et que les journaux indiquent `Login failed`
-avec `Password did not match`, le mot de passe de `.env` ne correspond pas
-a celui enregistre dans le volume. Retablir le mot de passe d'origine dans
-`.env`, puis lancer `docker compose up -d`. Le service d'initialisation peut
-rester `Created` tant que le serveur n'est pas sain. Ne pas supprimer le
-volume pour corriger ce probleme sans avoir decide de perdre son contenu.
-
-Si le mot de passe d'origine est perdu, une recuperation hors ligne avec
-`mssql-conf --noprompt set-sa-password` permet de conserver les donnees.
-Arreter SQL Server et sauvegarder le volume avant cette operation. Une
-sauvegarde effectuee avant la recuperation locale se trouve dans `backups/`
-(ignore par Git). Elle contient encore les anciens identifiants : la restaurer
-ne retablirait pas le nouveau mot de passe.
-
-## Etape 2 : API de connexion et d'exploration
-
-```powershell
-docker compose up -d --build
-```
-
-Le service ponctuel `backend-init` cree le compte `lake_reader` apres
-l'initialisation SQL. Il met son mot de passe en coherence avec `.env` a
-chaque execution. Lui seul recoit le mot de passe administrateur ; le service
-API ne le recoit pas. `backend-init` doit finir en `Exited (0)` et `backend`
-rester `healthy`.
-
-Ouvrir [la documentation interactive](http://localhost:8000/docs). Choisir
-une operation, cliquer **Try it out**, puis **Execute**. Parcours sans saisir
-de mot de passe, avec la source locale deja configuree :
-
-1. `GET /sources` : voir la connexion configuree, sans son mot de passe.
-2. `POST /sources/sqlserver/test` : verifier la connexion.
-3. `GET /sources/sqlserver/tables` : lister les trois tables.
-4. `GET /sources/sqlserver/tables/Invoice?schema=dbo` : afficher colonnes,
-   types, precision, echelle, nullabilite, cle primaire et cles etrangeres.
-
-Exemples directs depuis PowerShell :
-
-```powershell
-Invoke-RestMethod http://localhost:8000/sources
-Invoke-RestMethod -Method Post http://localhost:8000/sources/sqlserver/test
-Invoke-RestMethod http://localhost:8000/sources/sqlserver/tables
-Invoke-RestMethod 'http://localhost:8000/sources/sqlserver/tables/Invoice?schema=dbo' | ConvertTo-Json -Depth 6
-```
-
-Pour tester une connexion saisie par l'utilisateur, utiliser
-`POST /connections/test`. `POST /connections/explore` accepte le meme corps
-et renvoie la structure complete des tables visibles. Exemple (remplacer le
-mot de passe par `LAKE_READER_PASSWORD` de `.env`) :
-
-```json
-{
-  "engine": "sqlserver",
-  "host": "sqlserver",
-  "port": 1433,
-  "database": "BusinessDB",
-  "username": "lake_reader",
-  "password": "votre-mot-de-passe-lecteur",
-  "trust_server_certificate": true
-}
-```
-
-Le serveur de base est vu **depuis le conteneur backend** : `sqlserver` pour
-ce projet ; `host.docker.internal` pour une autre instance sur Windows.
-`localhost` dans ce formulaire designerait le conteneur backend lui-meme.
-Le trafic SQL est chiffre. L'acceptation d'un certificat autosigne est
-activee pour la source Docker locale ; pour une source externe avec un
-certificat valide, garder `trust_server_certificate: false`.
-
-Les connexions soumises ne sont ni sauvegardees ni renvoyees. Les erreurs
-d'authentification et de validation ne renvoient pas les mots de passe.
-Les noms de tables/schemas sont passes en parametres SQL. L'API n'accepte
-pas de SQL libre. Les sources ne voient que les metadonnees accessibles au
-compte utilise. Pour l'instant, seul SQL Server est implemente ; Oracle et
-les autres moteurs seront des connecteurs supplementaires.
-
-L'API est destinee au developpement local et liee a `127.0.0.1:8000`. Elle
-ne fournit pas encore d'authentification utilisateur ou de gestion multiutilisateur.
-`GET /health` teste le processus API ; `POST /sources/sqlserver/test` teste
-reellement l'acces a la base.
-
-### Verification du backend
-
-```powershell
-docker compose exec -T backend python -m unittest discover -s tests -v
-```
-
-Les tests utilisent la vraie base de test et verifient les relations,
-les types, les droits de lecture, les erreurs et l'absence de mots de passe
-dans les reponses. Ils ne modifient pas les donnees.
-
-Documentation technique : [FastAPI](https://fastapi.tiangolo.com/tutorial/first-steps/),
-[pilote ODBC Microsoft](https://learn.microsoft.com/en-us/sql/connect/odbc/linux/installing-the-microsoft-odbc-driver-for-sql-server-on-linux).
-
-## Prochaine etape
-
-Construire le formulaire de connexion et l'explorateur visuel des tables
-au-dessus de cette API. Puis ajouter les jobs d'extraction par lots vers MinIO.
-
-## Organisation modulaire du backend
+## Architecture du code
 
 ```text
-backend/app/
-  main.py          Construction de l'application et montage des routes
-  api/
-    routes/        Endpoints : connexions, sources, exploration, sante
-    dependencies.py  Injection des services
-    errors.py      Traduction des erreurs en reponses HTTP
-  services/        Cas d'utilisation, independants de FastAPI
-  connectors/      Contrat commun, fabrique et implementation SQL Server
-  schemas/         Validation des donnees de connexion
-  core/            Configuration et erreurs metier
-  scripts/         Initialisation administrative du compte lecteur
+backend/src/main/java/com/atlas/explorer/
+  ExplorerApplication.java
+  features/
+    health/          Sante du service
+    connection/      Connexion et sources (branche suivante)
+    exploration/     Structure des bases (branche suivante)
+  shared/            Erreurs communes et traduction HTTP
 ```
 
-Le parcours d'une requete est `route -> service -> connecteur -> SQL Server`.
-Les requetes SQL et le pilote ODBC restent dans `connectors/`. Ajouter un
-moteur necessitera un nouvel adaptateur respectant `DatabaseConnector`,
-son enregistrement dans la fabrique et l'extension du modele de connexion.
-Les routes et services seront reutilisables.
+Le trajet est `controleur -> service -> connecteur -> base source`.
+Le SQL reste dans les connecteurs. Les erreurs ne renvoient jamais les mots
+de passe ou les details du pilote aux clients.
 
-## Branches de fonctionnalites
+## Interface et prochaines etapes
 
-Chaque nouvelle fonctionnalite backend est developpee, testee, commitee et
-poussee sur une branche `codex/<fonctionnalite>` distincte. Les regles sont
-conservees dans `AGENTS.md`. Les fusions vers la branche principale sont
-effectuees sur demande.
+L'interface Angular est developpee sur sa propre branche. Sa version finale
+sera servie par Nginx dans Docker ; `/api` sera transmis au backend Compose.
+La maquette et le mode connecte seront clairement distingues.
 
-Le commit initial conserve la version fonctionnelle precedente sur `master`.
-La reorganisation modulaire se trouve sur `codex/backend-modularization`.
-Les fonctionnalites suivantes partiront de la version validee la plus recente ;
-si la branche precedente n'est pas encore fusionnee, leur dependance sera
-indiquee pour permettre une revue dans le bon ordre.
+Le [backlog](docs/roadmap.md) comprend le glossaire metier lie aux tables et
+colonnes, puis l'extraction, MinIO, le catalogue, Trino et les benchmarks.
 
-Depot distant : [distibuteddatam2](https://github.com/l8haitham-ctrl/distibuteddatam2).
+References techniques : [Spring Boot](https://docs.spring.io/spring-boot/system-requirements.html),
+[JDBC SQL Server](https://learn.microsoft.com/en-us/sql/connect/jdbc/configuring-the-client-for-ssl-encryption),
+[Angular](https://angular.dev/reference/versions).

@@ -5,3 +5,8 @@ __pycache__/
 .venv/
 node_modules/
 backups/
+frontend/dist/
+*.tsbuildinfo
+backend/target/
+frontend/.angular/
+work/
