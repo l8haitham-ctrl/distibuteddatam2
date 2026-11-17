@@ -1,0 +1,10 @@
+{
+  "name": "Atlas development",
+  "dockerComposeFile": ["../docker-compose.yml", "../docker-compose.dev.yml"],
+  "service": "workspace",
+  "runServices": ["sqlserver", "backend-init", "backend", "frontend", "workspace"],
+  "workspaceFolder": "/workspace",
+  "shutdownAction": "stopCompose",
+  "forwardPorts": [3000, 8000],
+  "customizations": {"vscode": {"extensions": ["vscjava.vscode-java-pack", "Angular.ng-template"]}}
+}

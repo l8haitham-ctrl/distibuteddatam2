@@ -1,0 +1,124 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: atlas
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: atlas-config
+data:
+  SOURCE_HOST: sql-source.private.example
+  SOURCE_PORT: "1433"
+  SOURCE_DATABASE: BusinessDB
+  SOURCE_USERNAME: lake_reader
+  SOURCE_TRUST_SERVER_CERTIFICATE: "false"
+  SPRINGDOC_SWAGGER_UI_ENABLED: "false"
+  SPRINGDOC_API_DOCS_ENABLED: "false"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels: {app: atlas-backend}
+  template:
+    metadata:
+      labels: {app: atlas-backend}
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        seccompProfile: {type: RuntimeDefault}
+      containers:
+        - name: api
+          image: atlas-backend:0.3.0
+          ports: [{containerPort: 8000}]
+          envFrom: [{configMapRef: {name: atlas-config}}]
+          env:
+            - name: SOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef: {name: atlas-source-credentials, key: password}
+          resources:
+            requests: {cpu: 250m, memory: 384Mi}
+            limits: {cpu: "1", memory: 768Mi}
+          startupProbe:
+            httpGet: {path: /actuator/health/readiness, port: 8000}
+            periodSeconds: 5
+            failureThreshold: 30
+          readinessProbe:
+            httpGet: {path: /actuator/health/readiness, port: 8000}
+          livenessProbe:
+            httpGet: {path: /actuator/health/liveness, port: 8000}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: {drop: [ALL]}
+          volumeMounts: [{name: temp, mountPath: /tmp}]
+      volumes: [{name: temp, emptyDir: {}}]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+spec:
+  selector: {app: atlas-backend}
+  ports: [{port: 8000, targetPort: 8000}]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels: {app: atlas-frontend}
+  template:
+    metadata:
+      labels: {app: atlas-frontend}
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 101
+        seccompProfile: {type: RuntimeDefault}
+      containers:
+        - name: web
+          image: atlas-frontend:0.1.0
+          ports: [{containerPort: 8080}]
+          resources:
+            requests: {cpu: 50m, memory: 32Mi}
+            limits: {cpu: 250m, memory: 128Mi}
+          readinessProbe:
+            httpGet: {path: /, port: 8080}
+          livenessProbe:
+            httpGet: {path: /, port: 8080}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: {drop: [ALL]}
+          volumeMounts: [{name: temp, mountPath: /tmp}]
+      volumes: [{name: temp, emptyDir: {}}]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+spec:
+  selector: {app: atlas-frontend}
+  ports: [{port: 80, targetPort: 8080}]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: backend-from-frontend
+spec:
+  podSelector:
+    matchLabels: {app: atlas-backend}
+  policyTypes: [Ingress]
+  ingress:
+    - from: [{podSelector: {matchLabels: {app: atlas-frontend}}}]
+      ports: [{protocol: TCP, port: 8000}]

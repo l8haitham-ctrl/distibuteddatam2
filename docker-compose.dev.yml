@@ -1,0 +1,38 @@
+# Compose >= 2.24.4. Source code and toolchains stay in containers.
+services:
+  backend:
+    image: distributed-data-backend-dev:local
+    build:
+      context: ./backend
+      target: development
+    volumes:
+      - ./backend:/workspace
+      - maven-cache:/root/.m2
+    command: ["mvn", "-B", "spring-boot:run"]
+    healthcheck:
+      start_period: 120s
+
+  frontend:
+    image: distributed-data-frontend-dev:local
+    build:
+      context: ./frontend
+      target: development
+    volumes:
+      - ./frontend:/app
+      - frontend-modules:/app/node_modules
+    ports: !override
+      - "127.0.0.1:3000:3000"
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://127.0.0.1:3000/"]
+      start_period: 120s
+
+  workspace:
+    profiles: ["tools"]
+    build: ./.devcontainer
+    volumes:
+      - .:/workspace
+    working_dir: /workspace
+    command: ["sleep", "infinity"]
+
+volumes:
+  frontend-modules:

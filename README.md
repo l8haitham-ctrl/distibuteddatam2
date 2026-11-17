@@ -15,6 +15,7 @@ automatiquement la branche principale :
 | `feature/database-connections` | Connexions, sources, compte de lecture | Socle Spring Boot |
 | `feature/schema-exploration` | Tables, colonnes, types, cles et relations | Connexions |
 | `feature/angular-database-explorer` | Maquette et interface Angular connectee | Exploration |
+| `feature/cloud-ready-containers` | Developpement conteneurise et architecture Azure/AWS | Interface Angular |
 
 Le socle expose `/health`, `/actuator/health/readiness` et `/docs`.
 La fonctionnalite de connexion ajoute `GET /sources`,
@@ -150,6 +151,51 @@ La compilation TypeScript et les tests Angular sont executes pendant
 `docker compose build frontend`. Les sources sont organisees dans
 `frontend/src/app/core` (API et etat), `features` (composants fonctionnels)
 et `shared` (composants communs). Les polices sont embarquees dans l'image.
+
+## Developper le projet dans des conteneurs
+
+Docker Compose **2.24.4 ou plus recent** est requis pour l'override des ports.
+Pour travailler avec les sources montees et le rechargement Angular :
+
+```powershell
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d --build
+```
+
+Le serveur Angular et Maven tournent dans leurs propres conteneurs. Aucun
+SDK Windows n'est necessaire. Les dependances Node et Maven sont dans des
+volumes dedies. Apres modification Java, redemarrer `backend` pour relancer
+la compilation ; Angular recharge automatiquement les changements frontend.
+
+Un conteneur `workspace` fournit Java, Maven et Node pour travailler sur le
+projet lui-meme. Dans VS Code avec Dev Containers, utiliser **Reopen in
+Container** ; la configuration `.devcontainer/devcontainer.json` ouvre ce
+workspace avec les services de developpement. Il est aussi utilisable en CLI :
+
+```powershell
+docker compose -f docker-compose.yml -f docker-compose.dev.yml --profile tools run --rm --no-deps workspace bash
+```
+
+Pour revenir aux images de production locales :
+
+```powershell
+docker compose up -d --build
+```
+
+Les images `*-dev:local` sont distinctes des images de production : le
+bootstrap SQL continue d'utiliser le JAR de production. Les identifiants
+administratifs ne sont jamais injectes dans le frontend ou dans l'API.
+
+## Preparation Azure / AWS
+
+L'[architecture cloud](docs/architecture-cloud.md) explique les correspondances
+AKS/EKS, ACR/ECR, bases privees, stockage objet et gestion des secrets.
+`deploy/k8s/base` contient des manifests prives pour les deux images, avec
+ressources, sondes, secrets externes et execution non root.
+
+Ces fichiers sont des modeles de preparation : aucun cloud n'est deploye.
+Renseigner les images, la source et le secret externe, et terminer TLS/OIDC
+avant d'ajouter une entree publique. L'extraction, le stockage analytique et
+le glossaire metier restent au backlog.
 
 Le [backlog](docs/roadmap.md) comprend le glossaire metier lie aux tables et
 colonnes, puis l'extraction, MinIO, le catalogue, Trino et les benchmarks.
