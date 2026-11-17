@@ -36,11 +36,23 @@ services:
       - bash /scripts/init.sh
     restart: "no"
 
-  backend:
+  backend-init:
     image: distributed-data-backend:local
     build: ./backend
     depends_on:
       sqlserver-init:
+        condition: service_completed_successfully
+    environment:
+      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD:?Define MSSQL_SA_PASSWORD in .env}
+      SOURCE_PASSWORD: ${LAKE_READER_PASSWORD:?Define LAKE_READER_PASSWORD in .env}
+    command: ["--spring.main.web-application-type=none", "--app.provision=true"]
+    restart: "no"
+
+  backend:
+    image: distributed-data-backend:local
+    build: ./backend
+    depends_on:
+      backend-init:
         condition: service_completed_successfully
     environment:
       SOURCE_HOST: sqlserver
@@ -58,6 +70,16 @@ services:
       start_period: 10s
     restart: unless-stopped
 
+  frontend:
+    image: distributed-data-frontend:local
+    build: ./frontend
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:3000:80"
+    restart: unless-stopped
+
   backend-tests:
     profiles: ["tools"]
     build:
@@ -67,7 +89,7 @@ services:
       backend:
         condition: service_healthy
     environment:
-      RUN_DB_TESTS: "false"
+      RUN_DB_TESTS: "true"
       SOURCE_HOST: sqlserver
       SOURCE_PASSWORD: ${LAKE_READER_PASSWORD:?Define LAKE_READER_PASSWORD in .env}
       SOURCE_TRUST_SERVER_CERTIFICATE: "true"

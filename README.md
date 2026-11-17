@@ -15,8 +15,9 @@ automatiquement la branche principale :
 | `feature/database-connections` | Connexions, sources, compte de lecture | Socle Spring Boot |
 | `feature/schema-exploration` | Tables, colonnes, types, cles et relations | Connexions |
 
-Cette branche de socle expose `/health`, `/actuator/health/readiness` et `/docs`.
-Les endpoints de connexion et d'exploration sont ajoutes dans les branches suivantes.
+Le socle expose `/health`, `/actuator/health/readiness` et `/docs`.
+La fonctionnalite de connexion ajoute `GET /sources`,
+`POST /sources/{id}/test` et `POST /connections/test`.
 
 ## Demarrer sans SDK sur Windows
 
@@ -92,7 +93,7 @@ backend/src/main/java/com/atlas/explorer/
   ExplorerApplication.java
   features/
     health/          Sante du service
-    connection/      Connexion et sources (branche suivante)
+    connection/      Connexion, sources, DTO, services et connecteurs JDBC
     exploration/     Structure des bases (branche suivante)
   shared/            Erreurs communes et traduction HTTP
 ```
@@ -100,6 +101,23 @@ backend/src/main/java/com/atlas/explorer/
 Le trajet est `controleur -> service -> connecteur -> base source`.
 Le SQL reste dans les connecteurs. Les erreurs ne renvoient jamais les mots
 de passe ou les details du pilote aux clients.
+
+## Connexions
+
+Le service ponctuel `backend-init` cree `lake_reader`, lui attribue les droits
+de lecture et de consultation des definitions, puis termine en `Exited (0)`.
+L'API ne recoit que `SOURCE_PASSWORD`, pas le mot de passe `sa`.
+`POST /connections/test` accepte `engine`, `host`, `port`, `database`,
+`username`, `password`, `trust_server_certificate`. Seul `sqlserver` est
+implemente. Le certificat est verifie par defaut ; l'exception explicite est
+la source Docker locale avec certificat auto-signe.
+
+Le serveur est vu depuis le conteneur API : `sqlserver` pour le projet,
+`host.docker.internal` pour une instance sur Windows. Les identifiants soumis
+ne sont pas persistes. Le pilote JDBC recoit chaque propriete separement.
+
+Les tests d'integration sont actives par `RUN_DB_TESTS=true` dans le service
+`backend-tests` et verifient une vraie connexion ainsi que les privileges limites.
 
 ## Interface et prochaines etapes
 
