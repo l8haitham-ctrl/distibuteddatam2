@@ -9,9 +9,9 @@ ses tests et sa documentation avant d'etre poussee ; aucune fusion automatique.
 | Etape | Fonctionnalite | Resultat attendu | Etat |
 | --- | --- | --- | --- |
 | 1 | Stockage MinIO | Bucket prive persistant, compte limite, service Java par flux, tests reels | Implemente sur `feature/minio-storage` |
-| 2 | Jobs persistants | Creer et suivre un traitement avec statuts, dates, erreurs et resultat ; conserver l'etat apres redemarrage | A faire |
-| 3 | Extraction par lots | Lire une selection SQL Server avec ordre stable et memoire bornee ; suivre les lignes traitees | A faire |
-| 4 | Parquet et depot | Convertir les types correctement, ecrire des fichiers de taille controlee, envoyer vers MinIO et produire un manifeste | A faire |
+| 2 | Jobs persistants | Creer et suivre un traitement avec statuts, dates, erreurs et resultat ; conserver l'etat apres redemarrage | Implemente sur `feature/storage-jobs` |
+| 3 | Extraction par lots | Lecture JDBC Spark bornee ; ajouter selection, lecture repartie et progression detaillee | Premiere version complete de table ; optimisations a faire |
+| 4 | Parquet et depot | Ecrire dans MinIO, borner les fichiers et publier un manifeste | Premiere version Spark implementee ; CSV a faire |
 | 5 | Partitionnement et compression | Organiser les extractions par source/table/job puis partitions adaptees ; comparer sans surpartitionner | A faire |
 | 6 | Catalogue technique | Enregistrer schemas, emplacements et partitions dans un catalogue compatible Trino | A faire |
 | 7 | Acces SQL Trino | Lire les donnees deposees, verifier les jointures Customer/Invoice/Payment et les droits de lecture | A faire |
@@ -20,17 +20,18 @@ ses tests et sa documentation avant d'etre poussee ; aucune fusion automatique.
 | 10 | Benchmarks | Comparer CSV/Parquet, partitions, compression et lots avec les memes donnees et requetes ; presenter des mesures reelles | A faire |
 | 11 | Preparation de livraison | Parcours complet reproductible, documentation, secrets et adaptation Azure/AWS | A faire |
 
-La prochaine branche prevue est `feature/storage-jobs`. La persistance des
-jobs appartient aux metadonnees de l'application, distinctes de la base source
-et des fichiers MinIO. Une API ne doit pas annoncer un job termine avant que
-les fichiers et son manifeste soient valides. La relance apres erreur et les
-chargements incrementaux seront ajoutes ensuite.
+La branche `feature/storage-jobs` utilise PostgreSQL pour l'historique et
+Spark pour l'ingestion, sans Spring Batch. La suite porte sur la selection de
+donnees, la lecture JDBC repartie et le partitionnement de stockage. Une API
+ne doit pas annoncer un job termine avant que les fichiers et son manifeste
+soient valides. La relance apres erreur et les chargements incrementaux seront
+ajoutes ensuite. Le [guide des jobs](storage-jobs.md) precise les limites actuelles.
 
 Le flux cible reste :
 
 ```text
-Angular -> API Spring Boot -> job -> SQL Server (lots)
-                                -> conversion Parquet -> MinIO
+Angular -> API Spring Boot -> PostgreSQL (jobs) -> Spark -> SQL Server (lots)
+                                                     -> Parquet -> MinIO
                                 -> catalogue -> Trino -> resultat SQL -> Angular
 ```
 
@@ -50,9 +51,9 @@ consultant ce catalogue. Le depot de fichiers seul ne cree pas une table SQL.
 
 ## Pipeline analytique
 
-Les jobs d'extraction par lots, Parquet/CSV, partitions, catalogue, Trino et
-mesures comparables restent a implementer. MinIO et le service Java de
-stockage constituent maintenant le premier composant de ce pipeline.
+MinIO, l'historique PostgreSQL et le premier parcours Spark/Parquet sont
+implementes. CSV, selection avancee, partitions, catalogue, Trino et mesures
+comparables restent a implementer.
 
 ## Bonus apres le parcours principal
 

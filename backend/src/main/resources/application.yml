@@ -41,3 +41,13 @@ storage:
   bucket: ${STORAGE_BUCKET:lake}
   access-key: ${STORAGE_ACCESS_KEY:}
   secret-key: ${STORAGE_SECRET_KEY:}
+jobs:
+  enabled: ${JOBS_ENABLED:false}
+  dispatch-enabled: ${JOBS_DISPATCH_ENABLED:true}
+  jdbc-url: ${JOBS_JDBC_URL:jdbc:postgresql://metadata:5432/atlas}
+  username: ${JOBS_USERNAME:atlas}
+  password: ${JOBS_PASSWORD:}
+  poll-delay-ms: ${JOBS_POLL_DELAY_MS:2000}
+  timeout-seconds: ${JOBS_TIMEOUT_SECONDS:1800}
+  spark-rest-url: ${SPARK_REST_URL:http://spark-master:6066}
+  spark-master: ${SPARK_MASTER:spark://spark-master:7077}

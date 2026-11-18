@@ -20,6 +20,10 @@ public class ApiExceptionHandler {
             case OBJECT_NOT_FOUND -> { status = 404; message = "Fichier introuvable."; }
             case STORAGE_UNAVAILABLE -> { status = 503; message = "Stockage indisponible : vérifier le service et sa configuration."; }
             case STORAGE_INVALID -> { status = 422; message = "Paramètres de stockage invalides."; }
+            case JOB_NOT_FOUND -> { status = 404; message = "Traitement introuvable."; }
+            case JOB_NOT_COMPLETE -> { status = 409; message = "Le traitement ne dispose pas d’un résultat terminé."; }
+            case JOB_ENGINE_UNAVAILABLE -> { status = 503; message = "Moteur de traitement indisponible."; }
+            case JOB_RESULT_INVALID -> { status = 502; message = "Résultat du traitement invalide."; }
             default -> { status = 502; message = "La base a refusé l’opération. Vérifier les droits de lecture."; }
         }
         return ResponseEntity.status(status).body(Map.of("detail", message));
@@ -27,6 +31,6 @@ public class ApiExceptionHandler {
     @ExceptionHandler({MethodArgumentNotValidException.class, HttpMessageNotReadableException.class})
     public ResponseEntity<Map<String, String>> invalid() {
         // No binding errors or rejected values: these can contain passwords.
-        return ResponseEntity.unprocessableContent().body(Map.of("detail", "Paramètres de connexion invalides."));
+        return ResponseEntity.unprocessableContent().body(Map.of("detail", "Paramètres de la demande invalides."));
     }
 }

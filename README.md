@@ -17,6 +17,7 @@ automatiquement la branche principale :
 | `feature/angular-database-explorer` | Maquette et interface Angular connectee | Exploration |
 | `feature/cloud-ready-containers` | Developpement conteneurise et architecture Azure/AWS | Interface Angular |
 | `feature/minio-storage` | MinIO, bucket prive, service de stockage et tests reels | Conteneurs cloud |
+| `feature/storage-jobs` | Jobs PostgreSQL, API asynchrone et premiere ingestion Spark/Parquet | Stockage MinIO |
 
 Le socle expose `/health`, `/actuator/health/readiness` et `/docs`.
 La fonctionnalite de connexion ajoute `GET /sources`,
@@ -46,6 +47,7 @@ docker compose ps -a
 - Documentation : [http://localhost:8000/docs](http://localhost:8000/docs).
 - Stockage : [http://localhost:8000/storage/status](http://localhost:8000/storage/status).
 - Console MinIO : [http://localhost:9001](http://localhost:9001).
+- Spark : [http://localhost:8088](http://localhost:8088).
 - SQL Server : `localhost,1433`, base `BusinessDB`, utilisateur administratif `sa`.
 
 Les ports sont accessibles uniquement en local. Le conteneur Java s'execute
@@ -101,6 +103,7 @@ backend/src/main/java/com/atlas/explorer/
     connection/      Connexion, sources, DTO, services et connecteurs JDBC
     exploration/     Exploration des schemas, tables, colonnes et relations
     storage/         Stockage objet, flux, metadonnees et bootstrap local MinIO
+    jobs/            API, historique PostgreSQL, dispatcher et connecteur Spark
   shared/            Erreurs communes et traduction HTTP
 ```
 
@@ -113,8 +116,8 @@ de passe ou les details du pilote aux clients.
 MinIO fournit le stockage objet S3 local. Un bucket est un conteneur d'objets ;
 chaque fichier y est identifie par une cle, par exemple
 `sqlserver/dbo/Invoice/job-123/part-0001.parquet`. Ces prefixes organisent les
-objets ; ce ne sont pas des dossiers physiques. Cette etape prepare le
-stockage ; l'extraction SQL Server et la conversion Parquet viennent ensuite.
+objets ; ce ne sont pas des dossiers physiques. Ce module de stockage prepare
+le parcours d'extraction Spark/Parquet decrit a l'etape 2.
 Compose lance une instance locale unique, sans haute disponibilite.
 
 Le demarrage suit cet ordre :
@@ -156,8 +159,8 @@ Ce controle verifie l'acces au bucket ; les tests verifient aussi l'ecriture.
 Le service Java `StorageService` permet l'envoi par flux de taille connue,
 la lecture par flux, les metadonnees et la suppression. L'appelant ferme les
 flux. Le SDK utilise des parties de 5 Mio pour les envois multiparties,
-sans charger le fichier entier. Il n'y a pas encore de route d'envoi libre
-de fichiers ni d'interface de jobs.
+sans charger le fichier entier. Les extractions passent par l'API de jobs ;
+il n'y a pas de route d'envoi libre de fichiers.
 
 Le test Docker existant inclut maintenant une vraie integration MinIO :
 aller-retour CSV, fichier vide, envoi multipartie de plus de 6 Mio avec
@@ -173,6 +176,28 @@ l'image. Le depot communautaire est archive : ce choix repond au sujet
 pedagogique et devra etre reevalue avant une exploitation durable.
 Voir la [publication officielle](https://github.com/minio/minio/releases/tag/RELEASE.2025-10-15T17-29-55Z)
 et le [depot MinIO](https://github.com/minio/minio).
+
+## Etape 2 : jobs persistants et Spark
+
+`POST /storage/jobs` accepte une table SQL Server et renvoie HTTP 202 avec un
+UUID. PostgreSQL conserve la demande et son etat ; Spark execute l'extraction
+en arriere-plan, ecrit du Parquet dans MinIO et publie un manifeste de resultat.
+`GET /storage/jobs/{id}` suit le traitement ; `GET /storage/jobs/{id}/result`
+retourne les compteurs et l'emplacement une fois termine. `GET /storage/jobs`
+liste les 100 derniers traitements. Spring Batch n'est pas utilise.
+
+Ajouter `POSTGRES_ADMIN_PASSWORD` et `JOBS_PASSWORD` depuis `.env.example`
+avant de reconstruire une installation existante. Conserver les identifiants
+deja enregistres dans les volumes. Les nouvelles bases et leurs volumes sont
+distincts de BusinessDB et du stockage MinIO. PostgreSQL n'est pas expose sur
+un port Windows. L'API et le worker utilisent des comptes applicatifs limites.
+
+Le [guide des jobs](docs/storage-jobs.md) explique le flux, les requetes
+PowerShell, les etats, la recuperation apres redemarrage et les limites. La
+premiere version prend en charge Parquet, compression snappy ou aucune, une
+partition JDBC et un job actif. Le partitionnement des fichiers et l'interface
+Angular de suivi viennent ensuite ; une demande de partition non vide est
+refusee explicitement. Les fichiers seuls ne sont pas encore accessibles via SQL.
 
 ## Connexions
 
@@ -266,8 +291,8 @@ ressources, sondes, secrets externes et execution non root.
 
 Ces fichiers sont des modeles de preparation : aucun cloud n'est deploye.
 Renseigner les images, la source et le secret externe, et terminer TLS/OIDC
-avant d'ajouter une entree publique. L'extraction, les formats analytiques et
-le glossaire metier restent au backlog.
+avant d'ajouter une entree publique. Le catalogue, Trino, les optimisations
+d'extraction et le glossaire metier restent au backlog.
 
 La [feuille de route](docs/roadmap.md) donne l'ordre des prochaines etapes,
 dont les jobs, l'extraction, le catalogue, Trino et le glossaire metier.
