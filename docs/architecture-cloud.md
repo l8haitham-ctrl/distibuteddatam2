@@ -2,12 +2,12 @@
 
 ## Etat actuel
 
-Angular, Spring Boot, SQL Server de test et les outils de compilation sont
+Angular, Spring Boot, SQL Server de test, MinIO et les outils de compilation sont
 conteneurises. L'API est sans etat, configurable par environnement et dispose
 de sondes de sante et d'un arret gracieux. Les images de production ne tournent
 pas en root. Le navigateur utilise le meme domaine pour l'interface et `/api`.
 
-L'extraction, MinIO, le catalogue et Trino restent au backlog. Ce document
+L'extraction, la conversion Parquet, le catalogue et Trino restent au backlog. Ce document
 decrit la cible ; il ne signifie pas qu'un environnement cloud est deploye.
 
 ## Application actuellement livree
@@ -17,6 +17,7 @@ flowchart LR
     U[Utilisateur] --> F[Angular dans Nginx]
     F -->|/api| B[Spring Boot]
     B -->|JDBC chiffre / compte lecteur| DB[(SQL Server)]
+    B -->|SDK S3 / compte limite au bucket| M[(MinIO local)]
     S[Gestionnaire de secrets] -. configuration .-> B
 ```
 
@@ -47,7 +48,7 @@ la base relationnelle source.
 | Orchestration de la cible complete | Docker Compose | AKS | EKS |
 | Registre d'images | Docker local | Azure Container Registry | Amazon ECR |
 | Source SQL Server | Conteneur de test | Azure SQL Managed Instance ou source existante | Amazon RDS for SQL Server ou source existante |
-| Stockage objet futur | MinIO | Azure Blob Storage / ADLS Gen2 | Amazon S3 |
+| Stockage objet | MinIO | Azure Blob Storage / ADLS Gen2 | Amazon S3 |
 | Secrets | `.env` ignore par Git | Azure Key Vault | AWS Secrets Manager |
 | Observabilite | Logs stdout et sondes | Azure Monitor | CloudWatch |
 | Identite de service pour stockage futur | Configuration locale | Workload Identity | EKS Pod Identity / IAM |
@@ -60,6 +61,14 @@ pour tester cette premiere version.
 Trino devra utiliser le connecteur de stockage adapte : S3 pour AWS, Azure
 pour Blob/ADLS. Une URL Azure Blob n'est pas un remplacement transparent
 d'une URL S3 MinIO. Le catalogue doit rester accessible aux jobs et a Trino.
+
+Le module actuel utilise une interface Java `ObjectStorage` et un adaptateur
+MinIO/S3 configure par environnement. Il n'implemente pas encore Azure Blob,
+les fournisseurs d'identite cloud ni la gestion automatique des jetons.
+Le stockage reste desactive par defaut dans les modeles Kubernetes ; son
+activation necessitera le bucket, l'endpoint et un secret externe adapte.
+Le bootstrap MinIO avec compte root est exclusivement local, comme le
+bootstrap SQL Server. Il ne fait pas partie d'un deploiement cloud.
 
 ## Preparation avant exposition en production
 

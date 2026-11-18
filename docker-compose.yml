@@ -1,6 +1,44 @@
 name: distributed-data
 
 services:
+  minio:
+    image: distributed-data-minio:local
+    build: ./infra/minio
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:?Define MINIO_ROOT_USER in .env}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:?Define MINIO_ROOT_PASSWORD in .env}
+      MINIO_REGION_NAME: ${STORAGE_REGION:-us-east-1}
+      MINIO_BROWSER_REDIRECT_URL: http://localhost:${MINIO_CONSOLE_PORT:-9001}
+    ports:
+      - "127.0.0.1:${MINIO_API_PORT:-9000}:9000"
+      - "127.0.0.1:${MINIO_CONSOLE_PORT:-9001}:9001"
+    volumes:
+      - minio-data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:9000/minio/health/ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    restart: unless-stopped
+
+  storage-init:
+    image: distributed-data-backend:local
+    build: ./backend
+    depends_on:
+      minio:
+        condition: service_healthy
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:?Define MINIO_ROOT_USER in .env}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:?Define MINIO_ROOT_PASSWORD in .env}
+      STORAGE_ENDPOINT: http://minio:9000
+      STORAGE_REGION: ${STORAGE_REGION:-us-east-1}
+      STORAGE_BUCKET: ${STORAGE_BUCKET:-lake}
+      STORAGE_ACCESS_KEY: ${STORAGE_ACCESS_KEY:?Define STORAGE_ACCESS_KEY in .env}
+      STORAGE_SECRET_KEY: ${STORAGE_SECRET_KEY:?Define STORAGE_SECRET_KEY in .env}
+    command: ["--spring.main.web-application-type=none", "--storage.provision=true"]
+    restart: "no"
+
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
     environment:
@@ -54,12 +92,20 @@ services:
     depends_on:
       backend-init:
         condition: service_completed_successfully
+      storage-init:
+        condition: service_completed_successfully
     environment:
       SOURCE_HOST: sqlserver
       SOURCE_DATABASE: BusinessDB
       SOURCE_USERNAME: lake_reader
       SOURCE_PASSWORD: ${LAKE_READER_PASSWORD:?Define LAKE_READER_PASSWORD in .env}
       SOURCE_TRUST_SERVER_CERTIFICATE: "true"
+      STORAGE_ENABLED: "true"
+      STORAGE_ENDPOINT: http://minio:9000
+      STORAGE_REGION: ${STORAGE_REGION:-us-east-1}
+      STORAGE_BUCKET: ${STORAGE_BUCKET:-lake}
+      STORAGE_ACCESS_KEY: ${STORAGE_ACCESS_KEY:?Define STORAGE_ACCESS_KEY in .env}
+      STORAGE_SECRET_KEY: ${STORAGE_SECRET_KEY:?Define STORAGE_SECRET_KEY in .env}
     ports:
       - "127.0.0.1:8000:8000"
     healthcheck:
@@ -76,6 +122,7 @@ services:
     depends_on:
       backend:
         condition: service_healthy
+        restart: true
     ports:
       - "127.0.0.1:3000:8080"
     healthcheck:
@@ -96,15 +143,23 @@ services:
         condition: service_healthy
     environment:
       RUN_DB_TESTS: "true"
+      RUN_STORAGE_TESTS: "true"
       SOURCE_HOST: sqlserver
       SOURCE_PASSWORD: ${LAKE_READER_PASSWORD:?Define LAKE_READER_PASSWORD in .env}
       SOURCE_TRUST_SERVER_CERTIFICATE: "true"
+      STORAGE_ENABLED: "true"
+      STORAGE_ENDPOINT: http://minio:9000
+      STORAGE_REGION: ${STORAGE_REGION:-us-east-1}
+      STORAGE_BUCKET: ${STORAGE_BUCKET:-lake}
+      STORAGE_ACCESS_KEY: ${STORAGE_ACCESS_KEY:?Define STORAGE_ACCESS_KEY in .env}
+      STORAGE_SECRET_KEY: ${STORAGE_SECRET_KEY:?Define STORAGE_SECRET_KEY in .env}
     volumes:
       - ./backend:/workspace
       - maven-cache:/root/.m2
     command: ["mvn", "-B", "test"]
 
 volumes:
+  minio-data:
   sqlserver-data:
   maven-cache:
 

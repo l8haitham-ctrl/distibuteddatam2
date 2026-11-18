@@ -34,3 +34,10 @@ source:
   username: ${SOURCE_USERNAME:lake_reader}
   password: ${SOURCE_PASSWORD:}
   trust-server-certificate: ${SOURCE_TRUST_SERVER_CERTIFICATE:false}
+storage:
+  enabled: ${STORAGE_ENABLED:false}
+  endpoint: ${STORAGE_ENDPOINT:http://minio:9000}
+  region: ${STORAGE_REGION:us-east-1}
+  bucket: ${STORAGE_BUCKET:lake}
+  access-key: ${STORAGE_ACCESS_KEY:}
+  secret-key: ${STORAGE_SECRET_KEY:}

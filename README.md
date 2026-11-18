@@ -16,6 +16,7 @@ automatiquement la branche principale :
 | `feature/schema-exploration` | Tables, colonnes, types, cles et relations | Connexions |
 | `feature/angular-database-explorer` | Maquette et interface Angular connectee | Exploration |
 | `feature/cloud-ready-containers` | Developpement conteneurise et architecture Azure/AWS | Interface Angular |
+| `feature/minio-storage` | MinIO, bucket prive, service de stockage et tests reels | Conteneurs cloud |
 
 Le socle expose `/health`, `/actuator/health/readiness` et `/docs`.
 La fonctionnalite de connexion ajoute `GET /sources`,
@@ -43,6 +44,8 @@ docker compose ps -a
 
 - API : [http://localhost:8000/health](http://localhost:8000/health).
 - Documentation : [http://localhost:8000/docs](http://localhost:8000/docs).
+- Stockage : [http://localhost:8000/storage/status](http://localhost:8000/storage/status).
+- Console MinIO : [http://localhost:9001](http://localhost:9001).
 - SQL Server : `localhost,1433`, base `BusinessDB`, utilisateur administratif `sa`.
 
 Les ports sont accessibles uniquement en local. Le conteneur Java s'execute
@@ -97,12 +100,79 @@ backend/src/main/java/com/atlas/explorer/
     health/          Sante du service
     connection/      Connexion, sources, DTO, services et connecteurs JDBC
     exploration/     Exploration des schemas, tables, colonnes et relations
+    storage/         Stockage objet, flux, metadonnees et bootstrap local MinIO
   shared/            Erreurs communes et traduction HTTP
 ```
 
 Le trajet est `controleur -> service -> connecteur -> base source`.
 Le SQL reste dans les connecteurs. Les erreurs ne renvoient jamais les mots
 de passe ou les details du pilote aux clients.
+
+## Etape 1 : stockage MinIO
+
+MinIO fournit le stockage objet S3 local. Un bucket est un conteneur d'objets ;
+chaque fichier y est identifie par une cle, par exemple
+`sqlserver/dbo/Invoice/job-123/part-0001.parquet`. Ces prefixes organisent les
+objets ; ce ne sont pas des dossiers physiques. Cette etape prepare le
+stockage ; l'extraction SQL Server et la conversion Parquet viennent ensuite.
+Compose lance une instance locale unique, sans haute disponibilite.
+
+Le demarrage suit cet ordre :
+
+```text
+MinIO sain -> storage-init -> bucket lake + compte applicatif -> API
+SQL Server sain -> sqlserver-init -> backend-init ----------------^
+```
+
+Le service ponctuel `storage-init` termine normalement en `Exited (0)`.
+Il peut etre relance : il conserve le bucket et ses objets, met a jour le
+compte applicatif et reapplique sa politique d'acces. Le compte de l'API peut
+lire, ecrire et supprimer des objets dans le seul bucket configure ; il ne
+peut ni administrer MinIO ni creer d'autres buckets. Aucun acces public n'est
+accorde aux objets. Le volume `minio-data` conserve les fichiers aux redemarrages.
+
+Pour une installation existante, ajouter les variables MinIO de `.env.example`
+a `.env`, choisir deux secrets differents, puis relancer `docker compose up -d --build`.
+Conserver les identifiants SQL Server existants. Ne pas partager `.env`.
+
+- `MINIO_ROOT_USER` / `MINIO_ROOT_PASSWORD` : connexion administrateur a la
+  console ; transmis uniquement a MinIO et au bootstrap.
+- `STORAGE_ACCESS_KEY` / `STORAGE_SECRET_KEY` : compte applicatif limite.
+- `STORAGE_BUCKET` : `lake` par defaut ; nom de 3 a 63 caracteres minuscules,
+  chiffres ou tirets, commencant et terminant par une lettre ou un chiffre.
+- `STORAGE_REGION` : `us-east-1` par defaut.
+- `MINIO_API_PORT` / `MINIO_CONSOLE_PORT` : ports locaux 9000 / 9001.
+
+Dans Docker, l'API utilise `http://minio:9000`, pas `localhost:9000`.
+Hors Compose, activer le module avec `STORAGE_ENABLED=true` et renseigner
+`STORAGE_ENDPOINT`, la region, le bucket et les identifiants applicatifs.
+Le module est desactive par defaut, notamment dans le bootstrap SQL et les
+modeles Kubernetes existants. Les adaptateurs Azure/identites IAM ne sont
+pas encore implementes.
+
+`GET /storage/status` retourne `{"status":"ready","bucket":"lake"}` si
+le compte peut acceder au bucket, ou HTTP 503 avec un message generique.
+Ce controle verifie l'acces au bucket ; les tests verifient aussi l'ecriture.
+Le service Java `StorageService` permet l'envoi par flux de taille connue,
+la lecture par flux, les metadonnees et la suppression. L'appelant ferme les
+flux. Le SDK utilise des parties de 5 Mio pour les envois multiparties,
+sans charger le fichier entier. Il n'y a pas encore de route d'envoi libre
+de fichiers ni d'interface de jobs.
+
+Le test Docker existant inclut maintenant une vraie integration MinIO :
+aller-retour CSV, fichier vide, envoi multipartie de plus de 6 Mio avec
+comparaison SHA-256, suppression, fichier absent, refus d'acces anonyme et
+refus de creation d'un bucket par le compte applicatif. Les fichiers de test
+sont supprimes apres verification. `RUN_STORAGE_TESTS=true` active ces tests.
+
+L'image MinIO est construite a partir de la version officielle epinglee
+`RELEASE.2025-10-15T17-29-55Z` ; le premier build telecharge et compile Go
+dans Docker et prend plusieurs minutes. Aucun Go local n'est necessaire.
+Cette version est distribuee sous AGPL-3.0 ; la licence est conservee dans
+l'image. Le depot communautaire est archive : ce choix repond au sujet
+pedagogique et devra etre reevalue avant une exploitation durable.
+Voir la [publication officielle](https://github.com/minio/minio/releases/tag/RELEASE.2025-10-15T17-29-55Z)
+et le [depot MinIO](https://github.com/minio/minio).
 
 ## Connexions
 
@@ -137,6 +207,8 @@ la base, pas des liens inférés a partir des noms de colonnes.
 
 L'interface Angular est disponible sur [http://localhost:3000](http://localhost:3000).
 Nginx la sert depuis un conteneur non root et transmet `/api` au backend.
+Compose relance le frontend lors d'une mise a jour du backend pour renouveler
+la resolution de son adresse dans le proxy.
 La [maquette interactive](http://localhost:3000/?maquette=1) utilise des
 metadonnees illustratives et n'effectue aucune connexion reelle.
 
@@ -194,11 +266,11 @@ ressources, sondes, secrets externes et execution non root.
 
 Ces fichiers sont des modeles de preparation : aucun cloud n'est deploye.
 Renseigner les images, la source et le secret externe, et terminer TLS/OIDC
-avant d'ajouter une entree publique. L'extraction, le stockage analytique et
+avant d'ajouter une entree publique. L'extraction, les formats analytiques et
 le glossaire metier restent au backlog.
 
-Le [backlog](docs/roadmap.md) comprend le glossaire metier lie aux tables et
-colonnes, puis l'extraction, MinIO, le catalogue, Trino et les benchmarks.
+La [feuille de route](docs/roadmap.md) donne l'ordre des prochaines etapes,
+dont les jobs, l'extraction, le catalogue, Trino et le glossaire metier.
 
 References techniques : [Spring Boot](https://docs.spring.io/spring-boot/system-requirements.html),
 [JDBC SQL Server](https://learn.microsoft.com/en-us/sql/connect/jdbc/configuring-the-client-for-ssl-encryption),

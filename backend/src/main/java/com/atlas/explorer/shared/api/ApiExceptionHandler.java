@@ -17,6 +17,9 @@ public class ApiExceptionHandler {
             case UNAVAILABLE -> { status = 503; message = "Connexion impossible : vérifier le serveur, le port et le certificat."; }
             case SOURCE_NOT_FOUND -> { status = 404; message = "Source inconnue."; }
             case TABLE_NOT_FOUND -> { status = 404; message = "Table introuvable ou non accessible."; }
+            case OBJECT_NOT_FOUND -> { status = 404; message = "Fichier introuvable."; }
+            case STORAGE_UNAVAILABLE -> { status = 503; message = "Stockage indisponible : vérifier le service et sa configuration."; }
+            case STORAGE_INVALID -> { status = 422; message = "Paramètres de stockage invalides."; }
             default -> { status = 502; message = "La base a refusé l’opération. Vérifier les droits de lecture."; }
         }
         return ResponseEntity.status(status).body(Map.of("detail", message));
