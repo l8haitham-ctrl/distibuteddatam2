@@ -22,6 +22,17 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 class JobTests {
+    @Test void validationIdentifiesFieldsWithoutEchoingSubmittedValues() throws Exception {
+        var service=mock(JobService.class);
+        MockMvcBuilders.standaloneSetup(new JobController(service))
+                .setControllerAdvice(new com.atlas.explorer.features.jobs.api.JobExceptionHandler(),new ApiExceptionHandler()).build()
+                .perform(post("/storage/jobs").contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"source_id\":\"sqlserver\",\"table\":\"private-invalid-value!\",\"fetch_size\":0,\"partition_by\":[\"invoice_date\"]}"))
+                .andExpect(status().isUnprocessableEntity()).andExpect(jsonPath("$.errors.table").exists())
+                .andExpect(jsonPath("$.errors.fetch_size").exists()).andExpect(jsonPath("$.errors.partition_by").exists())
+                .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("private-invalid-value"))));
+        verifyNoInteractions(service);
+    }
     private CreateJobRequest request() { return new CreateJobRequest("sqlserver",null,"Invoice",null,null,null,null); }
     private StorageJob job(String status,String submission,Instant start) { return new StorageJob(UUID.randomUUID(),status,request(),Instant.now(),start,null,submission,null,null); }
     private JobProperties properties() { return new JobProperties("jdbc:postgresql://metadata/atlas","atlas","private-password",1800,"http://spark-master:6066","spark://spark-master:7077"); }

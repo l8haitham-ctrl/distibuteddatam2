@@ -179,6 +179,10 @@ et le [depot MinIO](https://github.com/minio/minio).
 
 ## Etape 2 : jobs persistants et Spark
 
+Dans Swagger, `POST /storage/jobs` fournit un exemple executable pour `Invoice`.
+Les reponses 202, 404, 422 et 503 sont documentees. Une erreur de validation
+de job indique les champs a corriger sans renvoyer les valeurs soumises.
+
 `POST /storage/jobs` accepte une table SQL Server et renvoie HTTP 202 avec un
 UUID. PostgreSQL conserve la demande et son etat ; Spark execute l'extraction
 en arriere-plan, ecrit du Parquet dans MinIO et publie un manifeste de resultat.
