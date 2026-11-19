@@ -42,6 +42,7 @@ a `master` ; aucune branche n'est supprimee :
 | `feature/cloud-ready-containers` | Developpement conteneurise et architecture Azure/AWS | Interface Angular |
 | `feature/minio-storage` | MinIO, bucket prive, service de stockage et tests reels | Conteneurs cloud |
 | `feature/storage-jobs` | Jobs PostgreSQL, API asynchrone et premiere ingestion Spark/Parquet | Stockage MinIO |
+| `feature/large-dataset` | Volumes deterministes configurables et migration updated_at | master apres integration |
 
 Le socle expose `/health`, `/actuator/health/readiness` et `/docs`.
 La fonctionnalite de connexion ajoute `GET /sources`,
@@ -88,8 +89,46 @@ La configuration est externalisee dans les variables d'environnement.
 
 Les factures couvrent 2025 et 2026 : 3 500 payees en deux versements, 1 000
 partiellement payees et 500 impayees. Les montants sont en `DECIMAL(12,2)`.
-Ce petit jeu deterministe sert au developpement ; les benchmarks utiliseront
-plus tard des volumes plus importants.
+Ce petit jeu deterministe sert au developpement et aux tests. Le generateur
+peut maintenant produire le volume `large` dans une base separee.
+
+`SEED_SCALE=small` est le defaut ; `large` produit 100 000 clients,
+1 000 000 factures et 1 600 000 paiements. Le total des paiements conserve la
+repartition initiale : 70 % payees avec deux versements, 20 % partielles avec
+un versement, 10 % impayees. `SEED_CUSTOMERS` et `SEED_INVOICES` permettent
+des surcharges explicites. Une base deja peuplee est conservee quel que soit
+le profil ; chaque table recoit `updated_at DATETIME2(0)` de facon idempotente.
+
+Pour generer et mesurer le grand volume dans une **nouvelle** base de benchmark,
+sans remplacer BusinessDB :
+
+```powershell
+docker compose run --rm --no-deps sqlserver-init 'bash /scripts/measure-large.sh'
+```
+
+Mesures reelles du 19 novembre 2026 dans Docker Desktop (8 CPU logiques,
+7,64 Gio de RAM disponibles pour Docker, limite SQL Server 2 048 Mio) :
+
+| Mesure | Premiere generation | Seconde generation, nouvelle base |
+| --- | ---: | ---: |
+| Generation T-SQL | 39,619 s | 29,782 s |
+| Initialisation complete, mesure dans le conteneur | 42,448 s | 32,471 s |
+| Clients / factures / paiements | 100 000 / 1 000 000 / 1 600 000 | Identique |
+| Fichier de donnees alloue | 200,00 Mio | 200,00 Mio |
+| Pages de donnees utilisees, index inclus | 137,75 Mio | 137,75 Mio |
+| Journal alloue | 264,00 Mio | 264,00 Mio |
+| Total des fichiers alloues | 464,00 Mio | 464,00 Mio |
+
+Ces mesures de generation ne sont pas un benchmark du pipeline analytique.
+Les tests et autres services etaient actifs ; le cache et la charge locale
+peuvent expliquer l'ecart entre les durees. Les deux jeux generes ont les
+memes empreintes de regression. Les chiffres de stockage viennent de
+`sys.database_files` et `FILEPROPERTY(..., 'SpaceUsed')`, pas de MinIO.
+
+Le [guide du generateur](docs/large-dataset.md) explique les lots SQL,
+la migration, les tests et le reseed. **Le reseed est destructif et n'est
+jamais lance automatiquement** ; il exige `CONFIRM_RESEED` egal au nom de la
+base cible. Ne pas l'utiliser pour un simple redemarrage.
 
 `sqlserver-init` attend SQL Server, puis reessaie l'initialisation si une base
 persistante termine sa recuperation. `Exited (0)` est son etat final normal.
@@ -99,7 +138,7 @@ le volume : ne pas utiliser `down -v` pour un simple redemarrage.
 Verifier les relations, dates et paiements :
 
 ```powershell
-docker compose run --rm --no-deps sqlserver-init '/opt/mssql-tools18/bin/sqlcmd -S sqlserver -U sa -C -b -i /scripts/02-verify.sql'
+docker compose run --rm --no-deps sqlserver-init 'bash /scripts/verify.sh'
 ```
 
 Si les logs indiquent `Password did not match`, remettre dans `.env` le mot

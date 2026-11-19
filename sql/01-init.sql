@@ -1,10 +1,10 @@
 -- Development database. Re-running this script preserves existing data.
 USE master;
 GO
-IF DB_ID(N'BusinessDB') IS NULL
-    EXEC(N'CREATE DATABASE BusinessDB');
+IF DB_ID(N'$(DatabaseName)') IS NULL
+    EXEC(N'CREATE DATABASE [$(DatabaseName)]');
 GO
-USE BusinessDB;
+USE [$(DatabaseName)];
 GO
 SET NOCOUNT ON;
 SET XACT_ABORT ON;
@@ -48,59 +48,6 @@ BEGIN TRY
         CONSTRAINT CK_Payment_Method CHECK (payment_method IN ('card', 'transfer', 'cash'))
     );
 
-    IF NOT EXISTS (SELECT 1 FROM dbo.Customer)
-       AND NOT EXISTS (SELECT 1 FROM dbo.Invoice)
-       AND NOT EXISTS (SELECT 1 FROM dbo.Payment)
-    BEGIN
-        -- Deterministic seed: 1,000 customers and 5,000 invoices over two years.
-        ;WITH digits(n) AS (
-            SELECT n FROM (VALUES (0),(1),(2),(3),(4),(5),(6),(7),(8),(9)) v(n)
-        ), numbers(n) AS (
-            SELECT 1 + a.n + 10 * b.n + 100 * c.n
-            FROM digits a CROSS JOIN digits b CROSS JOIN digits c
-        )
-        INSERT INTO dbo.Customer (customer_id, first_name, last_name, email, city, created_at)
-        SELECT n, CONCAT(N'Prenom', n), CONCAT(N'Nom', n),
-            CONCAT(N'client', n, N'@example.com'),
-            CHOOSE(1 + n % 5, N'Casablanca', N'Rabat', N'Fes', N'Marrakech', N'Tanger'),
-            DATEADD(DAY, n % 365, CONVERT(DATETIME2(0), '20240101', 112))
-        FROM numbers;
-
-        ;WITH digits(n) AS (
-            SELECT n FROM (VALUES (0),(1),(2),(3),(4),(5),(6),(7),(8),(9)) v(n)
-        ), numbers(n) AS (
-            SELECT 1 + a.n + 10 * b.n + 100 * c.n + 1000 * d.n
-            FROM digits a CROSS JOIN digits b CROSS JOIN digits c CROSS JOIN digits d
-        )
-        INSERT INTO dbo.Invoice (invoice_id, customer_id, invoice_date, amount, status)
-        SELECT n, 1 + (n - 1) % 1000,
-            DATEADD(DAY, (n - 1) % 730, CONVERT(DATE, '20250101', 112)),
-            CAST(50 + (n * 137 % 200000) / 100.0 AS DECIMAL(12, 2)),
-            CASE WHEN n % 10 = 0 THEN 'unpaid'
-                 WHEN n % 10 IN (8, 9) THEN 'partial' ELSE 'paid' END
-        FROM numbers WHERE n <= 5000;
-
-        -- Paid invoices receive two installments, partial invoices one half-payment.
-        -- This deliberately exercises the one-to-many Invoice -> Payment relation.
-        INSERT INTO dbo.Payment (payment_id, invoice_id, payment_date, amount, payment_method)
-        SELECT 2 * i.invoice_id - 1,
-            i.invoice_id, DATEADD(DAY, 3, i.invoice_date),
-            CAST(ROUND(i.amount / 2, 2) AS DECIMAL(12, 2)),
-            CHOOSE(1 + i.invoice_id % 3, 'card', 'transfer', 'cash')
-        FROM dbo.Invoice i WHERE i.status IN ('paid', 'partial');
-
-        INSERT INTO dbo.Payment (payment_id, invoice_id, payment_date, amount, payment_method)
-        SELECT 2 * i.invoice_id,
-            i.invoice_id, DATEADD(DAY, 10, i.invoice_date),
-            i.amount - CAST(ROUND(i.amount / 2, 2) AS DECIMAL(12, 2)),
-            CHOOSE(1 + i.invoice_id % 3, 'card', 'transfer', 'cash')
-        FROM dbo.Invoice i WHERE i.status = 'paid';
-
-        PRINT 'Seed created: 1000 customers, 5000 invoices, 8000 payments.';
-    END
-    ELSE
-        PRINT 'Existing data detected; seed skipped.';
-
     COMMIT TRANSACTION;
 END TRY
 BEGIN CATCH
@@ -109,7 +56,27 @@ BEGIN CATCH
 END CATCH;
 GO
 
-SELECT N'Customer' AS table_name, COUNT_BIG(*) AS row_count FROM dbo.Customer
-UNION ALL SELECT N'Invoice', COUNT_BIG(*) FROM dbo.Invoice
-UNION ALL SELECT N'Payment', COUNT_BIG(*) FROM dbo.Payment;
+-- Upgrade existing volumes once. Dynamic SQL avoids compilation against the old schema.
+IF COL_LENGTH('dbo.Customer','updated_at') IS NULL
+BEGIN
+    ALTER TABLE dbo.Customer ADD updated_at DATETIME2(0) NOT NULL
+        CONSTRAINT DF_Customer_updated_at DEFAULT SYSUTCDATETIME() WITH VALUES;
+    EXEC(N'UPDATE dbo.Customer SET updated_at=DATEADD(DAY,1,created_at)');
+END;
+IF COL_LENGTH('dbo.Invoice','updated_at') IS NULL
+BEGIN
+    ALTER TABLE dbo.Invoice ADD updated_at DATETIME2(0) NOT NULL
+        CONSTRAINT DF_Invoice_updated_at DEFAULT SYSUTCDATETIME() WITH VALUES;
+    EXEC(N'UPDATE dbo.Invoice SET updated_at=DATEADD(DAY,2,CAST(invoice_date AS DATETIME2(0)))');
+END;
+IF COL_LENGTH('dbo.Payment','updated_at') IS NULL
+BEGIN
+    ALTER TABLE dbo.Payment ADD updated_at DATETIME2(0) NOT NULL
+        CONSTRAINT DF_Payment_updated_at DEFAULT SYSUTCDATETIME() WITH VALUES;
+    EXEC(N'UPDATE dbo.Payment SET updated_at=DATEADD(DAY,1,CAST(payment_date AS DATETIME2(0)))');
+END;
+GO
+:r /scripts/seed-procedure.sql
+GO
+EXEC dbo.SeedBusinessData @Customers=$(SeedCustomers), @Invoices=$(SeedInvoices);
 GO

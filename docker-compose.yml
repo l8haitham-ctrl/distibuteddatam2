@@ -135,6 +135,9 @@ services:
         condition: service_healthy
     environment:
       SQLCMDPASSWORD: ${MSSQL_SA_PASSWORD:?Define MSSQL_SA_PASSWORD in .env}
+      SEED_SCALE: ${SEED_SCALE:-small}
+      SEED_CUSTOMERS: ${SEED_CUSTOMERS:-}
+      SEED_INVOICES: ${SEED_INVOICES:-}
     volumes:
       - ./sql:/scripts:ro
     entrypoint: ["/bin/bash", "-ec"]

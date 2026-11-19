@@ -38,6 +38,14 @@ class DatabaseIntegrationTests {
         assertEquals("Customer", JsonPath.read(result.body(), "$.foreign_keys[0].referenced_table"));
         List<Integer> precisions = JsonPath.read(result.body(), "$.columns[?(@.name == 'amount')].precision");
         assertEquals(List.of(12), precisions);
+        List<String> names=JsonPath.read(result.body(),"$.columns[*].name");
+        assertEquals(List.of("invoice_id","customer_id","invoice_date","amount","status","updated_at"),names);
+        for(String table:List.of("Customer","Invoice","Payment")) {
+            var schema=call("GET","/sources/sqlserver/tables/"+table).body();
+            List<String> types=JsonPath.read(schema,"$.columns[?(@.name == 'updated_at')].data_type");
+            List<Boolean> nullable=JsonPath.read(schema,"$.columns[?(@.name == 'updated_at')].nullable");
+            assertEquals(List.of("datetime2"),types);assertEquals(List.of(false),nullable);
+        }
     }
     @Test void submittedConnectionsExploreWithoutReturningCredentials() throws Exception {
         var config=sources.get("sqlserver");

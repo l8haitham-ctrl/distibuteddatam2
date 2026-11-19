@@ -1,4 +1,4 @@
-USE BusinessDB;
+USE [$(DatabaseName)];
 GO
 SET NOCOUNT ON;
 
@@ -17,13 +17,18 @@ IF EXISTS (
 
 IF EXISTS (
     SELECT 1 FROM dbo.Invoice i
-    LEFT JOIN (SELECT invoice_id, SUM(amount) AS paid FROM dbo.Payment GROUP BY invoice_id) p
+    LEFT JOIN (SELECT invoice_id, SUM(amount) AS paid, COUNT(*) AS installments FROM dbo.Payment GROUP BY invoice_id) p
         ON p.invoice_id = i.invoice_id
-    WHERE (i.status = 'paid' AND COALESCE(p.paid, 0) <> i.amount)
-       OR (i.status = 'partial' AND (COALESCE(p.paid, 0) <= 0 OR p.paid >= i.amount))
+    WHERE (i.status = 'paid' AND (COALESCE(p.paid, 0) <> i.amount OR p.installments<>2))
+       OR (i.status = 'partial' AND (COALESCE(p.paid, 0) <= 0 OR p.paid >= i.amount OR p.installments<>1))
        OR (i.status = 'unpaid' AND COALESCE(p.paid, 0) <> 0)
 )
     THROW 51002, 'Invoice status does not match payments.', 1;
+
+IF EXISTS(SELECT 1 FROM dbo.Customer WHERE updated_at<created_at)
+ OR EXISTS(SELECT 1 FROM dbo.Invoice WHERE updated_at<CAST(invoice_date AS datetime2(0)))
+ OR EXISTS(SELECT 1 FROM dbo.Payment WHERE updated_at<CAST(payment_date AS datetime2(0)))
+    THROW 51003, 'Invalid updated_at timestamps.', 1;
 
 SELECT N'Customer' AS table_name, COUNT_BIG(*) AS row_count FROM dbo.Customer
 UNION ALL SELECT N'Invoice', COUNT_BIG(*) FROM dbo.Invoice

@@ -6,6 +6,12 @@ Le socle Docker, les connexions SQL Server, l'exploration et l'interface Angular
 sont deja implementes. Chaque nouvelle fonctionnalite conserve sa branche,
 ses tests et sa documentation avant d'etre poussee ; aucune fusion automatique.
 
+Le [generateur de volumes](large-dataset.md), branche `feature/large-dataset`,
+ajoute les profils small/large, updated_at et un reseed explicite. Le profil
+large a ete genere et verifie dans une base separee ; BusinessDB small reste
+la source des tests. Les mesures figurent dans README.md. La prochaine branche
+du parcours demande est `feature/partitioning-csv`.
+
 | Etape | Fonctionnalite | Resultat attendu | Etat |
 | --- | --- | --- | --- |
 | 1 | Stockage MinIO | Bucket prive persistant, compte limite, service Java par flux, tests reels | Implemente sur `feature/minio-storage` |
