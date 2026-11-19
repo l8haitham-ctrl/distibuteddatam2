@@ -4,10 +4,34 @@ Projet pedagogique : connecter une base relationnelle, explorer sa structure,
 puis construire un pipeline analytique Parquet / MinIO / catalogue / Trino.
 La stack retenue est **Angular + Java 21 / Spring Boot**, entierement conteneurisee.
 
+## Etat de la version principale
+
+`master` integre maintenant les fonctionnalites jusqu'a
+`feature/job-api-documentation`, par avance rapide sans reecriture d'historique.
+Le prototype d'architecture live reste une experimentation locale non publiee.
+
+Services livres : Angular/Nginx, API Spring Boot, SQL Server avec BusinessDB,
+PostgreSQL pour les jobs, Spark master/worker et MinIO pour le Parquet.
+Le catalogue technique, Trino, CSV, le partitionnement avance et les benchmarks
+restent a realiser : voir [la feuille de route](docs/roadmap.md).
+
+| Usage | Endpoints |
+| --- | --- |
+| Sante et documentation | `GET /health`, `GET /actuator/health/readiness`, `/docs`, `/openapi.json` |
+| Sources | `GET /sources`, `POST /sources/{id}/test`, `POST /connections/test` |
+| Structure SQL Server | `GET /sources/{id}/tables`, `GET /sources/{id}/tables/{table}?schema=dbo`, `POST /connections/explore` |
+| Stockage | `GET /storage/status` |
+| Jobs Spark | `POST /storage/jobs`, `GET /storage/jobs`, `GET /storage/jobs/{id}`, `GET /storage/jobs/{id}/result` |
+
+Un job cree renvoie 202 et ecrit une extraction Parquet dans MinIO. Son resultat
+n'est publie qu'apres validation du manifeste ; les fichiers ne sont pas encore
+interrogeables par SQL analytique. La base source reste accessible en lecture seule.
+
 ## Branches de fonctionnalites
 
-Les branches sont empilees pour conserver leurs dependances sans fusionner
-automatiquement la branche principale :
+Les branches historiques sont conservees pour retrouver leurs dependances et
+leurs revues. Leur chaine jusqu'a `feature/job-api-documentation` est integree
+a `master` ; aucune branche n'est supprimee :
 
 | Branche | Contenu | Base de revue |
 | --- | --- | --- |
