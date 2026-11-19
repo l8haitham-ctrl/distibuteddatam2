@@ -4,15 +4,17 @@ Projet pedagogique : connecter une base relationnelle, explorer sa structure,
 puis construire un pipeline analytique Parquet / MinIO / catalogue / Trino.
 La stack retenue est **Angular + Java 21 / Spring Boot**, entierement conteneurisee.
 
-## Etat de la version principale
+## Etat des branches
 
 `master` integre maintenant les fonctionnalites jusqu'a
 `feature/job-api-documentation`, par avance rapide sans reecriture d'historique.
 Le prototype d'architecture live reste une experimentation locale non publiee.
 
 Services livres : Angular/Nginx, API Spring Boot, SQL Server avec BusinessDB,
-PostgreSQL pour les jobs, Spark master/worker et MinIO pour le Parquet.
-Le catalogue technique, Trino, CSV, le partitionnement avance et les benchmarks
+PostgreSQL pour les jobs, Spark master/worker et MinIO. Cette branche
+`feature/partitioning-csv`, basee sur `feature/large-dataset`, ajoute CSV,
+compression, partitions Hive et lecteurs JDBC paralleles. Ces deux branches
+ne sont pas encore fusionnees dans master. Catalogue, Trino et benchmarks
 restent a realiser : voir [la feuille de route](docs/roadmap.md).
 
 | Usage | Endpoints |
@@ -23,7 +25,7 @@ restent a realiser : voir [la feuille de route](docs/roadmap.md).
 | Stockage | `GET /storage/status` |
 | Jobs Spark | `POST /storage/jobs`, `GET /storage/jobs`, `GET /storage/jobs/{id}`, `GET /storage/jobs/{id}/result` |
 
-Un job cree renvoie 202 et ecrit une extraction Parquet dans MinIO. Son resultat
+Un job cree renvoie 202 et ecrit une extraction Parquet ou CSV dans MinIO. Son resultat
 n'est publie qu'apres validation du manifeste ; les fichiers ne sont pas encore
 interrogeables par SQL analytique. La base source reste accessible en lecture seule.
 
@@ -43,6 +45,7 @@ a `master` ; aucune branche n'est supprimee :
 | `feature/minio-storage` | MinIO, bucket prive, service de stockage et tests reels | Conteneurs cloud |
 | `feature/storage-jobs` | Jobs PostgreSQL, API asynchrone et premiere ingestion Spark/Parquet | Stockage MinIO |
 | `feature/large-dataset` | Volumes deterministes configurables et migration updated_at | master apres integration |
+| `feature/partitioning-csv` | CSV/Parquet, compression, partitions Hive, lecteurs JDBC et durees | feature/large-dataset |
 
 Le socle expose `/health`, `/actuator/health/readiness` et `/docs`.
 La fonctionnalite de connexion ajoute `GET /sources`,
@@ -248,7 +251,7 @@ de job indique les champs a corriger sans renvoyer les valeurs soumises.
 
 `POST /storage/jobs` accepte une table SQL Server et renvoie HTTP 202 avec un
 UUID. PostgreSQL conserve la demande et son etat ; Spark execute l'extraction
-en arriere-plan, ecrit du Parquet dans MinIO et publie un manifeste de resultat.
+en arriere-plan, ecrit du Parquet ou CSV dans MinIO et publie un manifeste de resultat.
 `GET /storage/jobs/{id}` suit le traitement ; `GET /storage/jobs/{id}/result`
 retourne les compteurs et l'emplacement une fois termine. `GET /storage/jobs`
 liste les 100 derniers traitements. Spring Batch n'est pas utilise.
@@ -259,12 +262,22 @@ deja enregistres dans les volumes. Les nouvelles bases et leurs volumes sont
 distincts de BusinessDB et du stockage MinIO. PostgreSQL n'est pas expose sur
 un port Windows. L'API et le worker utilisent des comptes applicatifs limites.
 
-Le [guide des jobs](docs/storage-jobs.md) explique le flux, les requetes
-PowerShell, les etats, la recuperation apres redemarrage et les limites. La
-premiere version prend en charge Parquet, compression snappy ou aucune, une
-partition JDBC et un job actif. Le partitionnement des fichiers et l'interface
-Angular de suivi viennent ensuite ; une demande de partition non vide est
-refusee explicitement. Les fichiers seuls ne sont pas encore accessibles via SQL.
+Le [guide des jobs](docs/storage-jobs.md) detaille les formats, etats, limites
+et mesures. Parquet accepte snappy, zstd ou aucune compression ; CSV accepte
+gzip ou aucune. `partition_by: ["invoice_date"]` derive annee/mois par defaut,
+sans supprimer la date d'origine. Les colonnes non date a faible cardinalite
+peuvent etre partitionnees directement. Les noms inconnus, cles primaires et
+colonnes depassant 1000 valeurs distinctes sont refuses avant mise en file.
+
+`fetch_size` (1–100000) regle les lots reseau ; `num_partitions` (1–16, defaut 4)
+regle les lecteurs JDBC sur cle primaire entiere, avec repli a un lecteur si
+necessaire. Le fichier contient au plus 100000 lignes. Le manifeste expose
+`extract_write_ms`, `verify_ms`, `spark_duration_ms`, lignes, octets, fichiers
+et fichiers par partition. Reconstruire API **et Spark** lors de la mise a jour.
+Le CSV suit un contrat TEXTFILE simple, sans quoting : les chaines contenant
+virgules ou retours a la ligne font echouer le job ; utiliser Parquet pour elles.
+Les fichiers seuls ne sont pas encore accessibles via SQL. L'interface Angular
+de suivi, le catalogue et Trino constituent les prochaines etapes.
 
 ## Connexions
 
@@ -362,7 +375,7 @@ avant d'ajouter une entree publique. Le catalogue, Trino, les optimisations
 d'extraction et le glossaire metier restent au backlog.
 
 La [feuille de route](docs/roadmap.md) donne l'ordre des prochaines etapes,
-dont les jobs, l'extraction, le catalogue, Trino et le glossaire metier.
+dont le catalogue, Trino, les ecrans de jobs, les benchmarks et le glossaire metier.
 
 References techniques : [Spring Boot](https://docs.spring.io/spring-boot/system-requirements.html),
 [JDBC SQL Server](https://learn.microsoft.com/en-us/sql/connect/jdbc/configuring-the-client-for-ssl-encryption),

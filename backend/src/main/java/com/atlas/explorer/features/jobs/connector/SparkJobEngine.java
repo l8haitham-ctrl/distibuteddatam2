@@ -20,7 +20,8 @@ public class SparkJobEngine implements JobEngine {
         var response=call("POST","/create",Map.of(
                 "action","CreateSubmissionRequest","clientSparkVersion","4.3.0",
                 "appResource","file:/opt/atlas/atlas-ingestion.jar","mainClass","com.atlas.ingestion.IngestionJob",
-                "appArgs",List.of(job.id().toString(),request.sourceId(),request.schema(),request.table(),request.fetchSize().toString(),request.compression()),
+                "appArgs",List.of(job.id().toString(),request.sourceId(),request.schema(),request.table(),request.fetchSize().toString(),request.compression(),
+                        request.format(),String.join(",",request.partitionBy()),request.partitionGranularity(),request.numPartitions().toString()),
                 "environmentVariables",Map.of(),
                 "sparkProperties",Map.of("spark.master",properties.sparkMaster(),"spark.app.name","atlas-"+job.id(),
                         "spark.submit.deployMode","cluster","spark.driver.memory","512m","spark.driver.cores","1",

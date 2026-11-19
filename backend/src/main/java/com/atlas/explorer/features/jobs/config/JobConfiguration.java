@@ -28,7 +28,8 @@ public class JobConfiguration {
         return Flyway.configure().dataSource(jobsDataSource).locations("classpath:db/jobs").load();
     }
     @Bean @DependsOn("jobsFlyway") JobRepository jobRepository(HikariDataSource jobsDataSource) { return new JdbcJobRepository(new JdbcTemplate(jobsDataSource)); }
-    @Bean JobService jobService(JobRepository repository,SourceService sources,ExplorationService exploration) { return new JobService(repository,sources,exploration); }
+    @Bean PartitionCardinality partitionCardinality() { return new PartitionCardinality(); }
+    @Bean JobService jobService(JobRepository repository,SourceService sources,ExplorationService exploration,PartitionCardinality cardinality) { return new JobService(repository,sources,exploration,cardinality); }
     @Bean JobEngine jobEngine(JobProperties properties) { return new SparkJobEngine(properties); }
     @Bean @ConditionalOnProperty(name="jobs.dispatch-enabled",havingValue="true",matchIfMissing=true)
     JobDispatcher jobDispatcher(JobRepository repository,JobEngine engine,StorageService storage,JobProperties properties) { return new JobDispatcher(repository,engine,storage,properties); }

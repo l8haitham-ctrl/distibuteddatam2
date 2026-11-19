@@ -69,7 +69,7 @@ public class JobDispatcher {
                 if(bytes.length>262144)throw invalid();
                 var result=json.readValue(bytes,new TypeReference<Map<String,Object>>(){});
                 if(!job.id().toString().equals(result.get("job_id")) || !job.prefix().equals(result.get("prefix"))
-                        || !"parquet".equals(result.get("format")) || !(result.get("row_count") instanceof Number rows) || rows.longValue()<0
+                        || !job.request().format().equals(result.get("format")) || !(result.get("row_count") instanceof Number rows) || rows.longValue()<0
                         || !(result.get("file_count") instanceof Number files) || files.longValue()<0
                         || !(result.get("storage_bytes") instanceof Number size) || size.longValue()<0)throw invalid();
                 storage.stat(job.prefix()+"/data/_SUCCESS");

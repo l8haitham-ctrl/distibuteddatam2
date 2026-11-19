@@ -18,10 +18,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 public class JobController {
     private final JobService jobs;
     public JobController(JobService jobs) { this.jobs=jobs; }
-    @Operation(summary="Lancer une extraction SQL Server vers Parquet", requestBody=@io.swagger.v3.oas.annotations.parameters.RequestBody(
-            content=@Content(mediaType="application/json", examples=@ExampleObject(value="""
-                {"source_id":"sqlserver","schema":"dbo","table":"Invoice","format":"parquet","partition_by":[],"fetch_size":1000,"compression":"snappy"}
-                """))))
+    @Operation(summary="Lancer une extraction SQL Server vers Parquet ou CSV", requestBody=@io.swagger.v3.oas.annotations.parameters.RequestBody(
+            content=@Content(mediaType="application/json", examples={@ExampleObject(name="Exemple du sujet",value="""
+                {"source_id":"sqlserver","table":"Invoice","format":"parquet","partition_by":["invoice_date"]}
+                """),@ExampleObject(name="CSV gzip par mois",value="""
+                {"source_id":"sqlserver","schema":"dbo","table":"Invoice","format":"csv","compression":"gzip","partition_by":["invoice_date"],"partition_granularity":"month","fetch_size":1000,"num_partitions":4}
+                """)})))
     @ApiResponse(responseCode="202",description="Demande acceptee ; consulter le job avec son identifiant",content=@Content(schema=@Schema(implementation=StorageJob.class)))
     @ApiResponse(responseCode="404",description="Source ou table introuvable",content=@Content)
     @ApiResponse(responseCode="422",description="Parametres invalides ; consulter les champs indiques",content=@Content)

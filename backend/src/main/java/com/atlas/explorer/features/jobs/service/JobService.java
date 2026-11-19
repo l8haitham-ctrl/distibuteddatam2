@@ -3,6 +3,7 @@ package com.atlas.explorer.features.jobs.service;
 import com.atlas.explorer.features.connection.service.SourceService;
 import com.atlas.explorer.features.exploration.service.ExplorationService;
 import com.atlas.explorer.features.jobs.connector.JobRepository;
+import com.atlas.explorer.features.jobs.connector.PartitionCardinality;
 import com.atlas.explorer.features.jobs.dto.*;
 import com.atlas.explorer.shared.domain.ExplorerException;
 import java.util.*;
@@ -11,12 +12,38 @@ public class JobService {
     private final JobRepository repository;
     private final SourceService sources;
     private final ExplorationService exploration;
-    public JobService(JobRepository repository,SourceService sources,ExplorationService exploration) {
-        this.repository=repository;this.sources=sources;this.exploration=exploration;
+    private final PartitionCardinality cardinality;
+    public JobService(JobRepository repository,SourceService sources,ExplorationService exploration,PartitionCardinality cardinality) {
+        this.repository=repository;this.sources=sources;this.exploration=exploration;this.cardinality=cardinality;
     }
     public StorageJob create(CreateJobRequest request) {
         // Confirm source/table access before persisting any executable request.
-        exploration.describe(sources.get(request.sourceId()),request.schema(),request.table());
+        var allowed=request.format().equals("csv")?Set.of("gzip","uncompressed"):Set.of("snappy","zstd","uncompressed");
+        if(!allowed.contains(request.compression()))throw new InvalidJobException("compression",
+                "Combinaison invalide : parquet accepte snappy, zstd, uncompressed ; csv accepte gzip, uncompressed.");
+        var source=sources.get(request.sourceId());
+        var metadata=exploration.describe(source,request.schema(),request.table());
+        @SuppressWarnings("unchecked") var columns=(List<Map<String,Object>>)metadata.get("columns");
+        @SuppressWarnings("unchecked") var keys=(List<Map<String,Object>>)metadata.get("primary_key");
+        var names=new HashSet<String>();
+        var outputNames=new HashSet<String>();
+        columns.forEach(c->outputNames.add(c.get("name").toString().toLowerCase(Locale.ROOT)));
+        for(String partition:request.partitionBy()) {
+            if(!names.add(partition.toLowerCase(Locale.ROOT)))throw new InvalidJobException("partition_by","Une colonne ne peut etre selectionnee qu'une fois.");
+            var column=columns.stream().filter(c->partition.equals(c.get("name"))).findFirst()
+                    .orElseThrow(()->new InvalidJobException("partition_by","Colonne de partition inexistante ; utiliser le nom exact affiche dans la structure."));
+            if(keys.stream().anyMatch(k->partition.equals(k.get("column_name"))))throw new InvalidJobException("partition_by","Le partitionnement sur une cle primaire est interdit.");
+            String type=column.get("data_type").toString();
+            if(Set.of("text","ntext","image","xml","varbinary","binary","geography","geometry").contains(type))
+                throw new InvalidJobException("partition_by","Type de colonne incompatible avec le partitionnement.");
+            if(cardinality.distinct(source,request.schema(),request.table(),partition)>1000)
+                throw new InvalidJobException("partition_by","La colonne depasse la limite de 1000 valeurs distinctes.");
+            if(Set.of("date","datetime","datetime2","smalldatetime","datetimeoffset").contains(type)) {
+                var suffixes=switch(request.partitionGranularity()) {case "year" -> List.of("year");case "day" -> List.of("year","month","day");default -> List.of("year","month");};
+                for(String suffix:suffixes)if(!outputNames.add((partition+"_"+suffix).toLowerCase(Locale.ROOT)))
+                    throw new InvalidJobException("partition_by","Une colonne derivee entre en conflit avec une colonne existante.");
+            }
+        }
         return repository.create(request);
     }
     public StorageJob get(UUID id) { return repository.get(id); }

@@ -1,106 +1,194 @@
-# Jobs persistants et execution Spark
+# Jobs persistants, formats et partitionnement
 
-Branche : `feature/storage-jobs`, base : `feature/minio-storage`.
+Branche : `feature/partitioning-csv`, base : `feature/large-dataset`.
+Les deux branches precedentes restent des dependances explicites ; pas de fusion automatique.
 
-## Parcours implemente
+## Flux
 
 ```mermaid
 flowchart LR
-    UI[Angular / client HTTP] --> API[API Spring Boot]
-    API --> PG[(PostgreSQL : jobs)]
-    PG --> D[Dispatcher periodique]
-    D --> M[Spark master : soumission REST]
-    M --> W[Spark worker : driver et executor Java]
-    DB[(SQL Server / compte lecteur)] --> W
-    W --> P[Parquet compresse]
-    P --> S[(MinIO : prefixe propre au job)]
-    W --> MF[Manifeste publie en dernier]
-    MF --> S
+    API[API Spring Boot] --> V[Validation et cardinalite SQL en lecture seule]
+    V --> PG[(PostgreSQL : file de jobs)]
+    PG --> D[Dispatcher]
+    D --> M[Spark master REST]
+    M --> W[Spark driver et executor]
+    DB[(SQL Server)] -->|JDBC par lots et partitions de lecture| W
+    W --> F[Parquet ou CSV et partitions de stockage]
+    F --> S[(MinIO)]
+    W -->|verification puis manifeste| S
     S --> D
-    D --> PG
 ```
 
-L'API conserve une demande avant de repondre HTTP 202 ; elle n'attend pas
-l'extraction. Le dispatcher revendique un job en base, soumet le driver au
-master Spark et conserve son identifiant. Il consulte ensuite le manifeste
-MinIO et l'etat Spark. Aucune socket Docker n'est montee dans l'application.
-Spring Batch n'est pas utilise dans ce parcours.
+Spring Boot conserve la demande et repond HTTP 202 sans attendre l'extraction.
+Spark execute le traitement ; Spring Batch n'est pas utilise. PostgreSQL stocke
+les demandes, etats et resultats, jamais les donnees extraites. Aucune socket
+Docker n'est montee dans l'application.
 
-Spark, SQL Server, MinIO et PostgreSQL sont des services distincts. Les fichiers
-Parquet ne sont pas stockes dans PostgreSQL. Cette base contient seulement
-les demandes, dates, statuts, identifiants Spark, erreurs generiques et resultats.
+## Installation et mise a jour
 
-## Demarrage
-
-Ajouter les variables `POSTGRES_ADMIN_PASSWORD`, `JOBS_PASSWORD` et
-`SPARK_UI_PORT` de `.env.example` a `.env`, avec deux secrets differents,
-puis executer :
+Configurer `.env` depuis `.env.example`, sans changer les secrets deja enregistres
+dans les volumes. Puis executer dans PowerShell :
 
 ```powershell
 docker compose up -d --build
 docker compose ps -a
 ```
 
-Les anciennes variables et les volumes SQL Server/MinIO sont conserves.
-L'initialisation PostgreSQL ne s'execute qu'a la creation du volume ; changer
-un mot de passe dans `.env` ne modifie pas celui d'un volume deja initialise.
-Le role applicatif `atlas` n'est pas superutilisateur. Flyway applique le
-schema de jobs via ce compte. PostgreSQL et les ports Spark RPC/REST restent
-dans le reseau Docker ; seule l'interface Spark est exposee sur
-[localhost:8088](http://localhost:8088), en boucle locale.
+Reconstruire **aussi Spark** lors d'une mise a jour : le protocole d'arguments
+du driver evolue avec l'API. Laisser les anciens jobs actifs terminer avant de
+remplacer master/worker. Les demandes JSON conservees sans les nouveaux champs
+restent lisibles grace aux valeurs par defaut. Aucun nouveau volume ni reseed
+n'est necessaire pour cette fonctionnalite.
 
-Spark 4.3.0 / Java 21 utilise l'image officielle `spark`. Le Dockerfile ajoute
-le driver JDBC SQL Server et `hadoop-aws` 3.5.0, correspondant au Hadoop livre
-dans cette distribution. Le JAR d'ingestion est compile dans Docker avec les
-bibliotheques de cette meme image. Aucun SDK Java/Spark local n'est requis.
+Le worker possede deux coeurs : un pour le driver, un pour l'executor, chacun
+avec 512 Mio. Les 4 lecteurs JDBC par defaut sont des taches qui se succedent
+sur cet executor ; 16 partitions de lecture ne demandent pas 16 coeurs disponibles.
+Spark 4.3.0 / Java 21 embarque Hadoop 3.5.0 ; le connecteur S3A correspond a ce
+Hadoop. Tous les builds et tests passent par Docker.
 
-## API
+## Creer et suivre une extraction
 
-### Creer une extraction
+L'exemple exact du sujet fonctionne, avec un partitionnement mensuel par defaut :
+
+```json
+{"source_id":"sqlserver","table":"Invoice","format":"parquet","partition_by":["invoice_date"]}
+```
+
+Exemple complet en PowerShell :
 
 ```powershell
 $body = @{
   source_id = 'sqlserver'
   schema = 'dbo'
   table = 'Invoice'
-  format = 'parquet'
-  partition_by = @()
+  format = 'csv'
+  compression = 'gzip'
+  partition_by = @('invoice_date')
+  partition_granularity = 'month'
   fetch_size = 1000
-  compression = 'snappy'
+  num_partitions = 4
 } | ConvertTo-Json
 $job = Invoke-RestMethod -Method Post -Uri 'http://localhost:8000/storage/jobs' -ContentType 'application/json' -Body $body
-$job
-```
-
-La reponse HTTP 202 contient `id`, `status`, la demande et les dates ; le header
-`Location` indique `/storage/jobs/{id}`. La source et la table sont verifiees
-avant la creation. Les identifiants SQL respectent ici le sous-ensemble
-lettres/chiffres/underscore, sans espace ; aucun SQL libre n'est accepte.
-
-Valeurs par defaut : schema `dbo`, format `parquet`, liste de partitions vide,
-`fetch_size=1000`, compression `snappy`. La compression peut aussi etre
-`uncompressed`. La taille de lecture JDBC est bornee entre 1 et 100 000.
-Une liste de partitions non vide ou un format different est refuse avec 422
-jusqu'a la fonctionnalite correspondante. La source persistante disponible
-est `sqlserver` ; les connexions ponctuelles du formulaire ne sont pas stockees.
-
-Chaque POST cree un nouveau job ; la relance et les cles d'idempotence de
-requete ne font pas partie de cette version.
-
-### Suivre et consulter
-
-```powershell
 Invoke-RestMethod "http://localhost:8000/storage/jobs/$($job.id)"
 Invoke-RestMethod "http://localhost:8000/storage/jobs/$($job.id)/result"
-Invoke-RestMethod 'http://localhost:8000/storage/jobs'
 ```
 
-`GET /storage/jobs` renvoie les 100 demandes les plus recentes.
-Un identifiant inconnu retourne 404. Le resultat retourne 409 tant que le job
-n'est pas `COMPLETED`, y compris en cas d'echec. Le statut expose alors un
-`error_code` generique, sans identifiants ni reponse brute JDBC/Spark.
+`GET /storage/jobs` retourne les 100 derniers jobs. `Location` dans la reponse
+202 indique l'URL du suivi (prefixe `/api` et port public conserves via Nginx). Le resultat
+retourne 409 avant COMPLETED ; identifiant inconnu : 404. Un POST cree toujours
+un nouvel UUID. Source persistante disponible : `sqlserver`. Les connexions
+ponctuelles de l'explorateur ne sont pas sauvegardees comme sources de jobs.
 
-## Etats et redemarrages
+| Parametre | Valeurs | Defaut |
+| --- | --- | --- |
+| schema | Identifiant SQL simple, nom exact | dbo |
+| format | parquet, csv | parquet |
+| compression Parquet | snappy, zstd, uncompressed | snappy |
+| compression CSV | gzip, uncompressed | gzip |
+| partition_by | 0 a 8 noms de colonnes exacts, sans doublon | [] |
+| partition_granularity | month, year, day | month |
+| fetch_size | 1 a 100000 | 1000 |
+| num_partitions | 1 a 16 | 4 |
+
+Une combinaison invalide, par exemple CSV/snappy, retourne 422 avec une
+explication dans `errors.compression`. Les valeurs soumises et secrets ne sont
+pas recopies dans les erreurs de validation.
+
+## Partitions de stockage
+
+Une colonne date/timestamp derive des colonnes entieres, placees a la fin du
+schema du manifeste. La date d'origine reste dans chaque fichier de donnees.
+
+| Granularite | Colonnes derivees | Exemple de chemin |
+| --- | --- | --- |
+| year | invoice_date_year | invoice_date_year=2025/ |
+| month | invoice_date_year, invoice_date_month | invoice_date_year=2025/invoice_date_month=3/ |
+| day | invoice_date_year, invoice_date_month, invoice_date_day | invoice_date_year=2025/invoice_date_month=3/invoice_date_day=15/ |
+
+`month` evite la multiplication des petits fichiers. `day` est un choix explicite
+pour les comparaisons futures. Les colonnes non date, par exemple `status`,
+`city` et `payment_method`, sont partitionnees directement. Spark encode les
+caracteres speciaux des valeurs dans les chemins Hive ; les NULL utilisent son
+repertoire special `__HIVE_DEFAULT_PARTITION__`.
+
+Avant de creer le job, l'API verifie la structure puis effectue un
+`COUNT_BIG(DISTINCT colonne)` via le compte lecteur. Colonne inconnue, cle
+primaire (y compris membre d'une cle composee), plus de 1000 valeurs distinctes,
+type non compatible ou conflit de nom derive : 422, aucun job persiste.
+La limite s'applique **a la colonne source, dates comprises**, conformement au
+prompt : une date couvrant plus de 1000 jours distincts est refusee meme avec
+une granularite annuelle. Les dates du seed couvrent 730 jours / 24 mois.
+Les NULL ne comptent pas dans COUNT DISTINCT et peuvent ajouter un repertoire.
+La combinaison de plusieurs colonnes peut multiplier les repertoires : preferer
+une seule colonne pertinente. Les controles ne constituent pas un snapshot ;
+une modification concurrente de la source peut changer sa cardinalite.
+
+## Trois tailles differentes
+
+| Reglage | Effet |
+| --- | --- |
+| fetch_size | Lignes demandees par aller-retour reseau JDBC ; n'impose pas un nombre de fichiers |
+| num_partitions | Nombre demande de lecteurs/taches JDBC, avec leurs connexions ; independant des repertoires Hive |
+| maxRecordsPerFile | Limite fixe de 100000 lignes par fichier de sortie ; independante des lots reseau |
+
+Avec plusieurs lecteurs, Spark utilise la **cle primaire entiere unique** et
+ses bornes MIN/MAX. Les bornes calculent les intervalles de lecture, elles ne
+filtrent pas les lignes. Sans cle primaire entiere a une colonne, ou sur une
+plage vide/constante, lecture avec une seule partition et raison explicite dans
+`parallel_read_note`. Spark peut reduire le nombre effectif de partitions pour
+une petite plage. `effective_num_partitions` rapporte la valeur reelle.
+Plusieurs lecteurs peuvent produire plusieurs fichiers dans chaque repertoire.
+Il n'y a pas de snapshot SQL partage entre les lecteurs.
+
+## Contrat CSV pour le futur catalogue Hive/Trino
+
+Le CSV utilise le futur format Hive **TEXTFILE type**, sans en-tete, virgule,
+UTF-8, NULL `\N`, dates `yyyy-MM-dd`, timestamps `yyyy-MM-dd HH:mm:ss` en UTC,
+decimaux en notation simple avec echelle conservee. Les options sont consignees
+dans `csv_options`. Les colonnes de partition sont dans le chemin, pas dans le
+contenu des fichiers ; les colonnes date d'origine restent dans le contenu.
+
+TEXTFILE avec un simple separateur ne gere pas les champs CSV entre guillemets.
+L'ecriture est donc sans quoting/escaping. Une chaine contenant virgule,
+retour ligne, retour chariot, NUL ou la valeur litterale `\N` provoque l'echec
+Spark (pas de manifeste de succes) ; choisir Parquet pour ces donnees. Les
+verifications sont appliquees par UDF dans le flux d'ecriture, sans collecter
+les lignes ni executer une seconde extraction. Les timestamps sont tronques
+au format demande a la seconde ; les fractions ne sont pas conservees en CSV.
+Gzip est pris en charge, avec son compromis CPU et l'absence de decoupage d'un
+meme fichier compresse entre plusieurs lecteurs SQL.
+
+## Fichiers, manifeste et durees
+
+```text
+lake/sqlserver/dbo/Invoice/<uuid>/
+  data/invoice_date_year=2025/invoice_date_month=3/part-....csv.gz
+  data/_SUCCESS
+  manifest.json
+```
+
+Chaque UUID garde son prefixe ; aucun ecrasement. Spark relit la sortie (schema
+explicite pour CSV) et compte les lignes, sans seconde extraction JDBC.
+Le manifeste v2 contient le schema type `schema_json`, `partition_columns`
+(nom, type Spark, colonne source, indicateur derive), les formats et compteurs :
+
+| Champ | Definition |
+| --- | --- |
+| extract_write_ms | Plan JDBC, MIN/MAX et lecture + transformations + commit des fichiers |
+| verify_ms | Relecture de la sortie, comptage, inventaire des fichiers et controle _SUCCESS |
+| spark_duration_ms | Debut du main jusqu'a la fin de verification, avant publication du manifeste ; inclut initialisation Spark, exclut attente en file et arret de session |
+| row_count | Lignes comptees dans les fichiers ecrits |
+| file_count | Fichiers de donnees uniquement |
+| storage_bytes | Somme des octets de ces fichiers, hors manifeste et marqueurs |
+| partition_file_counts | Nombre de fichiers par chemin de partition ; __unpartitioned__ sans repertoire Hive |
+
+Le manifeste est publie en dernier. Le dispatcher exige UUID, prefixe, format,
+compteurs valides et `_SUCCESS`, puis enrichit le resultat avec bucket et
+manifest_key. Les champs ci-dessus sont accessibles via GET resultat. Les
+secrets JDBC/MinIO ne font partie ni des arguments Spark REST ni du manifeste.
+Les comptes administrateurs servent seulement aux services d'initialisation.
+
+## Etats et limites
 
 ```text
 QUEUED -> SUBMITTING -> RUNNING -> COMPLETED
@@ -108,92 +196,56 @@ QUEUED -> SUBMITTING -> RUNNING -> COMPLETED
               +----------> FAILED
 ```
 
-Le passage a `SUBMITTING` est atomique avec verrouillage de ligne. Un index
-unique partiel limite a un seul job actif, y compris si deux dispatchers
-tentent de revendiquer des jobs simultanement. Le reste attend dans PostgreSQL.
+Un index PostgreSQL limite a un seul job actif ; les autres attendent. Les
+revendications sont atomiques. Historique et jobs en attente survivent a un
+redemarrage. Le dispatcher retrouve les drivers RUNNING apres redemarrage,
+sans resoumission automatique. Une soumission interrompue devient FAILED avec
+`error_code=SUBMISSION_UNCERTAIN` ; inspecter Spark avant une nouvelle demande.
+Ce n'est pas un statut autonome. SUBMITTING expire apres 120 secondes ; delai
+global par defaut 1800 secondes. Les indisponibilites temporaires Spark/MinIO
+ne font pas perdre le suivi tant que ce delai n'est pas depasse.
 
-Les jobs en attente et l'historique survivent au redemarrage de l'API. Un job
-`RUNNING` retrouve son identifiant Spark et continue d'etre surveille apres
-redemarrage ; il n'est pas automatiquement soumis une seconde fois. Le master
-Spark possede egalement un volume de recuperation locale. La haute disponibilite
-multi-machines et la reprise d'un driver interrompu ne sont pas implementees.
+Des fichiers partiels peuvent rester apres un echec ; sans manifeste valide ils
+ne sont jamais exposes comme resultat termine. Pas de relance automatique,
+de selection de colonnes/filtres ni de chargement incremental. Le catalogue,
+Trino et les ecrans Angular de suivi seront ajoutes sur les prochaines branches.
+COMPLETED signifie pour l'instant fichiers verifies, pas table SQL disponible.
+Les modeles Kubernetes n'activent pas encore ces jobs.
 
-Si la soumission est interrompue avant l'enregistrement de l'identifiant Spark,
-le job est marque `SUBMISSION_UNCERTAIN` ; il peut deja exister cote Spark.
-Une soumission en suspens est detectee apres 120 secondes. Il faut inspecter
-Spark avant de creer une nouvelle extraction : cette version n'annonce pas
-de garantie d'execution exactement une fois.
-
-Une indisponibilite temporaire de Spark ou MinIO conserve le job actif. Le
-delai total par defaut est de 1 800 secondes (`JOBS_TIMEOUT_SECONDS`) ; a
-l'expiration, le dispatcher tente d'arreter le driver et marque l'echec.
-Un resultat sans manifeste valide ne peut pas devenir `COMPLETED`.
-
-## Fichiers et controles
-
-```text
-lake/sqlserver/dbo/Invoice/<job-id>/
-  data/part-....snappy.parquet
-  data/_SUCCESS
-  manifest.json
-```
-
-Le driver transmet les identifiants JDBC dans les proprietes, jamais dans
-l'URL ou les parametres publics du job. Les secrets sont fournis au worker
-par environnement ; les comptes administrateurs SQL Server/MinIO/PostgreSQL
-ne sont transmis ni au worker ni a l'API. Le masquage Spark couvre les noms
-de proprietes contenant secret, password, token, access key ou credentials.
-
-Spark lit la table par JDBC avec `fetchsize`, ecrit des fichiers de 100 000
-lignes maximum, puis relit le Parquet pour compter les lignes effectivement
-ecrites. Il n'y a ni `collect()` ni chargement de toute la table dans le driver.
-Les types sont ceux du lecteur JDBC Spark ; les tests verifient notamment
-les montants `DECIMAL(12,2)` et les dates de factures.
-
-Le manifeste est publie apres le commit des fichiers et inclut nombre de
-lignes, nombre de fichiers, octets Parquet, schema, compression et identifiant
-de l'application Spark. Les octets mesures concernent les fichiers Parquet,
-pas le manifeste et les fichiers de controle. L'API exige aussi `_SUCCESS`.
-
-Les prefixes sont propres a chaque UUID et ne sont pas ecrases. Les fichiers
-partiels d'un job en erreur peuvent rester dans son prefixe ; ils ne doivent
-pas etre enregistres au futur catalogue comme un resultat valide.
-
-## Limites de cette premiere version
-
-- Un job actif, un worker de deux coeurs (un pour le driver et un pour
-  l'executor), driver et executor de 512 Mio chacun.
-- Une partition JDBC : le traitement est execute par Spark, mais la lecture
-  repartie de la source reste a ajouter. `fetch_size` n'est pas un nombre de
-  partitions et ne definit pas non plus la taille d'un fichier Parquet.
-- Extraction complete de la table ; selection de colonnes/filtres et chargement
-  incremental restent a developper.
-- Pas de snapshot commun garanti si la table change pendant l'extraction.
-- Pas encore de partitionnement de stockage, catalogue, Trino ou ecran Angular
-  de suivi. Les endpoints sont utilisables dans `/docs` ou par client HTTP.
-- Les modeles Kubernetes anterieurs n'activent pas encore les jobs. Le reseau,
-  les identites et les secrets Spark cloud demandent une configuration dediee.
-
-## Tests
+## Verification Docker
 
 ```powershell
 docker compose --profile tools run --rm backend-tests
 ```
 
-`RUN_JOB_TESTS=true` ajoute les tests PostgreSQL et Spark. Les tests utilisent
-`atlas_test`, sans toucher a l'historique applicatif `atlas`, et le dispatcher
-du contexte de test est desactive. Le test Spark pilote lui-meme son execution,
-extrait les 5 000 factures, verifie les compteurs, types et signatures Parquet,
-puis supprime uniquement les objets de ses prefixes UUID. Les tests couvrent
-aussi validation API, concurrence des revendications, persistance et erreurs.
+Les tests utilisent BusinessDB small et la base isolee `atlas_test`, dispatcher
+applicatif desactive. Ils couvrent la validation, cardinalite reelle SQL Server,
+concurrence, persistance et erreurs, puis lancent de vrais jobs Spark : Parquet
+non partitionne, Parquet/zstd mensuel et CSV mensuel gzip/sans compression.
+Ils verifient 5000 lignes, 24 repertoires, types et dates, notation decimale,
+quatre partitions JDBC, tailles des objets, compteurs et durees. Seuls les objets
+des UUID des tests sont supprimes.
 
-Validation effectuee sur cette branche : 40 tests backend reussis, sans test
-ignore. Un lancement par l'API Angular `/api/storage/jobs` a aussi ete verifie
-avec redemarrage du backend pendant l'execution : le suivi a retrouve le job,
-termine avec 5 000 lignes et un fichier Parquet de 55 712 octets. Cette mesure
-est un controle fonctionnel sur les donnees de demonstration, pas un benchmark.
+Validation du 19 novembre 2026 : 47 tests backend passes sans test ignore,
+7 tests Angular passes, images API/Spark/frontend construites dans Docker.
+Le controle du proxy a revele la perte du port public dans Location ; Nginx
+transmet maintenant le Host complet et le test de regression exige :3000/api.
+Un job lance via /api avec l'exemple exact du sujet a termine avec 5000 lignes,
+24 repertoires, 96 fichiers Parquet/snappy et 331451 octets de donnees.
+Manifeste : extract_write_ms=48529, verify_ms=21227, spark_duration_ms=77646,
+4 lecteurs JDBC. Il s'agit d'un controle fonctionnel unique sur small, pas d'un
+benchmark ; les mesures comparables et repetees appartiennent a la suite.
 
-References : [Spark standalone et REST](https://spark.apache.org/docs/4.3.0/spark-standalone.html),
-[JDBC Spark](https://spark.apache.org/docs/4.3.0/sql-data-sources-jdbc.html),
-[Parquet Spark](https://spark.apache.org/docs/4.3.0/sql-data-sources-parquet.html),
-[initialisation PostgreSQL Docker](https://hub.docker.com/_/postgres).
+Le contrat CSV est egalement verifie avec des valeurs qui ne figurent pas dans
+le seed : espaces en debut/fin de chaine (conserves explicitement), guillemets,
+NULL, petit decimal sans exposant, date et timestamp ; virgules, retours ligne
+et marqueur NULL litteral doivent echouer. Le manifeste indique
+`csv_preserve_whitespace=true`. Lancer ce controle dans l'image Spark courante :
+
+```powershell
+docker compose run --rm --no-deps --entrypoint /bin/bash --volume "${PWD}/spark/tests:/checks:ro" spark-master /checks/verify-csv.sh
+```
+
+Ce controle ne contacte ni SQL Server ni MinIO. Il a retourne
+`CSV_CONTRACT_PASSED`. Le parcours via Nginx a aussi verifie CSV sans compression
+partitionne directement par status : 5000 lignes, 3 repertoires, un lecteur.

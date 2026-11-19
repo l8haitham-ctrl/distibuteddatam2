@@ -10,15 +10,16 @@ Le [generateur de volumes](large-dataset.md), branche `feature/large-dataset`,
 ajoute les profils small/large, updated_at et un reseed explicite. Le profil
 large a ete genere et verifie dans une base separee ; BusinessDB small reste
 la source des tests. Les mesures figurent dans README.md. La prochaine branche
-du parcours demande est `feature/partitioning-csv`.
+du parcours demande est `feature/hive-catalog-trino`, apres la branche
+`feature/partitioning-csv` qui ajoute formats, partitions et lecture parallele.
 
 | Etape | Fonctionnalite | Resultat attendu | Etat |
 | --- | --- | --- | --- |
 | 1 | Stockage MinIO | Bucket prive persistant, compte limite, service Java par flux, tests reels | Implemente sur `feature/minio-storage` |
 | 2 | Jobs persistants | Creer et suivre un traitement avec statuts, dates, erreurs et resultat ; conserver l'etat apres redemarrage | Implemente sur `feature/storage-jobs` |
-| 3 | Extraction par lots | Lecture JDBC Spark bornee ; ajouter selection, lecture repartie et progression detaillee | Premiere version complete de table ; optimisations a faire |
-| 4 | Parquet et depot | Ecrire dans MinIO, borner les fichiers et publier un manifeste | Premiere version Spark implementee ; CSV a faire |
-| 5 | Partitionnement et compression | Organiser les extractions par source/table/job puis partitions adaptees ; comparer sans surpartitionner | A faire |
+| 3 | Extraction par lots | Lecture JDBC Spark par lots avec 1 a 16 partitions de lecture ; selection avancee et progression detaillee futures | Lecture parallele implementee sur feature/partitioning-csv |
+| 4 | Parquet et depot | Ecrire dans MinIO, borner les fichiers et publier un manifeste | CSV/Parquet implementes sur feature/partitioning-csv |
+| 5 | Partitionnement et compression | Parquet snappy/zstd/sans compression ; CSV gzip/sans compression ; dates annee/mois/jour et colonnes de faible cardinalite | Implemente sur feature/partitioning-csv |
 | 6 | Catalogue technique | Enregistrer schemas, emplacements et partitions dans un catalogue compatible Trino | A faire |
 | 7 | Acces SQL Trino | Lire les donnees deposees, verifier les jointures Customer/Invoice/Payment et les droits de lecture | A faire |
 | 8 | Parcours Angular complet | Selectionner, lancer, suivre un job, consulter le resultat et executer une requete analytique via l'API | A faire |
@@ -28,7 +29,7 @@ du parcours demande est `feature/partitioning-csv`.
 
 La branche `feature/storage-jobs` utilise PostgreSQL pour l'historique et
 Spark pour l'ingestion, sans Spring Batch. La suite porte sur la selection de
-donnees, la lecture JDBC repartie et le partitionnement de stockage. Une API
+donnees, le catalogue Hive et Trino, puis les ecrans Angular et benchmarks. Une API
 ne doit pas annoncer un job termine avant que les fichiers et son manifeste
 soient valides. La relance apres erreur et les chargements incrementaux seront
 ajoutes ensuite. Le [guide des jobs](storage-jobs.md) precise les limites actuelles.
@@ -58,8 +59,9 @@ consultant ce catalogue. Le depot de fichiers seul ne cree pas une table SQL.
 ## Pipeline analytique
 
 MinIO, l'historique PostgreSQL et le premier parcours Spark/Parquet sont
-implementes. CSV, selection avancee, partitions, catalogue, Trino et mesures
-comparables restent a implementer.
+implementes. La branche feature/partitioning-csv ajoute CSV, compression, partitions et lecteurs
+JDBC paralleles. Selection avancee, catalogue, Trino et mesures comparables
+restent a implementer.
 
 ## Bonus apres le parcours principal
 

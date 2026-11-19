@@ -7,6 +7,8 @@ import com.atlas.explorer.features.jobs.service.JobDispatcher;
 import com.atlas.explorer.features.storage.service.StorageService;
 import io.minio.*;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -65,6 +67,62 @@ class JobIntegrationTests {
         assertEquals(404,call("GET","/storage/jobs/"+UUID.randomUUID(),null).statusCode());
         assertEquals(400,call("GET","/storage/jobs/not-a-uuid",null).statusCode());
         assertFalse(response.body().contains("password"));
+    }
+    @Test void realSourcePartitionChecksRejectUnsafeRequestsWithoutQueuing() throws Exception {
+        for(String column:List.of("missing","invoice_id","amount")) {
+            var response=call("POST","/storage/jobs","{\"source_id\":\"sqlserver\",\"table\":\"Invoice\",\"partition_by\":[\""+column+"\"]}");
+            assertEquals(422,response.statusCode(),response.body());assertTrue(response.body().contains("partition_by"));
+        }
+        assertEquals(422,call("POST","/storage/jobs","{\"source_id\":\"sqlserver\",\"table\":\"Invoice\",\"format\":\"csv\",\"compression\":\"zstd\"}").statusCode());
+        assertTrue(repository.list().isEmpty());
+        var response=call("POST","/storage/jobs","{\"source_id\":\"sqlserver\",\"table\":\"Invoice\",\"format\":\"parquet\",\"partition_by\":[\"invoice_date\"]}");
+        assertEquals(202,response.statusCode(),response.body());
+    }
+    @ParameterizedTest @CsvSource({"parquet,zstd","csv,gzip","csv,uncompressed"})
+    void realSparkWritesTypedMonthlyPartitions(String format,String compression) throws Exception {
+        var request=new CreateJobRequest("sqlserver",null,"Invoice",format,List.of("invoice_date"),257,compression,"month",4);
+        var job=run(request);var result=job.result();
+        assertEquals(5000,((Number)result.get("row_count")).longValue());
+        assertEquals(4,((Number)result.get("effective_num_partitions")).intValue());
+        assertEquals("invoice_id",result.get("jdbc_partition_column"));
+        @SuppressWarnings("unchecked") var partitions=(Map<String,Number>)result.get("partition_file_counts");
+        assertEquals(24,partitions.size());
+        assertTrue(partitions.containsKey("invoice_date_year=2025/invoice_date_month=3"));
+        assertEquals(((Number)result.get("file_count")).longValue(),partitions.values().stream().mapToLong(Number::longValue).sum());
+        assertTrue(result.get("partition_columns").toString().contains("integer"));
+        for(String timing:List.of("extract_write_ms","verify_ms","spark_duration_ms"))assertTrue(((Number)result.get(timing)).longValue()>0);
+        long bytes=0,rows=0;var sum=java.math.BigDecimal.ZERO;
+        for(var entry:minio.listObjects(ListObjectsArgs.builder().bucket(storage.status().bucket()).prefix(job.prefix()+"/data/").recursive(true).build())) {
+            var object=entry.get();if(object.objectName().endsWith("/_SUCCESS"))continue;
+            assertTrue(object.objectName().contains("invoice_date_year="),object.objectName());
+            bytes+=object.size();
+            if(format.equals("csv"))try(var raw=storage.open(object.objectName());
+                    var input=compression.equals("gzip")?new java.util.zip.GZIPInputStream(raw):raw;
+                    var reader=new java.io.BufferedReader(new java.io.InputStreamReader(input,java.nio.charset.StandardCharsets.UTF_8))) {
+                String line;while((line=reader.readLine())!=null) {
+                    String[] fields=line.split(",",-1);assertEquals(6,fields.length,line);
+                    assertTrue(fields[0].matches("[0-9]+"),line);
+                    assertTrue(fields[2].matches("202[56]-[0-9]{2}-[0-9]{2}"),line);
+                    assertTrue(fields[3].matches("[0-9]+\\.[0-9]{2}"),line);
+                    assertTrue(fields[5].matches("[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}"),line);
+                    sum=sum.add(new java.math.BigDecimal(fields[3]));rows++;
+                }
+            }
+        }
+        assertEquals(((Number)result.get("storage_bytes")).longValue(),bytes);
+        if(format.equals("csv")) { assertEquals(5000,rows);assertTrue(sum.signum()>0);assertNotNull(result.get("csv_options")); }
+        var response=call("GET","/storage/jobs/"+job.id()+"/result",null);
+        assertEquals(200,response.statusCode());assertTrue(response.body().contains("extract_write_ms"));
+    }
+    private StorageJob run(CreateJobRequest request) throws Exception {
+        var job=repository.create(request);var dispatcher=new JobDispatcher(repository,engine,storage,properties);
+        dispatcher.tick();Instant deadline=Instant.now().plusSeconds(240);
+        while(Instant.now().isBefore(deadline)) {
+            dispatcher.tick();job=repository.get(job.id());
+            if(Set.of("COMPLETED","FAILED").contains(job.status()))break;
+            Thread.sleep(2000);
+        }
+        assertEquals("COMPLETED",job.status(),"Spark execution: "+job.errorCode());return job;
     }
     @Test void statePersistsAcrossRepositoryRecreationAndTerminalStatesCannotRegress() {
         var job=repository.create(request("Invoice"));repository.claim().orElseThrow();repository.running(job.id(),"driver-test-1");
