@@ -17,6 +17,26 @@ public class JobService {
         this.repository=repository;this.sources=sources;this.exploration=exploration;this.cardinality=cardinality;
     }
     public StorageJob create(CreateJobRequest request) {
+        validate(request);
+        return repository.create(request);
+    }
+    public List<Map<String,Object>> partitionCandidates(String sourceId,String schema,String table,String granularity) {
+        if(!schema.matches("[A-Za-z_][A-Za-z0-9_]{0,127}") || !table.matches("[A-Za-z_][A-Za-z0-9_]{0,127}")
+                || !Set.of("month","year","day").contains(granularity))throw new InvalidJobException("partition_by","Schema, table ou granularite invalide.");
+        var metadata=exploration.describe(sources.get(sourceId),schema,table);
+        @SuppressWarnings("unchecked") var columns=(List<Map<String,Object>>)metadata.get("columns");
+        var result=new ArrayList<Map<String,Object>>();
+        for(var column:columns) {
+            String name=column.get("name").toString();boolean eligible=false;String reason="Nom de colonne incompatible avec l'extraction.";
+            if(name.matches("[A-Za-z_][A-Za-z0-9_]{0,127}"))try {
+                validate(new CreateJobRequest(sourceId,schema,table,"parquet",List.of(name),1000,"snappy",granularity,4));
+                eligible=true;reason="";
+            } catch(InvalidJobException invalid) {reason=invalid.getMessage();}
+            result.add(Map.of("name",name,"data_type",column.get("data_type"),"eligible",eligible,"reason",reason));
+        }
+        return result;
+    }
+    private void validate(CreateJobRequest request) {
         // Confirm source/table access before persisting any executable request.
         var allowed=request.format().equals("csv")?Set.of("gzip","uncompressed"):Set.of("snappy","zstd","uncompressed");
         if(!allowed.contains(request.compression()))throw new InvalidJobException("compression",
@@ -44,7 +64,6 @@ public class JobService {
                     throw new InvalidJobException("partition_by","Une colonne derivee entre en conflit avec une colonne existante.");
             }
         }
-        return repository.create(request);
     }
     public StorageJob get(UUID id) { return repository.get(id); }
     public List<StorageJob> list() { return repository.list(); }

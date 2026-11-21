@@ -34,6 +34,12 @@ public class JobController {
                 .path("/{id}").buildAndExpand(job.id()).toUri()).body(job);
     }
     @GetMapping public List<StorageJob> list() { return jobs.list(); }
+    @Operation(summary="Verifier les colonnes partitionnables sans creer de traitement")
+    @GetMapping("/partition-candidates") public List<Map<String,Object>> partitionCandidates(
+            @RequestParam("source_id") String sourceId,@RequestParam(defaultValue="dbo") String schema,
+            @RequestParam String table,@RequestParam(name="partition_granularity",defaultValue="month") String granularity) {
+        return jobs.partitionCandidates(sourceId,schema,table,granularity);
+    }
     @GetMapping("/{id}") public StorageJob get(@PathVariable UUID id) { return jobs.get(id); }
     @GetMapping("/{id}/result") public Map<String,Object> result(@PathVariable UUID id) { return jobs.result(id); }
 }

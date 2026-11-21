@@ -85,6 +85,16 @@ class JobIntegrationTests {
         assertEquals(400,call("GET","/storage/jobs/not-a-uuid",null).statusCode());
         assertFalse(response.body().contains("password"));
     }
+    @Test void partitionCandidatesUseRealCardinalityAndNeverQueue() throws Exception {
+        var response=call("GET","/storage/jobs/partition-candidates?source_id=sqlserver&table=Invoice",null);
+        assertEquals(200,response.statusCode(),response.body());
+        var values=new com.fasterxml.jackson.databind.ObjectMapper().readTree(response.body());
+        var eligible=new HashSet<String>();
+        values.forEach(value->{if(value.get("eligible").asBoolean())eligible.add(value.get("name").asText());});
+        assertTrue(eligible.containsAll(List.of("invoice_date","status")));assertFalse(eligible.contains("invoice_id"));assertFalse(eligible.contains("amount"));
+        assertEquals(422,call("GET","/storage/jobs/partition-candidates?source_id=sqlserver&table=Invoice&partition_granularity=hour",null).statusCode());
+        assertTrue(repository.list().isEmpty());
+    }
     @Test void realSourcePartitionChecksRejectUnsafeRequestsWithoutQueuing() throws Exception {
         for(String column:List.of("missing","invoice_id","amount")) {
             var response=call("POST","/storage/jobs","{\"source_id\":\"sqlserver\",\"table\":\"Invoice\",\"partition_by\":[\""+column+"\"]}");

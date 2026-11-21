@@ -402,3 +402,12 @@ partitions, reprise d'enregistrement et refus d'ecriture SQL/S3. Le profil small
 fonctionne avec environ 8 Go alloues a Docker (hors Windows). Le metastore utilise
 un heap de 512 Mo et Trino 2 Go ; davantage de marge est utile pour large et les
 builds simultanes. Les premiers echecs et les reprises sont decrits dans le guide.
+
+## Colonnes partitionnables
+
+Branche `feature/partition-candidates`, base `feature/hive-catalog-trino`.
+`GET /storage/jobs/partition-candidates?source_id=sqlserver&schema=dbo&table=Invoice&partition_granularity=month`
+retourne les colonnes, types, eligibilite et motif d'exclusion pour le wizard
+Angular. Les controles utilisent la meme validation que POST /storage/jobs,
+dont COUNT DISTINCT via le compte lecteur. Aucun job n'est cree. La validation
+est refaite lors du lancement pour tenir compte des changements de la source.
