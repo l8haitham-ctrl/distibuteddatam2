@@ -283,7 +283,7 @@ et fichiers par partition. Reconstruire API **et Spark** lors de la mise a jour.
 Le CSV suit un contrat TEXTFILE simple, sans quoting : les chaines contenant
 virgules ou retours a la ligne font echouer le job ; utiliser Parquet pour elles.
 La branche catalogue rend les nouvelles extractions accessibles via Trino.
-L'interface Angular de suivi et la console SQL constituent la prochaine etape.
+L'interface de suivi et la console SQL sont implementees sur feature/angular-jobs-sql ; voir docs/angular-pipeline.md.
 
 ## Connexions
 
@@ -381,7 +381,7 @@ avant d'ajouter une entree publique. Le deploiement cloud du catalogue et de
 Trino, les optimisations d'extraction et le glossaire metier restent au backlog.
 
 La [feuille de route](docs/roadmap.md) donne l'ordre des prochaines etapes,
-dont les ecrans Angular de jobs/SQL, les benchmarks et le glossaire metier.
+dont les benchmarks et le glossaire metier.
 
 References techniques : [Spring Boot](https://docs.spring.io/spring-boot/system-requirements.html),
 [JDBC SQL Server](https://learn.microsoft.com/en-us/sql/connect/jdbc/configuring-the-client-for-ssl-encryption),
@@ -411,3 +411,11 @@ retourne les colonnes, types, eligibilite et motif d'exclusion pour le wizard
 Angular. Les controles utilisent la meme validation que POST /storage/jobs,
 dont COUNT DISTINCT via le compte lecteur. Aucun job n'est cree. La validation
 est refaite lors du lancement pour tenir compte des changements de la source.
+
+## Interface d'extraction et console SQL
+
+La branche `feature/angular-jobs-sql` depend de `feature/partition-candidates`.
+Elle ajoute l'assistant d'extraction depuis une table, le suivi des jobs et
+la console Trino. Ouvrir [l'interface](http://localhost:3000/sources).
+Le [guide Angular](docs/angular-pipeline.md) detaille le parcours, les etats,
+les limites et les commandes de validation Docker. Aucune fusion dans master.

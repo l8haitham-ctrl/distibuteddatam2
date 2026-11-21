@@ -1,0 +1,27 @@
+<dialog #dialog class="connection-dialog extraction-dialog" aria-labelledby="extract-title" (cancel)="cancel($event)">
+  <header class="pipeline-heading"><div><div class="eyebrow">NOUVELLE EXTRACTION · {{step()}} / 2</div><h2 id="extract-title">{{table().schema_name}}.{{table().table_name}}</h2></div><button class="icon-button" aria-label="Fermer" [disabled]="busy()" (click)="cancel()"><app-icon name="X"/></button></header>
+  @if(step()===1){
+    <p>Choisissez le stockage et les paramètres de lecture de la source.</p>
+    <div class="form-grid">
+      <label>Format<select [(ngModel)]="format" (ngModelChange)="changeFormat()"><option value="parquet">Parquet</option><option value="csv">CSV</option></select></label>
+      <label>Compression<select [(ngModel)]="compression">@if(format==='parquet'){<option value="snappy">Snappy</option><option value="zstd">Zstandard</option>}@else{<option value="gzip">Gzip</option>}<option value="uncompressed">Sans compression</option></select></label>
+      <label>Taille des lots JDBC<input type="number" min="1" max="100000" step="1" [(ngModel)]="fetchSize" required><small>1 à 100 000 lignes par lecture.</small></label>
+      <label>Lecteurs Spark demandés<input type="number" min="1" max="16" step="1" [(ngModel)]="numPartitions" required><small>1 à 16. Le nombre effectif dépend de la source.</small></label>
+      <label>Granularité des dates<select [(ngModel)]="granularity" (ngModelChange)="loadCandidates()"><option value="month">Année / mois</option><option value="year">Année</option><option value="day">Année / mois / jour</option></select></label>
+    </div>
+    <fieldset class="partition-options"><legend>Partitionnement facultatif</legend>
+      @if(candidateLoading()){<p role="status">Vérification des colonnes dans SQL Server…</p>}
+      @else if(candidateError()){<p role="alert">{{candidateError()}}</p><button class="button secondary" (click)="loadCandidates()">Réessayer</button>}
+      @else{ @for(c of eligible();track c.name){<label><input type="checkbox" [checked]="partitions.includes(c.name)" (change)="toggle(c.name,$any($event.target).checked)"><code>{{c.name}}</code><small>{{c.data_type}}</small></label>} @empty{<p>Aucune colonne éligible. Une extraction sans partitionnement reste possible.</p>}
+        <details><summary>Colonnes exclues et raisons</summary>@for(c of candidates();track c.name){@if(!c.eligible){<p><code>{{c.name}}</code> : {{c.reason}}</p>}}</details>
+      }
+    </fieldset>
+    @if(partitions.length){<p class="pipeline-notice" role="status">Une colonne éligible peut encore produire beaucoup de petits fichiers. Préférez une seule colonne et une granularité mensuelle pour commencer. @if(partitions.length>1 || granularity==='day'){Le découpage choisi augmente ce risque.}</p>}
+    <p class="muted">Sans sélection, les fichiers restent organisés par source, schéma, table et traitement.</p>
+    <footer class="pipeline-actions"><button class="button secondary" (click)="cancel()">Annuler</button><button class="button primary" [disabled]="!valid()" (click)="step.set(2)">Vérifier la demande <app-icon name="ArrowRight"/></button></footer>
+  }@else{
+    <p>Vérifiez les paramètres qui seront envoyés à l’API.</p><pre class="request-preview">{{request() | json}}</pre>
+    @if(error()){<p class="pipeline-error" role="alert">{{error()}}</p>}
+    <footer class="pipeline-actions"><button class="button secondary" [disabled]="busy()" (click)="step.set(1)">Modifier</button>@if(uncertain()){<button class="button secondary" (click)="cancel()">Fermer et consulter les extractions</button>}@else{<button class="button primary" [disabled]="busy() || !valid()" (click)="submit()">{{busy() ? 'Envoi…' : 'Lancer l’extraction'}}</button>}</footer>
+  }
+</dialog>

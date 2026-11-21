@@ -7,6 +7,7 @@ import type { TableDetails, TableRef } from '../../types';
 export class TableStructureComponent {
   table = input.required<TableDetails>(); database = input.required<string>(); mockup = input(false);
   select = output<TableRef>(); tab = signal<'columns'|'relations'>('columns'); formatType = formatType;
+  extractable = input(false); extract = output<void>();
   primary = computed(() => new Set(this.table().primary_key.map(k => k.column_name)));
   foreign = computed(() => new Set(this.table().foreign_keys.map(k => k.column_name)));
   relations = computed(() => [...new Set(this.table().foreign_keys.map(k => k.constraint_name))]);

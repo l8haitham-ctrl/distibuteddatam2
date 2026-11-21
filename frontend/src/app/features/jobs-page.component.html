@@ -1,0 +1,28 @@
+<div class="page-heading"><div><div class="eyebrow">EXTRAIRE. STOCKER. SUIVRE.</div><h1>Extractions<span>.</span></h1><p>Les 100 derniers traitements, de la source au catalogue SQL.</p></div><div class="page-actions"><button class="button secondary" [disabled]="store.loading()" (click)="store.refresh()"><app-icon name="RefreshCw"/>Actualiser</button><a class="button primary" routerLink="/sources">Nouvelle extraction <app-icon name="ArrowRight"/></a></div></div>
+<div class="pipeline-notice"><app-icon name="Info"/> Lancez une extraction depuis la structure d’une table. Les traitements actifs sont actualisés toutes les 2 secondes ; le suivi se met en pause lorsque cet onglet est masqué.</div>
+@if(store.error()){<p class="pipeline-error" role="alert">{{store.error()}}</p>}
+@if(detailMode()){<a class="text-action" routerLink="/jobs">Toutes les extractions <app-icon name="ArrowRight"/></a>}
+@if(!detailMode()){
+@if(store.loading() && !store.jobs().length){<p class="pipeline-empty" role="status">Chargement des extractions…</p>}
+@else{
+<section class="pipeline-card table-scroll" aria-label="Traitements"><table class="pipeline-table"><thead><tr><th>Table / traitement</th><th>Format</th><th>État</th><th>Création</th><th>Durée</th><th></th></tr></thead><tbody>
+@for(job of store.jobs();track job.id){<tr [class.selected-row]="store.selected()?.id===job.id"><th><strong>{{job.request.schema}}.{{job.request.table}}</strong><small>{{job.id.slice(0,8)}} · {{job.request.source_id}}</small></th><td>{{job.request.format.toUpperCase()}}<small>{{job.request.compression}}</small></td><td><span class="job-badge" [class.complete]="job.status==='COMPLETED'" [class.failed]="job.status==='FAILED'">{{label(job)}}</span></td><td>{{job.created_at | date:'dd/MM HH:mm:ss'}}</td><td>{{duration(job)}}</td><td><a class="text-action" [routerLink]="['/jobs',job.id]">Détails <app-icon name="ChevronRight"/></a></td></tr>}
+@empty{<tr><td colspan="6"><div class="pipeline-empty"><app-icon name="Layers3" [size]="28"/><h3>Aucune extraction</h3><p>Sélectionnez une table dans l’explorateur pour commencer.</p></div></td></tr>}
+</tbody></table></section>}
+}
+@if(store.detailError()){<div class="pipeline-error" role="alert">{{store.detailError()}}</div>}
+@if(detailMode() && !store.selected() && !store.detailError()){<p class="pipeline-empty" role="status">Chargement du traitement…</p>}
+@if(store.selected();as job){
+<section class="pipeline-card job-detail" aria-labelledby="job-title"><header class="pipeline-heading"><div><div class="eyebrow">DÉTAIL DU TRAITEMENT</div><h2 id="job-title">{{job.request.schema}}.{{job.request.table}}</h2><code class="break-anywhere">{{job.id}}</code></div><span class="job-badge" [class.failed]="job.status==='FAILED'">{{label(job)}}</span></header>
+<ol class="job-timeline" aria-label="Étapes du traitement">@for(stage of stages;track stage;let i=$index){<li [class.reached]="stageIndex(job)>=i" [class.current]="job.status===stage"><span>{{i+1}}</span>{{stageNames[i]}}</li>}</ol>
+<p class="muted">Le parcours indique l’état actuel ; les heures des transitions intermédiaires ne sont pas enregistrées.</p>
+<dl class="result-grid"><div><dt>Création</dt><dd>{{job.created_at | date:'dd/MM/yyyy HH:mm:ss'}}</dd></div><div><dt>Début</dt><dd>{{job.started_at ? (job.started_at | date:'HH:mm:ss') : 'En attente'}}</dd></div><div><dt>Fin</dt><dd>{{job.finished_at ? (job.finished_at | date:'HH:mm:ss') : '—'}}</dd></div><div><dt>Durée</dt><dd>{{duration(job)}}</dd></div></dl>
+@if(job.error_code){<div class="pipeline-error" role="alert"><strong>{{job.error_code}}</strong><p>{{failure(job)}}</p></div>}
+@if(job.status==='COMPLETED'){
+ @if(job.result;as result){<h3>Résultat du stockage</h3><dl class="result-grid"><div><dt>Lignes</dt><dd>{{result.row_count | number}}</dd></div><div><dt>Fichiers</dt><dd>{{result.file_count | number}}</dd></div><div><dt>Taille (octets)</dt><dd>{{result.storage_bytes | number}}</dd></div><div><dt>Extraction + écriture</dt><dd>{{result.extract_write_ms ?? '—'}} ms</dd></div><div><dt>Vérification</dt><dd>{{result.verify_ms ?? '—'}} ms</dd></div><div><dt>Inscription au catalogue</dt><dd>{{result.registration_ms ?? '—'}} ms</dd></div></dl>
+ <dl class="result-locations"><dt>Emplacement MinIO</dt><dd><code>s3://{{result.bucket}}/{{result.prefix}}/data/</code></dd><dt>Manifeste</dt><dd><code>{{result.manifest_key ?? 'Non renseigné'}}</code></dd><dt>Table du catalogue</dt><dd><code>{{result.catalog_table ?? 'Non enregistrée (ancien traitement)'}}</code></dd><dt>Vue courante</dt><dd><code>{{result.current_view ?? 'Aucune vue'}}</code></dd></dl>
+ @if(result.example_query){<a class="button primary" routerLink="/sql" [queryParams]="{query:result.example_query}"><app-icon name="TerminalSquare"/>Ouvrir dans la console SQL</a>}@else{<p class="pipeline-notice">Ce résultat ne contient pas de table interrogeable. Lancez une nouvelle extraction pour l’enregistrer dans le catalogue.</p>}
+ }@else{<p class="pipeline-notice">Ce traitement ancien ne fournit pas de manifeste de résultat.</p>}
+}
+<details class="job-request"><summary>Paramètres de la demande</summary><pre class="request-preview">{{job.request | json}}</pre></details>
+</section>}
