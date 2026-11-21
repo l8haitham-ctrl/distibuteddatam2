@@ -1,0 +1,8 @@
+{
+ "catalogs":[{"user":"atlas_registrar","catalog":"hive|system","allow":"all"},{"user":"atlas_reader","catalog":"hive|system","allow":"read-only"}],
+ "schemas":[{"user":"atlas_registrar","catalog":"hive","owner":true},{"user":"atlas_reader","owner":false}],
+ "tables":[{"user":"atlas_registrar","privileges":["SELECT","GRANT_SELECT","OWNERSHIP","INSERT","DELETE"]},{"user":"atlas_reader","privileges":["SELECT"]}],
+ "procedures":[{"user":"atlas_registrar","catalog":"hive","schema":"system","procedure":"sync_partition_metadata","privileges":["EXECUTE"]}],
+ "system_information":[{"user":"atlas_registrar","allow":["read"]}],
+ "queries":[{"user":"atlas_registrar|atlas_reader","allow":["execute"]}],"impersonation":[],"authorization":[],"system_session_properties":[{"user":"atlas_registrar|atlas_reader","property":"query_max_run_time","allow":true}],"catalog_session_properties":[]
+}

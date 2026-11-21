@@ -10,6 +10,9 @@ public interface JobRepository {
     Optional<StorageJob> claim();
     List<StorageJob> active();
     void running(UUID id, String submissionId);
+    void registering(UUID id, Map<String,Object> manifest);
+    Map<String,Object> pending(UUID id);
+    void registrationError(UUID id);
     void completed(UUID id, Map<String,Object> result);
     void failed(UUID id, String code);
 }

@@ -191,9 +191,9 @@ Les comptes administrateurs servent seulement aux services d'initialisation.
 ## Etats et limites
 
 ```text
-QUEUED -> SUBMITTING -> RUNNING -> COMPLETED
-              |            |
-              +----------> FAILED
+QUEUED -> SUBMITTING -> RUNNING -> REGISTERING -> COMPLETED
+              |            |           |
+              +------------+-----------+----> FAILED
 ```
 
 Un index PostgreSQL limite a un seul job actif ; les autres attendent. Les
@@ -202,14 +202,17 @@ redemarrage. Le dispatcher retrouve les drivers RUNNING apres redemarrage,
 sans resoumission automatique. Une soumission interrompue devient FAILED avec
 `error_code=SUBMISSION_UNCERTAIN` ; inspecter Spark avant une nouvelle demande.
 Ce n'est pas un statut autonome. SUBMITTING expire apres 120 secondes ; delai
-global par defaut 1800 secondes. Les indisponibilites temporaires Spark/MinIO
+Spark par defaut 1800 secondes. REGISTERING utilise des requetes SQL bornees
+a 60 secondes et peut attendre le retour du catalogue pour retirer ses
+metadonnees avant FAILED. Les indisponibilites temporaires Spark/MinIO
 ne font pas perdre le suivi tant que ce delai n'est pas depasse.
 
 Des fichiers partiels peuvent rester apres un echec ; sans manifeste valide ils
 ne sont jamais exposes comme resultat termine. Pas de relance automatique,
-de selection de colonnes/filtres ni de chargement incremental. Le catalogue,
-Trino et les ecrans Angular de suivi seront ajoutes sur les prochaines branches.
-COMPLETED signifie pour l'instant fichiers verifies, pas table SQL disponible.
+de selection de colonnes/filtres ni de chargement incremental. La branche feature/hive-catalog-trino ajoute le catalogue et les API SQL ;
+les ecrans Angular de suivi restent a venir. Les nouveaux jobs deviennent
+COMPLETED apres verification SQL ; les anciens resultats ne sont pas migres
+automatiquement. Voir [catalogue et Trino](catalog-trino.md).
 Les modeles Kubernetes n'activent pas encore ces jobs.
 
 ## Verification Docker

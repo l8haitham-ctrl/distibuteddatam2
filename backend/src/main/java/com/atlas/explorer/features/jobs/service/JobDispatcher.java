@@ -1,6 +1,8 @@
 package com.atlas.explorer.features.jobs.service;
 
 import com.atlas.explorer.features.jobs.connector.*;
+import com.atlas.explorer.features.catalog.service.CatalogService;
+import com.atlas.explorer.features.catalog.service.CatalogException;
 import com.atlas.explorer.features.jobs.config.JobProperties;
 import com.atlas.explorer.features.jobs.dto.StorageJob;
 import com.atlas.explorer.features.storage.service.StorageService;
@@ -19,9 +21,14 @@ public class JobDispatcher {
     private final JobEngine engine;
     private final StorageService storage;
     private final int timeout;
+    private final CatalogService catalog;
     private final ObjectMapper json=new ObjectMapper();
     public JobDispatcher(JobRepository repository,JobEngine engine,StorageService storage,JobProperties properties) {
+        this(repository,engine,storage,properties,null);
+    }
+    public JobDispatcher(JobRepository repository,JobEngine engine,StorageService storage,JobProperties properties,CatalogService catalog) {
         this.repository=repository;this.engine=engine;this.storage=storage;this.timeout=properties.timeoutSeconds();
+        this.catalog=catalog;
     }
     @Scheduled(fixedDelayString="${jobs.poll-delay-ms:2000}")
     public void tick() {
@@ -37,13 +44,22 @@ public class JobDispatcher {
         }
     }
     private void monitor(StorageJob job) {
+        if(job.status().equals("REGISTERING")) {
+            var pending=repository.pending(job.id());
+            if("CATALOG_REGISTRATION_FAILED".equals(job.errorCode()))cleanupRegistration(job,pending);
+            else register(job,pending);
+            return;
+        }
         if(job.status().equals("SUBMITTING")) {
             if(job.startedAt().plusSeconds(120).isBefore(Instant.now()))repository.failed(job.id(),"SUBMISSION_UNCERTAIN");
             return;
         }
         try {
             var result=manifest(job);
-            if(result.isPresent()) { repository.completed(job.id(),result.get());return; }
+            if(result.isPresent()) {
+                repository.registering(job.id(),result.get());
+                register(job,result.get());return;
+            }
             if(job.startedAt().plusSeconds(timeout).isBefore(Instant.now())) {
                 try { engine.kill(job.submissionId()); } catch(Exception ignored) { }
                 repository.failed(job.id(),"EXECUTION_TIMEOUT");return;
@@ -60,6 +76,20 @@ public class JobDispatcher {
                 repository.failed(job.id(),"EXECUTION_TIMEOUT");
             }
         }
+    }
+    private void register(StorageJob job,Map<String,Object> manifest) {
+        if(catalog==null)throw new IllegalStateException("Catalogue required before completion.");
+        Map<String,Object> result;
+        try {result=catalog.register(job,manifest);}
+        catch(CatalogException exception) {
+            repository.registrationError(job.id());cleanupRegistration(job,manifest);return;
+        }
+        // A PostgreSQL outage leaves REGISTERING retryable; it must not undo a successful view publication.
+        repository.completed(job.id(),result);
+    }
+    private void cleanupRegistration(StorageJob job,Map<String,Object> manifest) {
+        if(catalog.discard(job,manifest))repository.failed(job.id(),"CATALOG_REGISTRATION_FAILED");
+        // If Trino is unavailable, keep the persistent error in REGISTERING until metadata can be removed.
     }
     private Optional<Map<String,Object>> manifest(StorageJob job) {
         String key=job.prefix()+"/manifest.json";

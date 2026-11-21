@@ -1,5 +1,11 @@
 name: distributed-data
 
+x-catalog-env: &catalog-env
+  CATALOG_ENABLED: "true"
+  TRINO_JDBC_URL: jdbc:trino://trino:8443/hive?SSL=true&SSLVerification=NONE
+  TRINO_REGISTRAR_PASSWORD: ${TRINO_REGISTRAR_PASSWORD:?Define TRINO_REGISTRAR_PASSWORD in .env}
+  TRINO_READER_PASSWORD: ${TRINO_READER_PASSWORD:?Define TRINO_READER_PASSWORD in .env}
+
 services:
   metadata:
     image: postgres:17-alpine
@@ -8,6 +14,7 @@ services:
       POSTGRES_USER: atlas_admin
       POSTGRES_PASSWORD: ${POSTGRES_ADMIN_PASSWORD:?Define POSTGRES_ADMIN_PASSWORD in .env}
       JOBS_PASSWORD: ${JOBS_PASSWORD:?Define JOBS_PASSWORD in .env}
+      METASTORE_PASSWORD: ${METASTORE_PASSWORD:?Define METASTORE_PASSWORD in .env}
     volumes:
       - metadata-data:/var/lib/postgresql/data
       - ./infra/postgres:/docker-entrypoint-initdb.d:ro
@@ -97,6 +104,8 @@ services:
       minio:
         condition: service_healthy
     environment:
+      TRINO_S3_ACCESS_KEY: ${TRINO_S3_ACCESS_KEY:?Define TRINO_S3_ACCESS_KEY in .env}
+      TRINO_S3_SECRET_KEY: ${TRINO_S3_SECRET_KEY:?Define TRINO_S3_SECRET_KEY in .env}
       MINIO_ROOT_USER: ${MINIO_ROOT_USER:?Define MINIO_ROOT_USER in .env}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:?Define MINIO_ROOT_PASSWORD in .env}
       STORAGE_ENDPOINT: http://minio:9000
@@ -161,6 +170,8 @@ services:
     image: distributed-data-backend:local
     build: ./backend
     depends_on:
+      trino:
+        condition: service_healthy
       backend-init:
         condition: service_completed_successfully
       storage-init:
@@ -170,6 +181,7 @@ services:
       spark-worker:
         condition: service_healthy
     environment:
+      <<: *catalog-env
       SOURCE_HOST: sqlserver
       SOURCE_DATABASE: BusinessDB
       SOURCE_USERNAME: lake_reader
@@ -219,9 +231,13 @@ services:
       backend:
         condition: service_healthy
     environment:
+      <<: *catalog-env
       RUN_DB_TESTS: "true"
       RUN_STORAGE_TESTS: "true"
       RUN_JOB_TESTS: "true"
+      TRINO_S3_ACCESS_KEY: ${TRINO_S3_ACCESS_KEY:?Define TRINO_S3_ACCESS_KEY in .env}
+      TRINO_S3_SECRET_KEY: ${TRINO_S3_SECRET_KEY:?Define TRINO_S3_SECRET_KEY in .env}
+      CATALOG_SCHEMA_SUFFIX: _test
       JOBS_ENABLED: "true"
       JOBS_DISPATCH_ENABLED: "false"
       JOBS_JDBC_URL: jdbc:postgresql://metadata:5432/atlas_test
@@ -239,6 +255,68 @@ services:
       - ./backend:/workspace
       - maven-cache:/root/.m2
     command: ["mvn", "-B", "test"]
+
+  metastore-db-init:
+    image: postgres:17-alpine@sha256:a77aa70e641402a21411b92b721c58d10f23b50ae5fdd2333efd22d166e1e5f7
+    depends_on:
+      metadata:
+        condition: service_healthy
+    environment:
+      PGHOST: metadata
+      PGUSER: atlas_admin
+      POSTGRES_USER: atlas_admin
+      PGPASSWORD: ${POSTGRES_ADMIN_PASSWORD:?Define POSTGRES_ADMIN_PASSWORD in .env}
+      METASTORE_PASSWORD: ${METASTORE_PASSWORD:?Define METASTORE_PASSWORD in .env}
+    volumes:
+      - ./infra/postgres/02-metastore.sh:/bootstrap.sh:ro
+    entrypoint: ["/bin/sh", "/bootstrap.sh"]
+    restart: "no"
+
+  hive-metastore:
+    image: distributed-data-metastore:local
+    build: ./infra/hive
+    depends_on:
+      metastore-db-init:
+        condition: service_completed_successfully
+      minio:
+        condition: service_healthy
+    environment:
+      METASTORE_PASSWORD: ${METASTORE_PASSWORD:?Define METASTORE_PASSWORD in .env}
+      TRINO_S3_ACCESS_KEY: ${TRINO_S3_ACCESS_KEY:?Define TRINO_S3_ACCESS_KEY in .env}
+      TRINO_S3_SECRET_KEY: ${TRINO_S3_SECRET_KEY:?Define TRINO_S3_SECRET_KEY in .env}
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/127.0.0.1/9083'"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 60s
+    restart: unless-stopped
+
+  trino:
+    image: distributed-data-trino:local
+    build: ./infra/trino
+    depends_on:
+      hive-metastore:
+        condition: service_healthy
+      storage-init:
+        condition: service_completed_successfully
+    environment:
+      TRINO_S3_ACCESS_KEY: ${TRINO_S3_ACCESS_KEY:?Define TRINO_S3_ACCESS_KEY in .env}
+      TRINO_S3_SECRET_KEY: ${TRINO_S3_SECRET_KEY:?Define TRINO_S3_SECRET_KEY in .env}
+      TRINO_REGISTRAR_PASSWORD: ${TRINO_REGISTRAR_PASSWORD:?Define TRINO_REGISTRAR_PASSWORD in .env}
+      TRINO_READER_PASSWORD: ${TRINO_READER_PASSWORD:?Define TRINO_READER_PASSWORD in .env}
+      TRINO_KEYSTORE_PASSWORD: ${TRINO_KEYSTORE_PASSWORD:?Define TRINO_KEYSTORE_PASSWORD in .env}
+      TRINO_SHARED_SECRET: ${TRINO_SHARED_SECRET:?Define TRINO_SHARED_SECRET in .env}
+      STORAGE_REGION: ${STORAGE_REGION:-us-east-1}
+    ports:
+      - "127.0.0.1:${TRINO_PORT:-8089}:8443"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -kfsS https://localhost:8443/v1/info | grep -q '\"starting\":false'"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 45s
+    restart: unless-stopped
 
 volumes:
   metadata-data:

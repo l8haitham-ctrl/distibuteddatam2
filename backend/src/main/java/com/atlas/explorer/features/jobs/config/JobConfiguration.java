@@ -5,6 +5,7 @@ import com.atlas.explorer.features.exploration.service.ExplorationService;
 import com.atlas.explorer.features.jobs.connector.*;
 import com.atlas.explorer.features.jobs.service.*;
 import com.atlas.explorer.features.storage.service.StorageService;
+import com.atlas.explorer.features.catalog.service.CatalogService;
 import com.zaxxer.hikari.*;
 import org.flywaydb.core.Flyway;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -32,5 +33,5 @@ public class JobConfiguration {
     @Bean JobService jobService(JobRepository repository,SourceService sources,ExplorationService exploration,PartitionCardinality cardinality) { return new JobService(repository,sources,exploration,cardinality); }
     @Bean JobEngine jobEngine(JobProperties properties) { return new SparkJobEngine(properties); }
     @Bean @ConditionalOnProperty(name="jobs.dispatch-enabled",havingValue="true",matchIfMissing=true)
-    JobDispatcher jobDispatcher(JobRepository repository,JobEngine engine,StorageService storage,JobProperties properties) { return new JobDispatcher(repository,engine,storage,properties); }
+    JobDispatcher jobDispatcher(JobRepository repository,JobEngine engine,StorageService storage,JobProperties properties,CatalogService catalog) { return new JobDispatcher(repository,engine,storage,properties,catalog); }
 }

@@ -47,6 +47,17 @@ public class StorageProvisioner implements ApplicationRunner {
             admin.addUser(properties.accessKey(), Status.ENABLED, properties.secretKey(), null, null);
             // Replacement is idempotent, unlike attaching an already attached policy.
             admin.setPolicy(properties.accessKey(), false, policyName);
+            String reader=env.getProperty("TRINO_S3_ACCESS_KEY");
+            if(reader!=null && !reader.isBlank()) {
+                if(reader.equals(rootUser)||reader.equals(properties.accessKey()))throw new IllegalArgumentException();
+                admin.addCannedPolicy(policyName+"-reader","""
+                    {"Version":"2012-10-17","Statement":[
+                     {"Effect":"Allow","Action":["s3:GetBucketLocation","s3:ListBucket"],"Resource":["arn:aws:s3:::%s"]},
+                     {"Effect":"Allow","Action":["s3:GetObject"],"Resource":["arn:aws:s3:::%s/*"]}]}
+                    """.formatted(properties.bucket(),properties.bucket()));
+                admin.addUser(reader,Status.ENABLED,env.getRequiredProperty("TRINO_S3_SECRET_KEY"),null,null);
+                admin.setPolicy(reader,false,policyName+"-reader");
+            }
             System.out.println("Storage bucket and restricted application account ready.");
         } catch (Exception exception) {
             throw new IllegalStateException("Storage provisioning failed; check MinIO readiness and local configuration.");

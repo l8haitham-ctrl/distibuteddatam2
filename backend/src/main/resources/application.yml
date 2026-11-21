@@ -51,3 +51,9 @@ jobs:
   timeout-seconds: ${JOBS_TIMEOUT_SECONDS:1800}
   spark-rest-url: ${SPARK_REST_URL:http://spark-master:6066}
   spark-master: ${SPARK_MASTER:spark://spark-master:7077}
+catalog:
+  enabled: ${CATALOG_ENABLED:false}
+  jdbc-url: ${TRINO_JDBC_URL:jdbc:trino://trino:8443/hive?SSL=true&SSLVerification=NONE}
+  registrar-password: ${TRINO_REGISTRAR_PASSWORD:}
+  reader-password: ${TRINO_READER_PASSWORD:}
+  schema-suffix: ${CATALOG_SCHEMA_SUFFIX:}

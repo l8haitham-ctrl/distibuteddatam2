@@ -26,21 +26,38 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest(webEnvironment=SpringBootTest.WebEnvironment.RANDOM_PORT)
 class JobIntegrationTests {
     @Autowired JobRepository repository;
+    @Autowired com.atlas.explorer.features.catalog.service.CatalogService catalog;
     @Autowired JobEngine engine;
     @Autowired StorageService storage;
     @Autowired JobProperties properties;
     @Autowired DataSource dataSource;
     @Autowired MinioClient minio;
+    @Autowired org.springframework.core.env.Environment environment;
+    @Autowired com.atlas.explorer.features.catalog.connector.TrinoConnections trino;
+    @Autowired com.atlas.explorer.features.sql.service.SqlService sql;
+    @Autowired com.atlas.explorer.features.connection.service.SourceService sources;
     @LocalServerPort int port;
     private JdbcTemplate jdbc;
-    @BeforeEach void isolate() {
+    @BeforeEach void isolate() throws Exception {
         assertTrue(properties.jdbcUrl().endsWith("/atlas_test"),"Job tests require their isolated database.");
+        cleanupObjects();
         jdbc=new JdbcTemplate(dataSource);jdbc.update("DELETE FROM storage_job");
     }
     @AfterEach void cleanupObjects() throws Exception {
         for(var job:repository.list()) {
             if(job.submissionId()!=null && job.status().equals("RUNNING")) {
                 try { engine.kill(job.submissionId()); } catch(Exception ignored) { }
+            }
+            // Test schemas never replace application views; only remove this test's metadata.
+            String run="hive.runs_test."+job.request().table().toLowerCase(Locale.ROOT)+"_"+job.id().toString().substring(0,8);
+            String view="hive.sqlserver_dbo_test."+job.request().table().toLowerCase(Locale.ROOT);
+            try(var connection=trino.open(true);var statement=connection.createStatement()) {
+                statement.setQueryTimeout(60);
+                boolean ownView=false;
+                try(var ddl=statement.executeQuery("SHOW CREATE VIEW "+view)) {ownView=ddl.next()&&ddl.getString(1).contains(run);}
+                catch(java.sql.SQLException ignored){}
+                if(ownView)statement.execute("DROP VIEW "+view);
+                statement.execute("DROP TABLE IF EXISTS "+run);
             }
             for(var result:minio.listObjects(ListObjectsArgs.builder().bucket(storage.status().bucket()).prefix(job.prefix()+"/").recursive(true).build())) {
                 minio.removeObject(RemoveObjectArgs.builder().bucket(storage.status().bucket()).object(result.get().objectName()).build());
@@ -114,15 +131,94 @@ class JobIntegrationTests {
         var response=call("GET","/storage/jobs/"+job.id()+"/result",null);
         assertEquals(200,response.statusCode());assertTrue(response.body().contains("extract_write_ms"));
     }
+    @Test void catalogMatchesSourceAggregatesAndLatestView() throws Exception {
+        run(request("Customer"));run(request("Payment"));
+        var invoice=run(new CreateJobRequest("sqlserver",null,"Invoice","parquet",List.of("invoice_date"),1000,"snappy"));
+        String view=invoice.result().get("current_view").toString();
+        var counts=sql.query(new com.atlas.explorer.features.sql.dto.SqlRequest("SELECT count(*),sum(amount) FROM "+view,1000));
+        @SuppressWarnings("unchecked") var row=((List<List<Object>>)counts.get("rows")).getFirst();
+        try(var connection=com.atlas.explorer.features.connection.connector.SqlServerConnections.open(sources.get("sqlserver"))) {
+            var expected=com.atlas.explorer.features.connection.connector.SqlServerConnections.query(connection,"SELECT COUNT_BIG(*) AS n,SUM(amount) AS total FROM dbo.Invoice").getFirst();
+            assertEquals(((Number)expected.get("n")).longValue(),((Number)row.getFirst()).longValue());
+            assertEquals(0,new java.math.BigDecimal(expected.get("total").toString()).compareTo(new java.math.BigDecimal(row.get(1).toString())));
+            String sourceQuery="SELECT c.city,SUM(p.amount) AS total FROM dbo.Customer c JOIN dbo.Invoice i ON i.customer_id=c.customer_id JOIN dbo.Payment p ON p.invoice_id=i.invoice_id GROUP BY c.city ORDER BY c.city";
+            var expectedJoin=com.atlas.explorer.features.connection.connector.SqlServerConnections.query(connection,sourceQuery);
+            String query=sourceQuery.replace("dbo.Customer","hive.sqlserver_dbo_test.customer").replace("dbo.Invoice",view).replace("dbo.Payment","hive.sqlserver_dbo_test.payment");
+            @SuppressWarnings("unchecked") var rows=(List<List<Object>>)sql.query(new com.atlas.explorer.features.sql.dto.SqlRequest(query,1000)).get("rows");
+            assertEquals(expectedJoin.size(),rows.size());
+            for(int i=0;i<rows.size();i++) {
+                assertEquals(expectedJoin.get(i).get("city"),rows.get(i).get(0));
+                assertEquals(0,new java.math.BigDecimal(expectedJoin.get(i).get("total").toString()).compareTo(new java.math.BigDecimal(rows.get(i).get(1).toString())));
+            }
+        }
+        var newer=run(request("Invoice"));
+        try(var connection=trino.open(true);var statement=connection.createStatement()) {
+            catalog.register(invoice,invoice.result()); // Idempotent old registration must not rewind the latest view.
+            try(var ddl=statement.executeQuery("SHOW CREATE VIEW "+view)) {
+                assertTrue(ddl.next());assertTrue(ddl.getString(1).contains(newer.result().get("catalog_table").toString()));
+            }
+        }
+        assertTrue(catalog.tables().stream().anyMatch(t->t.get("job_id").equals(newer.id().toString())));
+        assertTrue(((Number)newer.result().get("registration_ms")).longValue()>=0);
+    }
+    @Test void catalogStorageCredentialsCannotWriteOrDeleteData() throws Exception {
+        String key="sqlserver/test-policy/"+UUID.randomUUID();byte[] content="read-only-check".getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        String readerKey=environment.getRequiredProperty("TRINO_S3_ACCESS_KEY");
+        assertFalse(readerKey.equals(environment.getRequiredProperty("STORAGE_ACCESS_KEY")));
+        try(var reader=MinioClient.builder().endpoint(environment.getRequiredProperty("STORAGE_ENDPOINT"))
+                .credentials(readerKey,environment.getRequiredProperty("TRINO_S3_SECRET_KEY")).build()) {
+            String bucket=storage.status().bucket();storage.put(key,new java.io.ByteArrayInputStream(content),content.length,"text/plain");
+            try {
+                try(var input=reader.getObject(GetObjectArgs.builder().bucket(bucket).object(key).build())) {assertArrayEquals(content,input.readAllBytes());}
+                var put=assertThrows(io.minio.errors.ErrorResponseException.class,()->reader.putObject(PutObjectArgs.builder().bucket(bucket).object(key)
+                        .stream(new java.io.ByteArrayInputStream(content),(long)content.length,-1L).build()));
+                assertEquals("AccessDenied",put.errorResponse().code());
+                var delete=assertThrows(io.minio.errors.ErrorResponseException.class,()->reader.removeObject(RemoveObjectArgs.builder().bucket(bucket).object(key).build()));
+                assertEquals("AccessDenied",delete.errorResponse().code());
+            } finally {storage.delete(key);}
+        }
+    }
+    @Test void failedRegistrationRemovesItsExternalTableAndKeepsFiles() throws Exception {
+        var job=repository.create(request("Invoice"));repository.claim();repository.running(job.id(),"driver-test-1");
+        storage.put(job.prefix()+"/data/_SUCCESS",new java.io.ByteArrayInputStream(new byte[0]),0,"application/octet-stream");
+        var manifest=new HashMap<String,Object>();manifest.put("job_id",job.id().toString());manifest.put("bucket",storage.status().bucket());
+        manifest.put("prefix",job.prefix());manifest.put("source_id","sqlserver");manifest.put("schema_name","dbo");manifest.put("table_name","Invoice");
+        manifest.put("format","parquet");manifest.put("row_count",1);manifest.put("schema_json","{\"fields\":[{\"name\":\"invoice_id\",\"type\":\"integer\"}]}");
+        repository.registering(job.id(),manifest);
+        new JobDispatcher(repository,engine,storage,properties,catalog).tick();
+        var failed=repository.get(job.id());assertEquals("FAILED",failed.status());assertEquals("CATALOG_REGISTRATION_FAILED",failed.errorCode());
+        assertNotNull(storage.stat(job.prefix()+"/data/_SUCCESS"));
+        try(var connection=trino.open(false);var statement=connection.createStatement()) {
+            assertThrows(java.sql.SQLException.class,()->statement.executeQuery("SELECT * FROM hive.runs_test.invoice_"+job.id().toString().substring(0,8)));
+        }
+    }
+    @Test void trinoEnforcesReadOnlyAccessAndApiCapsRows() throws Exception {
+        // Direct JDBC bypasses the API validator; Trino itself must deny writes/procedures/impersonation.
+        try(var connection=trino.open(false);var statement=connection.createStatement()) {
+            assertThrows(java.sql.SQLException.class,()->statement.execute("CREATE SCHEMA hive.reader_should_not_create"));
+            assertThrows(java.sql.SQLException.class,()->statement.execute("CALL hive.system.sync_partition_metadata('runs_test','missing','FULL')"));
+        }
+        var result=sql.query(new com.atlas.explorer.features.sql.dto.SqlRequest("SELECT n FROM UNNEST(sequence(1,20)) AS t(n)",5));
+        assertEquals(5,result.get("row_count"));assertEquals(true,result.get("truncated"));assertNotNull(result.get("query_id"));
+        var failed=repository.create(request("Invoice"));repository.claim();repository.running(failed.id(),"driver-test-1");repository.failed(failed.id(),"TEST_FAILURE");
+        assertTrue(catalog.tables().stream().noneMatch(t->t.get("job_id").equals(failed.id().toString())));
+        try(var connection=trino.open(false);var statement=connection.createStatement()) {
+            assertThrows(java.sql.SQLException.class,()->statement.executeQuery("SELECT * FROM hive.runs_test.invoice_"+failed.id().toString().substring(0,8)));
+        }
+        assertEquals(422,call("POST","/sql/query","{\"sql\":\"DROP TABLE invoice\"}").statusCode());
+        assertEquals(422,call("POST","/sql/query","{\"sql\":\"SELECT 1\",\"max_rows\":1001}").statusCode());
+        assertEquals(200,call("GET","/catalog/tables",null).statusCode());
+    }
     private StorageJob run(CreateJobRequest request) throws Exception {
-        var job=repository.create(request);var dispatcher=new JobDispatcher(repository,engine,storage,properties);
-        dispatcher.tick();Instant deadline=Instant.now().plusSeconds(240);
+        var job=repository.create(request);var dispatcher=new JobDispatcher(repository,engine,storage,properties,catalog);
+        dispatcher.tick();Instant deadline=Instant.now().plusSeconds(600);
         while(Instant.now().isBefore(deadline)) {
             dispatcher.tick();job=repository.get(job.id());
             if(Set.of("COMPLETED","FAILED").contains(job.status()))break;
             Thread.sleep(2000);
         }
-        assertEquals("COMPLETED",job.status(),"Spark execution: "+job.errorCode());return job;
+        assertEquals("COMPLETED",job.status(),"Spark execution: "+job.errorCode());
+        System.out.println("Verified SQL run: "+request.table()+" / "+request.format()+" / rows="+job.result().get("row_count")+" / registration_ms="+job.result().get("registration_ms"));return job;
     }
     @Test void statePersistsAcrossRepositoryRecreationAndTerminalStatesCannotRegress() {
         var job=repository.create(request("Invoice"));repository.claim().orElseThrow();repository.running(job.id(),"driver-test-1");
@@ -145,8 +241,8 @@ class JobIntegrationTests {
         assertFalse(Boolean.TRUE.equals(jdbc.queryForObject("SELECT rolcreatedb FROM pg_roles WHERE rolname=current_user",Boolean.class)));
     }
     @Test void realSparkWritesReadableParquetAndManifest() throws Exception {
-        var job=repository.create(request("Invoice"));var dispatcher=new JobDispatcher(repository,engine,storage,properties);
-        dispatcher.tick();Instant deadline=Instant.now().plusSeconds(240);
+        var job=repository.create(request("Invoice"));var dispatcher=new JobDispatcher(repository,engine,storage,properties,catalog);
+        dispatcher.tick();Instant deadline=Instant.now().plusSeconds(600);
         while(Instant.now().isBefore(deadline)) {
             dispatcher.tick();job=repository.get(job.id());
             if(Set.of("COMPLETED","FAILED").contains(job.status()))break;

@@ -10,12 +10,12 @@ La stack retenue est **Angular + Java 21 / Spring Boot**, entierement conteneuri
 `feature/job-api-documentation`, par avance rapide sans reecriture d'historique.
 Le prototype d'architecture live reste une experimentation locale non publiee.
 
-Services livres : Angular/Nginx, API Spring Boot, SQL Server avec BusinessDB,
-PostgreSQL pour les jobs, Spark master/worker et MinIO. Cette branche
-`feature/partitioning-csv`, basee sur `feature/large-dataset`, ajoute CSV,
-compression, partitions Hive et lecteurs JDBC paralleles. Ces deux branches
-ne sont pas encore fusionnees dans master. Catalogue, Trino et benchmarks
-restent a realiser : voir [la feuille de route](docs/roadmap.md).
+Services : Angular/Nginx, API Spring Boot, SQL Server avec BusinessDB,
+PostgreSQL pour les jobs et le metastore, Spark master/worker, MinIO, Hive
+Metastore et Trino. Cette branche `feature/hive-catalog-trino` depend de
+`feature/partitioning-csv` et ajoute l'enregistrement des tables et l'API SQL.
+Les lectures Parquet/CSV et les jointures sont verifiees. Aucune de ces nouvelles branches
+n'est fusionnee dans master. Voir [la feuille de route](docs/roadmap.md).
 
 | Usage | Endpoints |
 | --- | --- |
@@ -23,11 +23,13 @@ restent a realiser : voir [la feuille de route](docs/roadmap.md).
 | Sources | `GET /sources`, `POST /sources/{id}/test`, `POST /connections/test` |
 | Structure SQL Server | `GET /sources/{id}/tables`, `GET /sources/{id}/tables/{table}?schema=dbo`, `POST /connections/explore` |
 | Stockage | `GET /storage/status` |
+| Catalogue / SQL | `GET /catalog/tables`, `POST /sql/query` |
 | Jobs Spark | `POST /storage/jobs`, `GET /storage/jobs`, `GET /storage/jobs/{id}`, `GET /storage/jobs/{id}/result` |
 
 Un job cree renvoie 202 et ecrit une extraction Parquet ou CSV dans MinIO. Son resultat
-n'est publie qu'apres validation du manifeste ; les fichiers ne sont pas encore
-interrogeables par SQL analytique. La base source reste accessible en lecture seule.
+passe par REGISTERING apres validation du manifeste, puis COMPLETED quand
+la table est interrogeable dans Trino. Les anciennes executions sans catalogue
+restent historiques. La base source reste accessible en lecture seule.
 
 ## Branches de fonctionnalites
 
@@ -46,6 +48,7 @@ a `master` ; aucune branche n'est supprimee :
 | `feature/storage-jobs` | Jobs PostgreSQL, API asynchrone et premiere ingestion Spark/Parquet | Stockage MinIO |
 | `feature/large-dataset` | Volumes deterministes configurables et migration updated_at | master apres integration |
 | `feature/partitioning-csv` | CSV/Parquet, compression, partitions Hive, lecteurs JDBC et durees | feature/large-dataset |
+| `feature/hive-catalog-trino` | Catalogue, enregistrement des executions, vues et API SQL | feature/partitioning-csv |
 
 Le socle expose `/health`, `/actuator/health/readiness` et `/docs`.
 La fonctionnalite de connexion ajoute `GET /sources`,
@@ -76,6 +79,7 @@ docker compose ps -a
 - Stockage : [http://localhost:8000/storage/status](http://localhost:8000/storage/status).
 - Console MinIO : [http://localhost:9001](http://localhost:9001).
 - Spark : [http://localhost:8088](http://localhost:8088).
+- Trino : [https://localhost:8089](https://localhost:8089), certificat local auto-signe.
 - SQL Server : `localhost,1433`, base `BusinessDB`, utilisateur administratif `sa`.
 
 Les ports sont accessibles uniquement en local. Le conteneur Java s'execute
@@ -170,6 +174,8 @@ backend/src/main/java/com/atlas/explorer/
     exploration/     Exploration des schemas, tables, colonnes et relations
     storage/         Stockage objet, flux, metadonnees et bootstrap local MinIO
     jobs/            API, historique PostgreSQL, dispatcher et connecteur Spark
+    catalog/         Enregistrement Trino, schemas et metadonnees des executions
+    sql/             API et service de requetes en lecture seule
   shared/            Erreurs communes et traduction HTTP
 ```
 
@@ -276,8 +282,8 @@ necessaire. Le fichier contient au plus 100000 lignes. Le manifeste expose
 et fichiers par partition. Reconstruire API **et Spark** lors de la mise a jour.
 Le CSV suit un contrat TEXTFILE simple, sans quoting : les chaines contenant
 virgules ou retours a la ligne font echouer le job ; utiliser Parquet pour elles.
-Les fichiers seuls ne sont pas encore accessibles via SQL. L'interface Angular
-de suivi, le catalogue et Trino constituent les prochaines etapes.
+La branche catalogue rend les nouvelles extractions accessibles via Trino.
+L'interface Angular de suivi et la console SQL constituent la prochaine etape.
 
 ## Connexions
 
@@ -371,12 +377,28 @@ ressources, sondes, secrets externes et execution non root.
 
 Ces fichiers sont des modeles de preparation : aucun cloud n'est deploye.
 Renseigner les images, la source et le secret externe, et terminer TLS/OIDC
-avant d'ajouter une entree publique. Le catalogue, Trino, les optimisations
-d'extraction et le glossaire metier restent au backlog.
+avant d'ajouter une entree publique. Le deploiement cloud du catalogue et de
+Trino, les optimisations d'extraction et le glossaire metier restent au backlog.
 
 La [feuille de route](docs/roadmap.md) donne l'ordre des prochaines etapes,
-dont le catalogue, Trino, les ecrans de jobs, les benchmarks et le glossaire metier.
+dont les ecrans Angular de jobs/SQL, les benchmarks et le glossaire metier.
 
 References techniques : [Spring Boot](https://docs.spring.io/spring-boot/system-requirements.html),
 [JDBC SQL Server](https://learn.microsoft.com/en-us/sql/connect/jdbc/configuring-the-client-for-ssl-encryption),
 [Angular](https://angular.dev/reference/versions).
+
+## Catalogue Hive / Trino
+
+La branche `feature/hive-catalog-trino` depend de `feature/partitioning-csv`.
+Elle ajoute le metastore PostgreSQL, Trino, le statut REGISTERING et les API
+`GET /catalog/tables` et `POST /sql/query`. Les tables sont enregistrees par
+execution et les vues courantes pointent vers la derniere execution Parquet.
+Voir [le guide du catalogue](docs/catalog-trino.md) pour le design, les secrets,
+l'installation sur volumes existants, l'acces SQL et les tests prevus.
+
+Validation locale : 54 tests backend distincts valides (suite complete puis
+relances ciblees), y compris les jointures SQL Server/Trino, CSV/Parquet,
+partitions, reprise d'enregistrement et refus d'ecriture SQL/S3. Le profil small
+fonctionne avec environ 8 Go alloues a Docker (hors Windows). Le metastore utilise
+un heap de 512 Mo et Trino 2 Go ; davantage de marge est utile pour large et les
+builds simultanes. Les premiers echecs et les reprises sont decrits dans le guide.
