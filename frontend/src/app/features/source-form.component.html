@@ -1,4 +1,5 @@
 <div class="wf-page-heading wf-form-heading"><div><h1>Ajouter une connexion {{engineName()}}</h1><p>Saisissez les informations dont la plateforme a besoin pour joindre votre base. Testez la connexion<br class="wf-desktop-break"> avant de l’enregistrer pour vérifier qu’elle fonctionne.</p></div></div>
+@if(!mockup){<p><a class="wf-button" routerLink="/sources/native">Connecter Redis ou MinIO</a></p>}
 @if(connectors.error()){<div class="wf-alert" role="alert">{{connectors.error()}}<button type="button" class="wf-button" (click)="connectors.load(true)">Réessayer</button></div>}
 <div class="wf-connection-layout"><form #form class="wf-connection-card" (submit)="$event.preventDefault();run(true)">
   <fieldset [disabled]="busy()||connectors.loading()" class="wf-form-fields">

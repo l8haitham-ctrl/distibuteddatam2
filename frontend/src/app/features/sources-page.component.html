@@ -1,4 +1,5 @@
 <div class="wf-page-heading"><div><h1>Data Sources</h1><p>Connectez des bases de données externes pour explorer leurs schémas et leurs tables, puis les<br class="wf-desktop-break"> extraire vers le stockage.</p></div><a class="wf-button wf-primary" routerLink="/sources/new" [queryParams]="store.mockup ? {maquette:1} : {}"><app-icon name="Plus"/>Ajouter une source</a></div>
+@if(!store.mockup){<p><a class="wf-button" routerLink="/sources/native">Connecter Redis ou MinIO</a></p>}
 @if(store.error()){<div class="wf-alert" role="alert"><app-icon name="CircleAlert"/><div>{{store.error()}}</div><button class="wf-button" (click)="store.load(true)">Réessayer</button></div>}
 @if(store.loading()){<div class="wf-sources-box wf-empty" role="status"><app-icon name="LoaderCircle" class="spin" [size]="24"/><h2>Chargement des sources…</h2></div>}
 @else if(!store.rows().length && !store.error()){

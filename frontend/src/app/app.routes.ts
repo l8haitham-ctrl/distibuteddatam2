@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 export const routes: Routes = [
+  {path:'sources/native',loadComponent:()=>import('./features/native-sources.component').then(m=>m.NativeSourcesComponent)},
   {path:'sources/new',loadComponent:()=>import('./features/source-form.component').then(m=>m.SourceFormComponent)},
   {path:'sources',loadComponent:()=>import('./features/sources-page.component').then(m=>m.SourcesPageComponent)},
   {path:'explorer',loadComponent:()=>import('./features/explorer-page.component').then(m=>m.ExplorerPageComponent)},

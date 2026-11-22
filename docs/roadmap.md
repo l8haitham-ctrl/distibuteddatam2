@@ -106,3 +106,9 @@ Redis natif a Trino et une jointure avec les factures Parquet de MinIO. Il
 ne remplace pas les sources relationnelles et ne fournit pas d'ingestion Spark
 Redis. Voir [le guide de test](redis-analytics.md). Les benchmarks et le glossaire
 metier conservent leur place dans la suite du projet.
+
+`feature/native-source-connections` puis `feature/native-source-interface`
+ajoutent la connexion/exploration native Redis et MinIO et leur formulaire
+Angular. Les metadonnees de session ne contiennent aucun mot de passe ; cette
+extension ne fournit pas d'extraction Redis vers Parquet ni d'enregistrement
+automatique de fichiers MinIO arbitraires dans Trino.

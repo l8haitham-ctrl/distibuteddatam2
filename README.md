@@ -461,3 +461,9 @@ les requetes, les droits de lecture et les tests Docker.
 les API de connexion et d'exploration Redis (cles/types/champs) et MinIO
 (bucket/fichiers/tailles), sans changer les API relationnelles. Voir
 [les sources natives](docs/native-sources.md).
+
+`feature/native-source-interface`, base `feature/native-source-connections`,
+ajoute `/sources/native` : boutons de test/exploration des profils Docker,
+formulaire de connexion Redis/MinIO et structures conservees en session
+sans mots de passe. Le lien « Connecter Redis ou MinIO » est disponible
+dans Data Sources et dans le formulaire de connexion.

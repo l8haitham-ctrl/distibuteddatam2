@@ -81,3 +81,29 @@ Reference : [client Java Jedis officiel](https://redis.io/docs/latest/develop/cl
 
 Validation locale : 20 tests cibles passes dans Docker, dont 4 integrations
 Redis/MinIO natives, 5 integrations analytiques et 7 integrations SQL Server.
+
+## Interface Angular
+
+La branche `feature/native-source-interface` depend de
+`feature/native-source-connections`. Depuis Data Sources ou le formulaire
+relationnel, cliquer sur « Connecter Redis ou MinIO » ouvre `/sources/native`.
+Les profils Docker se testent et s'explorent sans transfert de mot de passe
+vers le navigateur. Le formulaire personnalise choisit le moteur, l'hote,
+le port, l'index Redis ou le bucket, le prefixe, le compte et TLS.
+
+« Tester la connexion » verifie l'acces ; « Connecter et explorer » lit la
+structure et ajoute une connexion temporaire. La session conserve uniquement
+les metadonnees et la structure, pas le mot de passe. Changer de moteur
+efface le mot de passe et reactive TLS. Une connexion temporaire affiche une
+structure memorisee ; pour refaire une lecture il faut fournir les identifiants.
+Les resultats partiels sont annonces et aucun job Spark n'est cree.
+
+```powershell
+docker compose build frontend
+docker compose -f docker-compose.yml -f docker-compose.connectors.yml -f docker-compose.analytics.yml up -d --no-deps --wait frontend
+```
+
+Validation de l'interface : 36 tests Angular passes dans Docker et build de
+production reussi. Le controle navigateur confirme le lien depuis Data Sources,
+les tests de connexion Redis et MinIO, les deux explorations et l'adaptation
+des champs MinIO (port 9000, bucket et cles d'acces).
