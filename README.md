@@ -419,3 +419,13 @@ Elle ajoute l'assistant d'extraction depuis une table, le suivi des jobs et
 la console Trino. Ouvrir [l'interface](http://localhost:3000/sources).
 Le [guide Angular](docs/angular-pipeline.md) detaille le parcours, les etats,
 les limites et les commandes de validation Docker. Aucune fusion dans master.
+
+## Adaptation au wireframe
+
+`feature/wireframe-frontend`, base `feature/angular-jobs-sql`, reprend la
+navigation et les ecrans du PDF fourni : liste des sources, formulaire pleine
+page et panneau de test. Ouvrir [Data Sources](http://localhost:3000/sources).
+L'explorateur est maintenant sur `/explorer` et le stockage sur `/storage`.
+Les jobs et la console SQL restent disponibles. Voir le [guide du wireframe](docs/wireframe-frontend.md)
+pour les etats de reference, les tests Docker et les limites de l'enregistrement
+par session (l'API actuelle ne persiste pas de nouvelles sources).

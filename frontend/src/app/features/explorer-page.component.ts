@@ -13,7 +13,7 @@ export class ExplorerPageComponent {
   readonly store = inject(ExplorerStore); private router = inject(Router);
   dialog = signal(false); wizard = signal(false); defaults = signal<Source|undefined>(undefined);
   schemaCount = computed(() => new Set(this.store.tables().map(t=>t.schema_name)).size);
-  newConnection(){this.defaults.set(undefined);this.dialog.set(true);}
+  newConnection(){void this.router.navigate(['/sources/new'],{queryParams:this.store.mockup?{maquette:1}:{}});}
   refresh(){if(this.store.external()){this.defaults.set(this.store.source()??undefined);this.dialog.set(true);}else this.store.loadDefault();}
   launched(job:Job){this.wizard.set(false);void this.router.navigate(['/jobs',job.id]);}
 }

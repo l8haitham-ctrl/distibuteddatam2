@@ -83,3 +83,9 @@ feature/partition-candidates, qui expose les colonnes partitionnables validees
 sur SQL Server. La prochaine fonctionnalite principale est la comparaison
 des performances (CSV/Parquet, compression, partitions et tailles de lots).
 Les bonus restent exclus et le glossaire metier reste au backlog.
+
+L'adaptation visuelle du PDF est implementee sur `feature/wireframe-frontend`,
+base `feature/angular-jobs-sql` : Data Sources, formulaire pleine page,
+navigation, stockage et habillage commun. Voir [le guide du wireframe](wireframe-frontend.md).
+La creation permanente de sources et les etapes JDBC en direct restent des
+evolutions backend distinctes ; l'exploration temporaire reste disponible.

@@ -6,7 +6,7 @@ Aucune fusion dans la branche principale.
 
 ## Parcours
 
-1. Ouvrir `http://localhost:3000/sources` et selectionner une table.
+1. Ouvrir `http://localhost:3000/sources`, cliquer sur **Explorer**, puis selectionner une table dans `/explorer`.
 2. Cliquer sur **Extraire cette table**. Les connexions temporaires et la
    maquette restent limitees a l'exploration : elles ne sont pas des sources
    configurees pour le worker.

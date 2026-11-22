@@ -41,13 +41,14 @@ export class ExplorerStore {
   }
   select(table: TableRef|null) { this.selected.set(table); this.selections.next(table); }
   retryDetails() { this.select(this.selected()); }
-  loadDefault() {
+  loadDefault(sourceId?: string) {
     if (this.mockup) return;
     this.loader?.unsubscribe(); this.select(null); this.loading.set(true); this.error.set('');
     this.cache = null; this.tables.set([]); this.source.set(null); this.external.set(false);
     this.loader = this.api.sources().pipe(switchMap(sources => {
       if (!sources.length) { this.error.set('Aucune source configurée. Ajoutez une connexion.'); return EMPTY; }
-      const source = sources[0];
+      const source = (sourceId ? sources.find(s=>s.id===sourceId) : sources[0]);
+      if(!source){this.error.set('Source introuvable. Sélectionnez une source disponible.');return EMPTY;}
       return this.api.testSource(source.id).pipe(switchMap(() => this.api.tables(source.id)), tap(result => {
         this.source.set(source); this.tables.set(result.tables);
         this.select(result.tables.find(t => t.table_name === 'Invoice') ?? result.tables[0] ?? null);

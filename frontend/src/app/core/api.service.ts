@@ -10,7 +10,7 @@ export class ApiService {
   testSource(id: string) { return this.http.post(`/api/sources/${encodeURIComponent(id)}/test`, {}).pipe(timeout(20_000)); }
   tables(id: string) { return this.http.get<{tables: TableRef[]}>(`/api/sources/${encodeURIComponent(id)}/tables`).pipe(timeout(20_000)); }
   describe(id: string, table: TableRef) { return this.http.get<TableDetails>(`/api/sources/${encodeURIComponent(id)}/tables/${encodeURIComponent(table.table_name)}`, {params:{schema:table.schema_name}}).pipe(timeout(20_000)); }
-  test(config: ConnectionConfig) { return this.http.post('/api/connections/test', config).pipe(timeout(20_000)); }
+  test(config: ConnectionConfig,timeoutMs=20_000) { return this.http.post('/api/connections/test', config).pipe(timeout(timeoutMs)); }
   explore(config: ConnectionConfig) { return this.http.post<Exploration>('/api/connections/explore', config).pipe(timeout(120_000)); }
 }
 
