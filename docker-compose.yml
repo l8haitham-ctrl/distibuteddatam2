@@ -27,7 +27,9 @@ services:
 
   spark-master:
     image: distributed-data-spark:local
-    build: ./spark
+    build:
+      context: .
+      dockerfile: spark/Dockerfile
     environment:
       SPARK_DAEMON_MEMORY: 256m
       SPARK_MASTER_OPTS: -Dspark.master.rest.enabled=true -Dspark.master.rest.host=0.0.0.0 -Dspark.deploy.recoveryMode=FILESYSTEM -Dspark.deploy.recoveryDirectory=/opt/spark/recovery
@@ -46,7 +48,9 @@ services:
 
   spark-worker:
     image: distributed-data-spark:local
-    build: ./spark
+    build:
+      context: .
+      dockerfile: spark/Dockerfile
     depends_on:
       spark-master:
         condition: service_healthy

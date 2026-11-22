@@ -13,6 +13,7 @@ public class ApiExceptionHandler {
     public ResponseEntity<Map<String, String>> domain(ExplorerException exception) {
         int status; String message;
         switch (exception.code()) {
+            case CONNECTOR_NOT_FOUND -> { status = 422; message = "Connecteur non installé ou indisponible."; }
             case AUTHENTICATION -> { status = 400; message = "Authentification refusée : vérifier les identifiants et la base."; }
             case UNAVAILABLE -> { status = 503; message = "Connexion impossible : vérifier le serveur, le port et le certificat."; }
             case SOURCE_NOT_FOUND -> { status = 404; message = "Source inconnue."; }

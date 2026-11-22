@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.*;
 
 public record ConnectionConfig(
-        @NotBlank @Pattern(regexp = "sqlserver") String engine,
+        @NotBlank @Pattern(regexp = "[a-z][a-z0-9_]{0,31}") String engine,
         @NotBlank @Size(max = 255) @Pattern(regexp = "[a-zA-Z0-9_.:-]+") String host,
         @NotNull @Min(1) @Max(65535) Integer port,
         @NotBlank @Size(max = 128) String database,

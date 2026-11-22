@@ -39,6 +39,7 @@ class JobTests {
         var cardinality=mock(PartitionCardinality.class);
         var source=new com.atlas.explorer.features.connection.dto.ConnectionConfig("sqlserver","sqlserver",1433,"BusinessDB","reader","hidden",true);
         when(sources.get("sqlserver")).thenReturn(source);
+        when(sources.defaultSchema("sqlserver")).thenReturn("dbo");
         when(exploration.describe(source,"dbo","Invoice")).thenReturn(Map.of("columns",List.of(
                 Map.of("name","invoice_id","data_type","int"),Map.of("name","invoice_date","data_type","date"),
                 Map.of("name","status","data_type","varchar"),Map.of("name","amount","data_type","decimal")),
@@ -79,11 +80,11 @@ class JobTests {
                 .content("{\"source_id\":\"sqlserver\",\"table\":\"Invoice\",\"format\":\"csv\",\"compression\":\"snappy\"}"))
                 .andExpect(status().isUnprocessableEntity()).andExpect(jsonPath("$.errors.compression").exists());
     }
-    private StorageJob job(String status,String submission,Instant start) { return new StorageJob(UUID.randomUUID(),status,request(),Instant.now(),start,null,submission,null,null); }
+    private StorageJob job(String status,String submission,Instant start) { return new StorageJob(UUID.randomUUID(),status,new CreateJobRequest("sqlserver","dbo","Invoice",null,null,null,null),Instant.now(),start,null,submission,null,null); }
     private JobProperties properties() { return new JobProperties("jdbc:postgresql://metadata/atlas","atlas","private-password",1800,"http://spark-master:6066","spark://spark-master:7077"); }
 
     @Test void requestDefaultsAndInvalidInputNeverLaunchAnything() throws Exception {
-        assertEquals(1000,request().fetchSize());assertEquals("dbo",request().schema());
+        assertEquals(1000,request().fetchSize());assertNull(request().schema()); // Resolved from the selected connector before persistence.
         var service=mock(JobService.class);
         var mvc=MockMvcBuilders.standaloneSetup(new JobController(service)).setControllerAdvice(new ApiExceptionHandler()).build();
         for(String body:List.of("{\"source_id\":\"sqlserver\",\"table\":\"Invoice;DROP TABLE Invoice\"}",

@@ -29,7 +29,7 @@ public class JobConfiguration {
         return Flyway.configure().dataSource(jobsDataSource).locations("classpath:db/jobs").load();
     }
     @Bean @DependsOn("jobsFlyway") JobRepository jobRepository(HikariDataSource jobsDataSource) { return new JdbcJobRepository(new JdbcTemplate(jobsDataSource)); }
-    @Bean PartitionCardinality partitionCardinality() { return new PartitionCardinality(); }
+    @Bean PartitionCardinality partitionCardinality(com.atlas.explorer.features.connectors.connector.PluginRegistry plugins) { return new PartitionCardinality(plugins); }
     @Bean JobService jobService(JobRepository repository,SourceService sources,ExplorationService exploration,PartitionCardinality cardinality) { return new JobService(repository,sources,exploration,cardinality); }
     @Bean JobEngine jobEngine(JobProperties properties) { return new SparkJobEngine(properties); }
     @Bean @ConditionalOnProperty(name="jobs.dispatch-enabled",havingValue="true",matchIfMissing=true)

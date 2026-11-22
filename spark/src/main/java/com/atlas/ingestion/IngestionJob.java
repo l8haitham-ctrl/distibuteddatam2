@@ -1,6 +1,8 @@
 package com.atlas.ingestion;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.atlas.explorer.features.connectors.connector.*;
+import com.atlas.explorer.features.connectors.dto.JdbcSettings;
 import org.apache.hadoop.fs.*;
 import org.apache.spark.sql.*;
 import org.apache.spark.sql.api.java.UDF1;
@@ -19,7 +21,7 @@ public final class IngestionJob {
         UUID id=UUID.fromString(args[0]);
         String format=args[6],compression=args[5],granularity=args[8];
         List<String> requested=args[7].isEmpty()?List.of():List.of(args[7].split(",",-1));
-        if(!args[1].equals("sqlserver") || !args[2].matches(IDENTIFIER) || !args[3].matches(IDENTIFIER)
+        if(!args[1].matches("[a-z][a-z0-9_]{0,31}") || !args[2].matches(IDENTIFIER) || !args[3].matches(IDENTIFIER)
                 || !Set.of("parquet","csv").contains(format)
                 || !(format.equals("csv")?Set.of("gzip","uncompressed"):Set.of("snappy","zstd","uncompressed")).contains(compression)
                 || !Set.of("year","month","day").contains(granularity)
@@ -39,16 +41,13 @@ public final class IngestionJob {
             hadoop.set("fs.s3a.access.key",required("STORAGE_ACCESS_KEY"));
             hadoop.set("fs.s3a.secret.key",required("STORAGE_SECRET_KEY"));
             hadoop.setBoolean("fs.s3a.path.style.access",true);
-            String host=required("SOURCE_HOST"),port=required("SOURCE_PORT"),database=required("SOURCE_DATABASE");
-            if(!host.matches("[A-Za-z0-9.-]+") || !port.matches("[0-9]{1,5}") || !database.matches(IDENTIFIER))throw new IllegalArgumentException("Invalid configured source.");
-            String jdbcUrl="jdbc:sqlserver://"+host+":"+port+";databaseName="+database+";encrypt=true;trustServerCertificate="+
-                    Boolean.parseBoolean(required("SOURCE_TRUST_SERVER_CERTIFICATE"))+";loginTimeout=10";
+            var plugins=PluginRegistry.discover();
+            var source=SourceDefinitions.get(args[1],System::getenv,plugins);
+            var plugin=plugins.get(source.engine());var settings=source.settings();
             long extractStarted=System.nanoTime();
-            var plan=readPlan(jdbcUrl,args[2],args[3],numPartitions);
-            var reader=spark.read().format("jdbc").option("url",jdbcUrl)
-                    .option("driver","com.microsoft.sqlserver.jdbc.SQLServerDriver")
-                    .option("user",required("SOURCE_USERNAME")).option("password",required("SOURCE_PASSWORD"))
-                    .option("dbtable","["+args[2]+"].["+args[3]+"]")
+            var plan=readPlan(plugin,settings,args[2],args[3],numPartitions);
+            var reader=spark.read().format("jdbc").options(plugin.sparkOptions(settings))
+                    .option("dbtable",plugin.qualified(args[2],args[3]))
                     .option("fetchsize",fetchSize).option("queryTimeout",600);
             if(plan.column()!=null)reader.option("partitionColumn",plan.column()).option("lowerBound",plan.lower())
                     .option("upperBound",plan.upper()).option("numPartitions",numPartitions);
@@ -108,6 +107,7 @@ public final class IngestionJob {
                 var manifest=new LinkedHashMap<String,Object>();
                 manifest.put("version",2);manifest.put("job_id",id.toString());manifest.put("prefix",prefix);
                 manifest.put("source_id",args[1]);manifest.put("schema_name",args[2]);manifest.put("table_name",args[3]);
+                manifest.put("source_engine",source.engine());
                 manifest.put("format",format);manifest.put("compression",compression);manifest.put("row_count",rows);
                 manifest.put("file_count",files);manifest.put("storage_bytes",bytes);manifest.put("schema_json",schema.json());
                 manifest.put("partition_by",requested);manifest.put("partition_granularity",granularity);
@@ -149,21 +149,22 @@ public final class IngestionJob {
         return data;
     }
     private record ReadPlan(String column,String lower,String upper,String note) { }
-    private static ReadPlan readPlan(String url,String schema,String table,int partitions) throws Exception {
+    private static ReadPlan readPlan(RelationalPlugin plugin,JdbcSettings settings,String schema,String table,int partitions) throws Exception {
         if(partitions==1)return new ReadPlan(null,null,null,"Single reader requested.");
-        var credentials=new Properties();credentials.setProperty("user",required("SOURCE_USERNAME"));credentials.setProperty("password",required("SOURCE_PASSWORD"));
-        try(var connection=DriverManager.getConnection(url,credentials)) {
+        try(var connection=plugin.open(settings)) {
             var metadata=connection.getMetaData();var keys=new ArrayList<String>();
-            try(var pk=metadata.getPrimaryKeys(connection.getCatalog(),schema,table)) { while(pk.next())keys.add(pk.getString("COLUMN_NAME")); }
+            try(var pk=metadata.getPrimaryKeys(plugin.metadataCatalog(connection,schema),plugin.metadataSchema(schema),table)) { while(pk.next())keys.add(pk.getString("COLUMN_NAME")); }
             if(keys.size()!=1 || !keys.getFirst().matches(IDENTIFIER))return new ReadPlan(null,null,null,"Fallback: no single integer primary key.");
             String key=keys.getFirst();boolean integer=false;
-            try(var columns=metadata.getColumns(connection.getCatalog(),schema,table,null)) {
+            String escape=metadata.getSearchStringEscape();
+            String pattern=table.replace(escape,escape+escape).replace("_",escape+"_").replace("%",escape+"%");
+            try(var columns=metadata.getColumns(plugin.metadataCatalog(connection,schema),plugin.metadataSchema(schema),pattern,null)) {
                 while(columns.next())if(columns.getString("COLUMN_NAME").equals(key))integer=Set.of(Types.TINYINT,Types.SMALLINT,Types.INTEGER,Types.BIGINT).contains(columns.getInt("DATA_TYPE"));
             }
             if(!integer)return new ReadPlan(null,null,null,"Fallback: no single integer primary key.");
             try(var statement=connection.createStatement()) {
                 statement.setQueryTimeout(600);
-                try(var bounds=statement.executeQuery("SELECT MIN(["+key+"]),MAX(["+key+"]) FROM ["+schema+"].["+table+"]")) {
+                try(var bounds=statement.executeQuery("SELECT MIN("+plugin.quote(key)+"),MAX("+plugin.quote(key)+") FROM "+plugin.qualified(schema,table))) {
                     bounds.next();String lower=bounds.getString(1),upper=bounds.getString(2);
                     if(lower==null || lower.equals(upper))return new ReadPlan(null,null,null,"Fallback: empty or constant key range.");
                     return new ReadPlan(key,lower,upper,"Readers may queue behind the available executor cores; bounds define strides, not a row filter.");

@@ -27,7 +27,7 @@ class ApiTests {
             "username":"reader","password":"test-secret","trust_server_certificate":false}
             """)).andExpect(status().isOk()).andExpect(jsonPath("$.status").value("connected"));
         var result = mvc.perform(post("/connections/test").contentType(MediaType.APPLICATION_JSON).content("""
-            {"engine":"oracle","host":"server","port":1433,"database":"demo","username":"reader","password":"never-echo-me"}
+            {"engine":"invalid-engine!","host":"server","port":1433,"database":"demo","username":"reader","password":"never-echo-me"}
             """)).andExpect(status().isUnprocessableEntity()).andReturn();
         assertFalse(result.getResponse().getContentAsString().contains("never-echo-me"));
         verify(service, times(1)).test(any());

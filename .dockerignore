@@ -1,0 +1,11 @@
+.git
+.env
+.env.*
+!.env.example
+work
+tmp
+**/node_modules
+**/.angular
+**/dist
+**/target
+**/__pycache__

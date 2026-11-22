@@ -18,7 +18,6 @@ public record CreateJobRequest(
         this(sourceId,schema,table,format,partitionBy,fetchSize,compression,null,null);
     }
     public CreateJobRequest {
-        schema = schema == null ? "dbo" : schema;
         format = format == null ? "parquet" : format;
         partitionBy = partitionBy == null ? List.of() : List.copyOf(partitionBy);
         fetchSize = fetchSize == null ? 1000 : fetchSize;

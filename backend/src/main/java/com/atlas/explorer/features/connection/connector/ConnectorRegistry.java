@@ -7,9 +7,12 @@ import java.util.List;
 @Component
 public class ConnectorRegistry {
     private final List<DatabaseConnector> connectors;
-    public ConnectorRegistry(List<DatabaseConnector> connectors) { this.connectors = List.copyOf(connectors); }
+    private final com.atlas.explorer.features.connectors.connector.PluginRegistry plugins;
+    public ConnectorRegistry(List<DatabaseConnector> connectors){this(connectors,com.atlas.explorer.features.connectors.connector.PluginRegistry.discover());}
+    @org.springframework.beans.factory.annotation.Autowired
+    public ConnectorRegistry(List<DatabaseConnector> connectors,com.atlas.explorer.features.connectors.connector.PluginRegistry plugins) { this.connectors = List.copyOf(connectors);this.plugins=plugins; }
     public DatabaseConnector get(String engine) {
         return connectors.stream().filter(c -> c.engine().equals(engine)).findFirst()
-                .orElseThrow(() -> new ExplorerException(ExplorerException.Code.SOURCE_NOT_FOUND));
+                .orElseGet(()->{try{return new PluginConnectionConnector(plugins.get(engine));}catch(IllegalArgumentException e){throw new ExplorerException(ExplorerException.Code.CONNECTOR_NOT_FOUND);}});
     }
 }

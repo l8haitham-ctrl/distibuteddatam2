@@ -7,9 +7,12 @@ import java.util.List;
 @Component
 public class SchemaConnectorRegistry {
     private final List<SchemaConnector> connectors;
-    public SchemaConnectorRegistry(List<SchemaConnector> connectors) { this.connectors = List.copyOf(connectors); }
+    private final com.atlas.explorer.features.connectors.connector.PluginRegistry plugins;
+    public SchemaConnectorRegistry(List<SchemaConnector> connectors){this(connectors,com.atlas.explorer.features.connectors.connector.PluginRegistry.discover());}
+    @org.springframework.beans.factory.annotation.Autowired
+    public SchemaConnectorRegistry(List<SchemaConnector> connectors,com.atlas.explorer.features.connectors.connector.PluginRegistry plugins) { this.connectors = List.copyOf(connectors);this.plugins=plugins; }
     public SchemaConnector get(String engine) {
         return connectors.stream().filter(c -> c.engine().equals(engine)).findFirst()
-                .orElseThrow(() -> new ExplorerException(ExplorerException.Code.SOURCE_NOT_FOUND));
+                .orElseGet(()->{try{return new JdbcSchemaConnector(plugins.get(engine));}catch(IllegalArgumentException e){throw new ExplorerException(ExplorerException.Code.CONNECTOR_NOT_FOUND);}});
     }
 }

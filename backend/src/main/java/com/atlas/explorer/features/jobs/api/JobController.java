@@ -36,7 +36,7 @@ public class JobController {
     @GetMapping public List<StorageJob> list() { return jobs.list(); }
     @Operation(summary="Verifier les colonnes partitionnables sans creer de traitement")
     @GetMapping("/partition-candidates") public List<Map<String,Object>> partitionCandidates(
-            @RequestParam("source_id") String sourceId,@RequestParam(defaultValue="dbo") String schema,
+            @RequestParam("source_id") String sourceId,@RequestParam(required=false) String schema,
             @RequestParam String table,@RequestParam(name="partition_granularity",defaultValue="month") String granularity) {
         return jobs.partitionCandidates(sourceId,schema,table,granularity);
     }

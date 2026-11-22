@@ -17,10 +17,12 @@ public class JobService {
         this.repository=repository;this.sources=sources;this.exploration=exploration;this.cardinality=cardinality;
     }
     public StorageJob create(CreateJobRequest request) {
+        if(request.schema()==null)request=new CreateJobRequest(request.sourceId(),sources.defaultSchema(request.sourceId()),request.table(),request.format(),request.partitionBy(),request.fetchSize(),request.compression(),request.partitionGranularity(),request.numPartitions());
         validate(request);
         return repository.create(request);
     }
     public List<Map<String,Object>> partitionCandidates(String sourceId,String schema,String table,String granularity) {
+        if(schema==null)schema=sources.defaultSchema(sourceId);
         if(!schema.matches("[A-Za-z_][A-Za-z0-9_]{0,127}") || !table.matches("[A-Za-z_][A-Za-z0-9_]{0,127}")
                 || !Set.of("month","year","day").contains(granularity))throw new InvalidJobException("partition_by","Schema, table ou granularite invalide.");
         var metadata=exploration.describe(sources.get(sourceId),schema,table);
@@ -54,11 +56,11 @@ public class JobService {
                     .orElseThrow(()->new InvalidJobException("partition_by","Colonne de partition inexistante ; utiliser le nom exact affiche dans la structure."));
             if(keys.stream().anyMatch(k->partition.equals(k.get("column_name"))))throw new InvalidJobException("partition_by","Le partitionnement sur une cle primaire est interdit.");
             String type=column.get("data_type").toString();
-            if(Set.of("text","ntext","image","xml","varbinary","binary","geography","geometry").contains(type))
+            if(Boolean.FALSE.equals(column.get("partitionable")) || (!column.containsKey("partitionable") && Set.of("text","ntext","image","xml","varbinary","binary","geography","geometry").contains(type)))
                 throw new InvalidJobException("partition_by","Type de colonne incompatible avec le partitionnement.");
             if(cardinality.distinct(source,request.schema(),request.table(),partition)>1000)
                 throw new InvalidJobException("partition_by","La colonne depasse la limite de 1000 valeurs distinctes.");
-            if(Set.of("date","datetime","datetime2","smalldatetime","datetimeoffset").contains(type)) {
+            if(Boolean.TRUE.equals(column.get("temporal")) || Set.of("date","datetime","datetime2","smalldatetime","datetimeoffset").contains(type)) {
                 var suffixes=switch(request.partitionGranularity()) {case "year" -> List.of("year");case "day" -> List.of("year","month","day");default -> List.of("year","month");};
                 for(String suffix:suffixes)if(!outputNames.add((partition+"_"+suffix).toLowerCase(Locale.ROOT)))
                     throw new InvalidJobException("partition_by","Une colonne derivee entre en conflit avec une colonne existante.");

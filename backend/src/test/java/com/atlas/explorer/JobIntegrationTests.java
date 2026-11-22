@@ -64,7 +64,7 @@ class JobIntegrationTests {
             }
         }
     }
-    private CreateJobRequest request(String table) { return new CreateJobRequest("sqlserver",null,table,null,null,null,null); }
+    private CreateJobRequest request(String table) { return new CreateJobRequest("sqlserver","dbo",table,null,null,null,null); }
     private HttpResponse<String> call(String method,String path,String body) throws Exception {
         var builder=HttpRequest.newBuilder(URI.create("http://localhost:"+port+path));
         if(body==null)builder.method(method,HttpRequest.BodyPublishers.noBody());
@@ -107,7 +107,7 @@ class JobIntegrationTests {
     }
     @ParameterizedTest @CsvSource({"parquet,zstd","csv,gzip","csv,uncompressed"})
     void realSparkWritesTypedMonthlyPartitions(String format,String compression) throws Exception {
-        var request=new CreateJobRequest("sqlserver",null,"Invoice",format,List.of("invoice_date"),257,compression,"month",4);
+        var request=new CreateJobRequest("sqlserver","dbo","Invoice",format,List.of("invoice_date"),257,compression,"month",4);
         var job=run(request);var result=job.result();
         assertEquals(5000,((Number)result.get("row_count")).longValue());
         assertEquals(4,((Number)result.get("effective_num_partitions")).intValue());
@@ -143,7 +143,7 @@ class JobIntegrationTests {
     }
     @Test void catalogMatchesSourceAggregatesAndLatestView() throws Exception {
         run(request("Customer"));run(request("Payment"));
-        var invoice=run(new CreateJobRequest("sqlserver",null,"Invoice","parquet",List.of("invoice_date"),1000,"snappy"));
+        var invoice=run(new CreateJobRequest("sqlserver","dbo","Invoice","parquet",List.of("invoice_date"),1000,"snappy"));
         String view=invoice.result().get("current_view").toString();
         var counts=sql.query(new com.atlas.explorer.features.sql.dto.SqlRequest("SELECT count(*),sum(amount) FROM "+view,1000));
         @SuppressWarnings("unchecked") var row=((List<List<Object>>)counts.get("rows")).getFirst();

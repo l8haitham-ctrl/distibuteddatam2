@@ -429,3 +429,13 @@ L'explorateur est maintenant sur `/explorer` et le stockage sur `/storage`.
 Les jobs et la console SQL restent disponibles. Voir le [guide du wireframe](docs/wireframe-frontend.md)
 pour les etats de reference, les tests Docker et les limites de l'enregistrement
 par session (l'API actuelle ne persiste pas de nouvelles sources).
+
+## Connecteurs relationnels extensibles
+
+`feature/jdbc-connector-plugins`, base `feature/wireframe-frontend`, introduit
+un contrat JDBC commun a l'API et a Spark, decouvert par Java ServiceLoader.
+`GET /connectors` annonce les moteurs installes et leurs valeurs par defaut.
+Les sources sont selectionnees par identifiant de configuration ; les secrets
+restent dans l'environnement et ne passent jamais dans les arguments Spark.
+Voir [le contrat des plugins](docs/connector-plugins.md). Le connecteur SQL Server
+conserve ses routes et son schema par defaut dbo.
