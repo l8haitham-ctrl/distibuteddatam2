@@ -1,0 +1,28 @@
+{
+    "source_id":  "benchmark",
+    "schema_name":  "benchmark",
+    "table_name":  "Invoice100k",
+    "row_count":  100000,
+    "amount_sum":  "104634500.00",
+    "id_sum":  5000050000,
+    "min_date":  "2025-01-01",
+    "max_date":  "2026-12-31",
+    "january":  "{\"row_count\":4247,\"amount_sum\":\"2442323.84\"}",
+    "statuses":  [
+                     {
+                         "status":  "paid",
+                         "row_count":  70000,
+                         "amount_sum":  "73244100.00"
+                     },
+                     {
+                         "status":  "partial",
+                         "row_count":  20000,
+                         "amount_sum":  "20925900.00"
+                     },
+                     {
+                         "status":  "unpaid",
+                         "row_count":  10000,
+                         "amount_sum":  "10464500.00"
+                     }
+                 ]
+}

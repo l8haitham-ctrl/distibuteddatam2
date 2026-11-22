@@ -24,12 +24,12 @@ de `feature/hive-catalog-trino`, basee sur `feature/partitioning-csv`.
 | 7 | Acces SQL Trino | Lire les donnees deposees, verifier les jointures Customer/Invoice/Payment et les droits de lecture | Implemente sur feature/hive-catalog-trino |
 | 8 | Parcours Angular complet | Selectionner, lancer, suivre un job, consulter le resultat et executer une requete analytique via l'API | Implemente sur feature/angular-jobs-sql |
 | 9 | Qualite et glossaire | Verifier completude, types, cles et montants ; relier les definitions metier aux tables et colonnes | A faire plus tard |
-| 10 | Benchmarks | Comparer CSV/Parquet, partitions, compression et lots avec les memes donnees et requetes ; presenter des mesures reelles | A faire |
+| 10 | Benchmarks | Comparer CSV/Parquet, partitions, compression et lots avec les memes donnees et requetes ; presenter des mesures reelles | Campagne locale 100k terminee sur `feature/reproducible-benchmarks` : 24 extractions, 216 requetes mesurees, rapport et preuves |
 | 11 | Preparation de livraison | Parcours complet reproductible, documentation, secrets et adaptation Azure/AWS | A faire |
 
 La branche `feature/storage-jobs` utilise PostgreSQL pour l'historique et
-Spark pour l'ingestion, sans Spring Batch. La suite porte sur la selection de
-donnees, le catalogue Hive et Trino, puis les ecrans Angular et benchmarks. Une API
+Spark pour l'ingestion, sans Spring Batch. Le catalogue Hive/Trino, les ecrans
+Angular et la campagne de benchmarks sont maintenant implementes. Une API
 ne doit pas annoncer un job termine avant que les fichiers et son manifeste
 soient valides. La relance apres erreur et les chargements incrementaux seront
 ajoutes ensuite. Le [guide des jobs](storage-jobs.md) precise les limites actuelles.
@@ -62,7 +62,8 @@ MinIO, l'historique PostgreSQL et le premier parcours Spark/Parquet sont
 implementes. La branche feature/partitioning-csv ajoute CSV, compression, partitions et lecteurs
 JDBC paralleles. La branche feature/hive-catalog-trino ajoute le metastore,
 Trino, les tables par execution, les vues et l'API SQL. La selection avancee
-et les mesures comparables restent a implementer. Le parcours Angular est implemente ; voir [le guide](angular-pipeline.md).
+reste a implementer ; les mesures comparables figurent dans [le rapport](benchmark-report.md).
+Le parcours Angular est implemente ; voir [le guide](angular-pipeline.md).
 
 ## Bonus apres le parcours principal
 
@@ -80,8 +81,9 @@ metier et ses liens vers les tables/colonnes restent au backlog.
 
 La branche feature/angular-jobs-sql depend explicitement de
 feature/partition-candidates, qui expose les colonnes partitionnables validees
-sur SQL Server. La prochaine fonctionnalite principale est la comparaison
-des performances (CSV/Parquet, compression, partitions et tailles de lots).
+sur SQL Server. La comparaison des performances est maintenant realisee
+sur 100 000 factures : voir [le rapport](benchmark-report.md).
+La suite principale est la preparation de livraison et la validation finale.
 Les bonus restent exclus et le glossaire metier reste au backlog.
 
 L'adaptation visuelle du PDF est implementee sur `feature/wireframe-frontend`,
@@ -104,8 +106,8 @@ leur pilote JDBC et une validation sur une base reelle.
 Un test analytique optionnel sur `feature/redis-analytics` ajoute un catalogue
 Redis natif a Trino et une jointure avec les factures Parquet de MinIO. Il
 ne remplace pas les sources relationnelles et ne fournit pas d'ingestion Spark
-Redis. Voir [le guide de test](redis-analytics.md). Les benchmarks et le glossaire
-metier conservent leur place dans la suite du projet.
+Redis. Voir [le guide de test](redis-analytics.md). La campagne locale de benchmarks
+est terminee ; le glossaire metier reste au backlog.
 
 `feature/native-source-connections` puis `feature/native-source-interface`
 ajoutent la connexion/exploration native Redis et MinIO et leur formulaire

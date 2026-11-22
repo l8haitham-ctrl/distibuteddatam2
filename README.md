@@ -467,3 +467,15 @@ ajoute `/sources/native` : boutons de test/exploration des profils Docker,
 formulaire de connexion Redis/MinIO et structures conservees en session
 sans mots de passe. Le lien « Connecter Redis ou MinIO » est disponible
 dans Data Sources et dans le formulaire de connexion.
+
+La branche `feature/reproducible-benchmarks`, base `feature/native-source-interface`,
+ajoute un runner Docker pour comparer huit strategies sur 100 000 factures,
+avec trois repetitions d'extraction et des requetes SQL repetees. Voir
+[le protocole de benchmark](docs/benchmarks.md) pour les commandes, les
+controles d'integrite, les resultats bruts et les limites des chronometrages.
+
+La campagne locale a termine 24 extractions et 216 requetes mesurees sans
+ecart de comptes ou de montants. Le [rapport de resultats](docs/benchmark-report.md)
+presente les medianes, l'effet des petits fichiers et les limites : Zstd
+reduit ici la taille de 86,96 % face au CSV brut, mais les partitions
+mensuelles ne reduisent pas la latence du filtre sur ce petit jeu.

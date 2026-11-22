@@ -1,0 +1,17 @@
+{
+    "recorded_at":  "2026-11-22T23:55:05.0930200Z",
+    "docker_version":  "29.0.1",
+    "docker_cpus":  8,
+    "docker_memory_bytes":  8202186752,
+    "docker_os":  "linux",
+    "architecture":  "x86_64",
+    "source":  "SQL Server BusinessBenchmark.benchmark.Invoice100k",
+    "spark_image":  "sha256:1b0d45b73fcd4abf6cc008afdd9b503f3b1155ee809d487b8bb34ffc85598ad9",
+    "trino_image":  "sha256:9e8be758512ed6efed79e2ae7a51b112d7853daeffa2267425486a0ff0286a80",
+    "backend_image":  "sha256:0c2cffc2a5f85f46b6c9c349d82c7d667254c4b1eb79b4896a9d22e86b055224",
+    "benchmark_image":  "sha256:cf1ab321ef9f49b41af566a1bf55aec435f429d9a49c051b08ec50d705580e34",
+    "executor_memory":  "512m",
+    "executor_cores":  1,
+    "jdbc_readers":  2,
+    "max_records_per_file":  100000
+}

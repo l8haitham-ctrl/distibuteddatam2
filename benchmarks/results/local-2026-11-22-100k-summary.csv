@@ -1,0 +1,9 @@
+scenario,format,compression,partition,fetch_size,repetitions,rows,storage_bytes,file_count,extract_write_ms,verify_ms,catalog_load_ms,server_pipeline_ms,api_wall_ms,full_sql_ms,january_sql_ms,status_sql_ms,full_sql_min_ms,full_sql_max_ms
+csv_raw,csv,uncompressed,none,1000,3,100000,5547450,2,19121,2436,623,37698,38864,159,580,575,130,1061
+csv_gzip,csv,gzip,none,1000,3,100000,1311482,2,17630,2716,1297,33982,35684,297,476,387,198,1508
+parquet_raw,parquet,uncompressed,none,1000,3,100000,1880314,2,18103,3195,681,35511,36770,165,144,159,112,403
+parquet_snappy,parquet,snappy,none,1000,3,100000,1289934,2,19724,3705,1051,39145,40922,222,229,431,102,437
+parquet_zstd,parquet,zstd,none,1000,3,100000,723561,2,18607,3794,1056,37465,38661,138,197,230,109,421
+parquet_month,parquet,snappy,month,1000,3,100000,1309093,48,24673,5104,1430,44771,45963,308,246,529,257,1021
+parquet_fetch100,parquet,snappy,none,100,3,100000,1289934,2,16977,3111,811,36405,36761,137,153,229,105,185
+parquet_fetch10000,parquet,snappy,none,10000,3,100000,1289934,2,17138,2589,679,35745,36653,183,225,181,141,206

@@ -1,0 +1,30 @@
+# Apply after connectors and analytics overrides in the current demonstration stack.
+x-benchmark-env: &benchmark-env
+  SOURCE_IDS: sqlserver,postgresql,benchmark
+  SOURCE_BENCHMARK_ENGINE: sqlserver
+  SOURCE_BENCHMARK_HOST: sqlserver
+  SOURCE_BENCHMARK_PORT: "1433"
+  SOURCE_BENCHMARK_DATABASE: BusinessBenchmark
+  SOURCE_BENCHMARK_USERNAME: lake_reader
+  SOURCE_BENCHMARK_PASSWORD: ${LAKE_READER_PASSWORD:?Define LAKE_READER_PASSWORD in .env}
+  SOURCE_BENCHMARK_TRUST_SERVER_CERTIFICATE: "true"
+services:
+  backend:
+    environment: *benchmark-env
+  spark-worker:
+    environment: *benchmark-env
+  backend-tests:
+    environment: *benchmark-env
+  benchmark:
+    profiles: [tools]
+    image: distributed-data-benchmark:local
+    build:
+      context: .
+      dockerfile: benchmarks/Dockerfile
+    environment:
+      BENCH_API_URL: http://backend:8000
+      BENCH_SPARK_URL: http://spark-master:8080/json/
+    volumes:
+      - ./benchmarks/results:/results
+      - ./benchmarks/fixtures:/fixtures:ro
+    mem_limit: 128m
