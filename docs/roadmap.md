@@ -100,3 +100,9 @@ croises et des extractions Parquet/CSV relues dans Trino. L'interface
 GET /connectors. SQL Server demeure le premier cas d'utilisation, pas une
 restriction de l'architecture. Les autres moteurs requierent leur fournisseur,
 leur pilote JDBC et une validation sur une base reelle.
+
+Un test analytique optionnel sur `feature/redis-analytics` ajoute un catalogue
+Redis natif a Trino et une jointure avec les factures Parquet de MinIO. Il
+ne remplace pas les sources relationnelles et ne fournit pas d'ingestion Spark
+Redis. Voir [le guide de test](redis-analytics.md). Les benchmarks et le glossaire
+metier conservent leur place dans la suite du projet.

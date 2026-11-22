@@ -1,0 +1,12 @@
+{
+  "tableName": "customer_segments",
+  "schemaName": "analytics",
+  "value": {
+    "dataFormat": "hash",
+    "fields": [
+      {"name": "customer_id", "type": "BIGINT", "mapping": "customer_id"},
+      {"name": "segment", "type": "VARCHAR", "mapping": "segment"},
+      {"name": "loyalty_points", "type": "BIGINT", "mapping": "loyalty_points"}
+    ]
+  }
+}

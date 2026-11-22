@@ -1,0 +1,47 @@
+# Optional live Redis analytics, alongside the existing Hive/MinIO catalog.
+services:
+  redis-source:
+    image: redis:7-alpine@sha256:8b81dd37ff027bec4e516d41acfbe9fe2460070dc6d4a4570a2ac5b9d59df065
+    command: ["sh", "/fixtures/start.sh"]
+    environment:
+      REDIS_ADMIN_PASSWORD: ${REDIS_ADMIN_PASSWORD:?Define REDIS_ADMIN_PASSWORD in .env}
+      REDIS_READER_PASSWORD: ${REDIS_READER_PASSWORD:?Define REDIS_READER_PASSWORD in .env}
+    volumes:
+      - ./infra/analytics/redis:/fixtures:ro
+    networks: [analytics]
+    healthcheck:
+      test: ["CMD-SHELL", 'REDISCLI_AUTH="$${REDIS_READER_PASSWORD}" redis-cli --user atlas_reader --no-auth-warning ping | grep -qx PONG']
+      interval: 5s
+      timeout: 5s
+      retries: 15
+    mem_limit: 128m
+    restart: unless-stopped
+  redis-seed:
+    image: redis:7-alpine@sha256:8b81dd37ff027bec4e516d41acfbe9fe2460070dc6d4a4570a2ac5b9d59df065
+    depends_on:
+      redis-source:
+        condition: service_healthy
+    environment:
+      REDISCLI_AUTH: ${REDIS_ADMIN_PASSWORD:?Define REDIS_ADMIN_PASSWORD in .env}
+    volumes:
+      - ./infra/analytics/redis:/fixtures:ro
+    networks: [analytics]
+    entrypoint: ["sh", "/fixtures/seed.sh"]
+    restart: "no"
+  trino:
+    image: distributed-data-trino-analytics:local
+    build:
+      context: .
+      dockerfile: infra/analytics/Dockerfile
+    environment:
+      REDIS_READER_PASSWORD: ${REDIS_READER_PASSWORD:?Define REDIS_READER_PASSWORD in .env}
+    networks: [default, analytics]
+    depends_on:
+      redis-seed:
+        condition: service_completed_successfully
+  backend-tests:
+    environment:
+      RUN_ANALYTICS_TESTS: "true"
+networks:
+  analytics:
+    internal: true
