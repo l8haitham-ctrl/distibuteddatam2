@@ -1,13 +1,19 @@
 export interface Source {
   id: string
-  engine: 'sqlserver'
+  engine: string
   host: string
   port: number
   database: string
   username: string
+  default_schema?: string
 }
 
-export interface ConnectionConfig extends Omit<Source, 'id'> {
+export interface ConnectorInfo {
+  engine: string; name: string; default_port: number; default_schema: string;
+  available: boolean; capabilities: string[];
+}
+
+export interface ConnectionConfig extends Omit<Source, 'id'|'default_schema'> {
   password: string
   trust_server_certificate: boolean
 }
@@ -23,6 +29,7 @@ export interface Column {
   nullable: boolean
   is_identity: boolean
   default_value: string | null
+  character_length?: number
 }
 export interface PrimaryKey { constraint_name: string; column_name: string; position: number }
 export interface ForeignKey extends PrimaryKey {

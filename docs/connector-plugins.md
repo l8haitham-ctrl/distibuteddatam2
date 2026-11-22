@@ -99,3 +99,24 @@ Server Compose), images API/Spark construites, extraction
 `6151da4d-10c5-4cd1-91c2-b1320dbf8c94` terminee avec 5 000 factures et COUNT(*)
 Trino = 5 000. Apres un redemarrage, attendre l'etat ALIVE du master Spark,
 qui peut traverser une minute de recuperation meme si son interface HTTP repond.
+
+## Interface de selection
+
+La branche `feature/connector-aware-frontend` depend de
+`feature/postgresql-connector`. Angular charge GET /connectors pour afficher
+les moteurs installes ; un pilote absent est annonce comme indisponible.
+Changer de moteur applique son port par defaut, invalide le dernier test et
+efface le mot de passe du moteur precedent. Le formulaire n'execute aucune
+connexion si le registre est indisponible ou le pilote manquant.
+
+La liste et l'explorateur affichent le moteur reel. Les longueurs de chaines
+JDBC sont des longueurs de caracteres lorsqu'elles sont disponibles : varchar(100)
+PostgreSQL reste affiche varchar(100), meme si la limite en octets vaut 400.
+Les connexions temporaires restent limitees a la session ; l'extraction Spark
+utilise les sources declarees dans l'environnement du backend et du worker.
+
+Validation de cette interface : 31 tests Angular passes dans Docker et build
+de production reussi. Le controle navigateur confirme les deux moteurs,
+la connexion PostgreSQL, les trois tables du schema public, les types
+numeric(12, 2) et varchar(20), la demande d'extraction source_id=postgresql
+et le port 5432 applique automatiquement dans le formulaire.

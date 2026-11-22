@@ -8,9 +8,12 @@ import { ConnectionDialogComponent } from './connection-dialog.component';
 import { ExtractionWizardComponent } from './extraction-wizard.component';
 import { Job } from '../core/pipeline.models';
 import { Source } from '../../types';
+import { ConnectorCatalog } from '../core/connector-catalog';
 @Component({selector:'app-explorer-page',imports:[IconComponent,TableTreeComponent,TableStructureComponent,ConnectionDialogComponent,ExtractionWizardComponent],templateUrl:'./explorer-page.component.html'})
 export class ExplorerPageComponent {
   readonly store = inject(ExplorerStore); private router = inject(Router);
+  readonly connectors=inject(ConnectorCatalog);
+  constructor(){this.connectors.load();}
   dialog = signal(false); wizard = signal(false); defaults = signal<Source|undefined>(undefined);
   schemaCount = computed(() => new Set(this.store.tables().map(t=>t.schema_name)).size);
   newConnection(){void this.router.navigate(['/sources/new'],{queryParams:this.store.mockup?{maquette:1}:{}});}

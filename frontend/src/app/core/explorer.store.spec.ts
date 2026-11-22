@@ -29,4 +29,8 @@ describe('Explorer workflow',()=>{
   it('preserves Unicode lengths, MAX and decimal precision',()=>{
     const column=mockExploration.tables[0].columns[1];expect(formatType(column)).toBe('nvarchar(100)');expect(formatType({...column,max_length_bytes:-1})).toBe('nvarchar(max)');expect(formatType({...column,data_type:'decimal',precision:12,scale:2})).toBe('decimal(12, 2)');expect(groupTables(mockExploration.tables,'INVOICE').get('dbo')?.[0].table_name).toBe('Invoice');
   });
+  it('uses logical JDBC character lengths instead of PostgreSQL byte limits',()=>{
+    const column={...mockExploration.tables[0].columns[1],data_type:'varchar',max_length_bytes:400,character_length:100};expect(formatType(column)).toBe('varchar(100)');
+    expect(formatType({...column,data_type:'numeric',precision:12,scale:2})).toBe('numeric(12, 2)');
+  });
 });

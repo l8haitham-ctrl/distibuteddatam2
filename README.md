@@ -444,3 +444,9 @@ Le fournisseur `feature/postgresql-connector` ajoute PostgreSQL comme deuxieme
 source metier. Le [guide PostgreSQL](docs/postgresql-connector.md) explique
 l'override Docker optionnel, les comptes lecteurs, TLS et les tests croises.
 SQL Server reste le cas de demonstration par defaut avec le Compose de base.
+
+`feature/connector-aware-frontend`, base `feature/postgresql-connector`, charge
+les moteurs installes depuis `/connectors` : libelles, ports et disponibilite
+des pilotes. Le formulaire et l'explorateur utilisent ce registre ; l'ajout
+d'un moteur ne demande pas de modifier une liste TypeScript. Voir le
+[guide des plugins](docs/connector-plugins.md) et le [guide PostgreSQL](docs/postgresql-connector.md).

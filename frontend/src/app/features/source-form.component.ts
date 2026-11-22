@@ -7,10 +7,12 @@ import { ExplorerStore } from '../core/explorer.store';
 import { SourcesStore } from '../core/sources.store';
 import { IconComponent } from '../shared/icon.component';
 import { ConnectionConfig } from '../../types';
+import { ConnectorCatalog } from '../core/connector-catalog';
 
 @Component({selector:'app-source-form',imports:[FormsModule,RouterLink,IconComponent],templateUrl:'./source-form.component.html'})
 export class SourceFormComponent {
   readonly sources=inject(SourcesStore);private api=inject(ApiService);private router=inject(Router);private injector=inject(Injector);
+  readonly connectors=inject(ConnectorCatalog);
   nativeForm=viewChild.required<ElementRef<HTMLFormElement>>('form');
   readonly mockup=this.sources.mockup;
   state=signal<'initial'|'testing'|'success'|'error'>('initial'); busy=signal(false); saving=signal(false);
@@ -20,6 +22,7 @@ export class SourceFormComponent {
   private pending?:Subscription;
   constructor(){
     this.sources.load();
+    this.connectors.load();
     if(this.mockup){
       this.name='erp-production';this.config={...this.config,host:'sql-erp-prod.corp.internal',database:'ERP_PROD',username:'svc_dataplatform',password:'illustrative-only'};
       const state=new URLSearchParams(location.search).get('state');
@@ -30,7 +33,10 @@ export class SourceFormComponent {
     inject(DestroyRef).onDestroy(()=>{this.pending?.unsubscribe();this.config.password='';});
   }
   changed(){if(!this.busy()){this.state.set('initial');this.testedAt.set(null);this.error.set('');}}
-  valid(){return this.name.trim().length>0&&(this.mockup||!this.sources.rows().some(s=>s.name.toLocaleLowerCase()===this.name.trim().toLocaleLowerCase()))&&Number.isInteger(this.timeoutSeconds)&&this.timeoutSeconds>=1&&this.timeoutSeconds<=120;}
+  engineChanged(engine:string){this.config.engine=engine;this.config.port=this.connectors.get(engine)?.default_port??0;this.config.password='';this.config.trust_server_certificate=false;this.changed();}
+  duplicateName(){return !this.mockup&&this.sources.rows().some(s=>s.name.toLocaleLowerCase()===this.name.trim().toLocaleLowerCase());}
+  engineName(){return this.mockup?'SQL Server':this.connectors.shortName(this.config.engine);}
+  valid(){return this.name.trim().length>0&&!this.duplicateName()&&Number.isInteger(this.timeoutSeconds)&&this.timeoutSeconds>=1&&this.timeoutSeconds<=120&&this.connectors.canConnect(this.config.engine);}
   run(save=false){
     if(this.busy()||!this.nativeForm().nativeElement.reportValidity()||!this.valid())return;
     if(this.mockup){this.error.set('Maquette illustrative : les actions réseau sont désactivées.');return;}

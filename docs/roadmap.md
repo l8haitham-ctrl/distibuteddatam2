@@ -89,3 +89,14 @@ base `feature/angular-jobs-sql` : Data Sources, formulaire pleine page,
 navigation, stockage et habillage commun. Voir [le guide du wireframe](wireframe-frontend.md).
 La creation permanente de sources et les etapes JDBC en direct restent des
 evolutions backend distinctes ; l'exploration temporaire reste disponible.
+
+## Extensibilite relationnelle
+
+Le socle `feature/jdbc-connector-plugins` definit une SPI partagee entre l'API
+et Spark et decouverte par ServiceLoader. `feature/postgresql-connector`
+ajoute PostgreSQL comme source metier reelle, avec les memes API, des tests
+croises et des extractions Parquet/CSV relues dans Trino. L'interface
+`feature/connector-aware-frontend` charge les moteurs disponibles depuis
+GET /connectors. SQL Server demeure le premier cas d'utilisation, pas une
+restriction de l'architecture. Les autres moteurs requierent leur fournisseur,
+leur pilote JDBC et une validation sur une base reelle.

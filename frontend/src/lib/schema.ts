@@ -6,7 +6,8 @@ export function formatType(column: Column): string {
   const type = column.data_type.toLowerCase()
   if (['decimal', 'numeric'].includes(type)) return `${type}(${column.precision}, ${column.scale})`
   if (['varchar', 'char', 'nvarchar', 'nchar', 'binary', 'varbinary'].includes(type)) {
-    const size = column.max_length_bytes === -1 ? 'max' : column.max_length_bytes / (type.startsWith('n') ? 2 : 1)
+    if (column.character_length !== undefined && column.character_length >= 2147483647) return type
+    const size = column.character_length !== undefined ? column.character_length : column.max_length_bytes === -1 ? 'max' : column.max_length_bytes / (type.startsWith('n') ? 2 : 1)
     return `${type}(${size})`
   }
   if (['datetime2', 'datetimeoffset', 'time'].includes(type)) return `${type}(${column.scale})`

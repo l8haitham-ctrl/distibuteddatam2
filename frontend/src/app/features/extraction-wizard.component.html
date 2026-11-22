@@ -10,7 +10,7 @@
       <label>Granularité des dates<select [(ngModel)]="granularity" (ngModelChange)="loadCandidates()"><option value="month">Année / mois</option><option value="year">Année</option><option value="day">Année / mois / jour</option></select></label>
     </div>
     <fieldset class="partition-options"><legend>Partitionnement facultatif</legend>
-      @if(candidateLoading()){<p role="status">Vérification des colonnes dans SQL Server…</p>}
+      @if(candidateLoading()){<p role="status">Vérification des colonnes dans la source…</p>}
       @else if(candidateError()){<p role="alert">{{candidateError()}}</p><button class="button secondary" (click)="loadCandidates()">Réessayer</button>}
       @else{ @for(c of eligible();track c.name){<label><input type="checkbox" [checked]="partitions.includes(c.name)" (change)="toggle(c.name,$any($event.target).checked)"><code>{{c.name}}</code><small>{{c.data_type}}</small></label>} @empty{<p>Aucune colonne éligible. Une extraction sans partitionnement reste possible.</p>}
         <details><summary>Colonnes exclues et raisons</summary>@for(c of candidates();track c.name){@if(!c.eligible){<p><code>{{c.name}}</code> : {{c.reason}}</p>}}</details>
