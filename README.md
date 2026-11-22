@@ -456,3 +456,8 @@ ajoute un test optionnel Redis -> Trino et une jointure SQL avec les factures
 Parquet dans MinIO. Redis reste distinct des plugins relationnels et des jobs
 Spark. Voir [le guide Redis et MinIO](docs/redis-analytics.md) pour le lancement,
 les requetes, les droits de lecture et les tests Docker.
+
+`feature/native-source-connections`, base `feature/redis-analytics`, expose
+les API de connexion et d'exploration Redis (cles/types/champs) et MinIO
+(bucket/fichiers/tailles), sans changer les API relationnelles. Voir
+[les sources natives](docs/native-sources.md).

@@ -40,8 +40,15 @@ services:
       redis-seed:
         condition: service_completed_successfully
   backend-tests:
+    networks: [default, analytics]
     environment:
       RUN_ANALYTICS_TESTS: "true"
+      RUN_NATIVE_TESTS: "true"
+      REDIS_READER_PASSWORD: ${REDIS_READER_PASSWORD:?Define REDIS_READER_PASSWORD in .env}
+  backend:
+    networks: [default, analytics]
+    environment:
+      REDIS_READER_PASSWORD: ${REDIS_READER_PASSWORD:?Define REDIS_READER_PASSWORD in .env}
 networks:
   analytics:
     internal: true
