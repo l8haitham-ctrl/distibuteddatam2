@@ -439,3 +439,8 @@ Les sources sont selectionnees par identifiant de configuration ; les secrets
 restent dans l'environnement et ne passent jamais dans les arguments Spark.
 Voir [le contrat des plugins](docs/connector-plugins.md). Le connecteur SQL Server
 conserve ses routes et son schema par defaut dbo.
+
+Le fournisseur `feature/postgresql-connector` ajoute PostgreSQL comme deuxieme
+source metier. Le [guide PostgreSQL](docs/postgresql-connector.md) explique
+l'override Docker optionnel, les comptes lecteurs, TLS et les tests croises.
+SQL Server reste le cas de demonstration par defaut avec le Compose de base.

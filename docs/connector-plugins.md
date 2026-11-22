@@ -18,6 +18,8 @@ Chaque fournisseur definit :
 
 - identifiant moteur, nom, classe du pilote, port et schema par defaut ;
 - URL et proprietes JDBC construites depuis des champs separes ;
+- schema par defaut eventuellement derive de la configuration de connexion,
+  pour les moteurs dont le namespace depend de la base ou de l'utilisateur ;
 - connexion avec indication de lecture seule, delimitation des identifiants ;
 - calcul de cardinalite, choix catalogue/schema JDBC si necessaire ;
 - options de lecture transmises au reader JDBC de Spark.

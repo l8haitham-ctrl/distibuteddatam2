@@ -22,6 +22,6 @@ public class SourceService {
         try{var d=SourceDefinitions.get(id,this::value,plugins);var s=d.settings();return new ConnectionConfig(d.engine(),s.host(),s.port(),s.database(),s.username(),s.password(),s.trustCertificate());}
         catch(IllegalArgumentException e){throw new ExplorerException(ExplorerException.Code.UNAVAILABLE);}
     }
-    public String defaultSchema(String id){return plugins.get(get(id).engine()).defaultSchema();}
-    public List<Map<String,Object>> list(){return SourceDefinitions.ids(this::value).stream().map(id->{var c=get(id);return Map.<String,Object>of("id",id,"engine",c.engine(),"host",c.host(),"port",c.port(),"database",c.database(),"username",c.username(),"default_schema",plugins.get(c.engine()).defaultSchema());}).toList();}
+    public String defaultSchema(String id){var c=get(id);return plugins.get(c.engine()).defaultSchema(com.atlas.explorer.features.connection.connector.JdbcConnections.settings(c));}
+    public List<Map<String,Object>> list(){return SourceDefinitions.ids(this::value).stream().map(id->{var c=get(id);return Map.<String,Object>of("id",id,"engine",c.engine(),"host",c.host(),"port",c.port(),"database",c.database(),"username",c.username(),"default_schema",plugins.get(c.engine()).defaultSchema(com.atlas.explorer.features.connection.connector.JdbcConnections.settings(c)));}).toList();}
 }

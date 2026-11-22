@@ -1,0 +1,47 @@
+# Optional second source for proving the JDBC plugin contract with real PostgreSQL.
+x-pg-source-env: &pg-source-env
+  SOURCE_IDS: sqlserver,postgresql
+  SOURCE_POSTGRESQL_ENGINE: postgresql
+  SOURCE_POSTGRESQL_HOST: postgres-source
+  SOURCE_POSTGRESQL_PORT: "5432"
+  SOURCE_POSTGRESQL_DATABASE: business
+  SOURCE_POSTGRESQL_USERNAME: atlas_reader
+  SOURCE_POSTGRESQL_PASSWORD: ${PG_SOURCE_READER_PASSWORD:?Define PG_SOURCE_READER_PASSWORD in .env}
+  # Local demonstration certificate only. Normal connection defaults verify certificates.
+  SOURCE_POSTGRESQL_TRUST_SERVER_CERTIFICATE: "true"
+services:
+  postgres-source:
+    image: distributed-data-postgres-source:local
+    build: ./infra/source-postgres
+    environment:
+      POSTGRES_DB: business
+      POSTGRES_USER: postgres_source_admin
+      POSTGRES_PASSWORD: ${PG_SOURCE_ADMIN_PASSWORD:?Define PG_SOURCE_ADMIN_PASSWORD in .env}
+      PG_SOURCE_READER_PASSWORD: ${PG_SOURCE_READER_PASSWORD:?Define PG_SOURCE_READER_PASSWORD in .env}
+    volumes:
+      - postgres-source-data:/var/lib/postgresql/data
+      - postgres-source-tls:/var/lib/postgresql/tls
+    healthcheck:
+      test: ["CMD-SHELL", "test -f /var/lib/postgresql/data/source-ready && pg_isready -U postgres_source_admin -d business"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
+    restart: unless-stopped
+  backend:
+    environment: *pg-source-env
+    depends_on:
+      postgres-source:
+        condition: service_healthy
+  spark-worker:
+    environment: *pg-source-env
+    depends_on:
+      postgres-source:
+        condition: service_healthy
+  backend-tests:
+    environment:
+      <<: *pg-source-env
+      RUN_PG_TESTS: "true"
+volumes:
+  postgres-source-data:
+  postgres-source-tls:

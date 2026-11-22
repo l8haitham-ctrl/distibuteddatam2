@@ -11,6 +11,7 @@ public interface RelationalPlugin {
     String driverClass();
     int defaultPort();
     String defaultSchema();
+    default String defaultSchema(JdbcSettings settings){return defaultSchema();}
     String jdbcUrl(JdbcSettings settings);
     default Properties properties(JdbcSettings settings){var p=new Properties();p.setProperty("user",settings.username());p.setProperty("password",settings.password());return p;}
     default Connection open(JdbcSettings settings) throws SQLException {

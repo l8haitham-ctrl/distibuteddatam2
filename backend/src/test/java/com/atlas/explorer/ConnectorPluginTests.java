@@ -18,6 +18,7 @@ class ConnectorPluginTests {
         public String engine(){return "example";}public String displayName(){return "Example JDBC";}
         public String driverClass(){return "com.microsoft.sqlserver.jdbc.SQLServerDriver";}public int defaultPort(){return 9999;}
         public String defaultSchema(){return "public";}public String jdbcUrl(JdbcSettings s){return "jdbc:example://"+s.authority();}
+        public String defaultSchema(JdbcSettings settings){return settings.database();}
     }
     @Test void discoversAProviderFromAJarServiceDescriptorWithoutAnEngineSwitch()throws Exception{
         var path=Files.createTempFile("connector-test-",".jar");
@@ -39,6 +40,7 @@ class ConnectorPluginTests {
         env.put("SOURCE_WAREHOUSE_ENGINE","example");env.put("SOURCE_WAREHOUSE_HOST","warehouse");env.put("SOURCE_WAREHOUSE_DATABASE","BusinessDB");env.put("SOURCE_WAREHOUSE_USERNAME","reader");env.put("SOURCE_WAREHOUSE_PASSWORD","private-second");
         var registry=new PluginRegistry(List.of(new SqlServerPlugin(),new ExamplePlugin()));
         var source=SourceDefinitions.get("warehouse",env::get,registry);assertEquals(9999,source.settings().port());assertEquals("example",source.engine());
+        assertEquals("BusinessDB",registry.get("example").defaultSchema(source.settings()));
         assertFalse(source.toString().contains("private"));assertFalse(source.settings().toString().contains("private"));
         assertThrows(IllegalArgumentException.class,()->SourceDefinitions.get("warehouse;injected",env::get,registry));
         env.put("SOURCE_IDS","sqlserver,sqlserver");assertThrows(IllegalArgumentException.class,()->SourceDefinitions.ids(env::get));

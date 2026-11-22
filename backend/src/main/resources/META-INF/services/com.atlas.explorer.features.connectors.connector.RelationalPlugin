@@ -1,1 +1,2 @@
 com.atlas.explorer.features.connectors.connector.SqlServerPlugin
+com.atlas.explorer.features.connectors.connector.PostgresqlPlugin
