@@ -1,0 +1,657 @@
+{
+  "report_id": "cc024ec0-3717-44d6-86c1-d3d454d73a5e",
+  "status": "passed",
+  "jobs": {
+    "Payment": "b8940d00-882d-40db-b9a5-da36305fa890",
+    "Customer": "1ef3ae65-b780-4d28-b3c6-61eb2675f603",
+    "Invoice": "c273c95b-d765-4769-a082-9d09a24f26df"
+  },
+  "profile": "customer_invoice_payment_v1",
+  "source_metrics": {
+    "customer": {
+      "row_count": "1000",
+      "distinct_ids": "1000",
+      "id_sum": "500500",
+      "null_rows": "0",
+      "duplicate_emails": "0",
+      "invalid_emails": "0",
+      "invalid_timestamps": "0"
+    },
+    "invoice": {
+      "row_count": "5000",
+      "distinct_ids": "5000",
+      "id_sum": "12502500",
+      "null_rows": "0",
+      "amount_sum": "4892425.00",
+      "invalid_amounts": "0",
+      "invalid_statuses": "0",
+      "invalid_timestamps": "0"
+    },
+    "payment": {
+      "row_count": "8000",
+      "distinct_ids": "8000",
+      "id_sum": "39988500",
+      "null_rows": "0",
+      "amount_sum": "3913605.00",
+      "invalid_amounts": "0",
+      "invalid_methods": "0",
+      "invalid_timestamps": "0"
+    },
+    "orphan_invoices": {
+      "violations": "0"
+    },
+    "orphan_payments": {
+      "violations": "0"
+    },
+    "payment_dates": {
+      "violations": "0"
+    },
+    "invoice_balances": {
+      "violations": "0"
+    }
+  },
+  "generated_at": "2026-11-23T23:30:39.827563106Z",
+  "lake_metrics": {
+    "customer": {
+      "row_count": "1000",
+      "distinct_ids": "1000",
+      "id_sum": "500500",
+      "null_rows": "0",
+      "duplicate_emails": "0",
+      "invalid_emails": "0",
+      "invalid_timestamps": "0"
+    },
+    "invoice": {
+      "row_count": "5000",
+      "distinct_ids": "5000",
+      "id_sum": "12502500",
+      "null_rows": "0",
+      "amount_sum": "4892425.00",
+      "invalid_amounts": "0",
+      "invalid_statuses": "0",
+      "invalid_timestamps": "0"
+    },
+    "payment": {
+      "row_count": "8000",
+      "distinct_ids": "8000",
+      "id_sum": "39988500",
+      "null_rows": "0",
+      "amount_sum": "3913605.00",
+      "invalid_amounts": "0",
+      "invalid_methods": "0",
+      "invalid_timestamps": "0"
+    },
+    "orphan_invoices": {
+      "violations": "0"
+    },
+    "orphan_payments": {
+      "violations": "0"
+    },
+    "payment_dates": {
+      "violations": "0"
+    },
+    "invoice_balances": {
+      "violations": "0"
+    }
+  },
+  "checks": [
+    {
+      "id": "lake.customer.primary_key",
+      "status": "passed",
+      "expected": "1000",
+      "observed": "1000"
+    },
+    {
+      "id": "lake.customer.null_rows",
+      "status": "passed",
+      "expected": "0",
+      "observed": "0"
+    },
+    {
+      "id": "lake.customer.duplicate_emails",
+      "status": "passed",
+      "expected": "0",
+      "observed": "0"
+    },
+    {
+      "id": "lake.customer.invalid_emails",
+      "status": "passed",
+      "expected": "0",
+      "observed": "0"
+    },
+    {
+      "id": "lake.customer.invalid_timestamps",
+      "status": "passed",
+      "expected": "0",
+      "observed": "0"
+    },
+    {
+      "id": "source.customer.primary_key",
+      "status": "passed",
+      "expected": "1000",
+      "observed": "1000"
+    },
+    {
+      "id": "source.customer.null_rows",
+      "status": "passed",
+      "expected": "0",
+      "observed": "0"
+    },
+    {
+      "id": "source.customer.duplicate_emails",
+      "status": "passed",
+      "expected": "0",
+      "observed": "0"
+    },
+    {
+      "id": "source.customer.invalid_emails",
+      "status": "passed",
+      "expected": "0",
+      "observed": "0"
+    },
+    {
+      "id": "source.customer.invalid_timestamps",
+      "status": "passed",
+      "expected": "0",
+      "observed": "0"
+    },
+    {
+      "id": "lake.invoice.primary_key",
+      "status": "passed",
+      "expected": "5000",
+      "observed": "5000"
+    },
+    {
+      "id": "lake.invoice.null_rows",
+      "status": "passed",
+      "expected": "0",
+      "observed": "0"
+    },
+    {
+      "id": "lake.invoice.invalid_amounts",
+      "status": "passed",
+      "expected": "0",
+      "observed": "0"
+    },
+    {
+      "id": "lake.invoice.invalid_statuses",
+      "status": "passed",
+      "expected": "0",
+      "observed": "0"
+    },
+    {
+      "id": "lake.invoice.invalid_timestamps",
+      "status": "passed",
+      "expected": "0",
+      "observed": "0"
+    },
+    {
+      "id": "source.invoice.primary_key",
+      "status": "passed",
+      "expected": "5000",
+      "observed": "5000"
+    },
+    {
+      "id": "source.invoice.null_rows",
+      "status": "passed",
+      "expected": "0",
+      "observed": "0"
+    },
+    {
+      "id": "source.invoice.invalid_amounts",
+      "status": "passed",
+      "expected": "0",
+      "observed": "0"
+    },
+    {
+      "id": "source.invoice.invalid_statuses",
+      "status": "passed",
+      "expected": "0",
+      "observed": "0"
+    },
+    {
+      "id": "source.invoice.invalid_timestamps",
+      "status": "passed",
+      "expected": "0",
+      "observed": "0"
+    },
+    {
+      "id": "lake.payment.primary_key",
+      "status": "passed",
+      "expected": "8000",
+      "observed": "8000"
+    },
+    {
+      "id": "lake.payment.null_rows",
+      "status": "passed",
+      "expected": "0",
+      "observed": "0"
+    },
+    {
+      "id": "lake.payment.invalid_amounts",
+      "status": "passed",
+      "expected": "0",
+      "observed": "0"
+    },
+    {
+      "id": "lake.payment.invalid_methods",
+      "status": "passed",
+      "expected": "0",
+      "observed": "0"
+    },
+    {
+      "id": "lake.payment.invalid_timestamps",
+      "status": "passed",
+      "expected": "0",
+      "observed": "0"
+    },
+    {
+      "id": "source.payment.primary_key",
+      "status": "passed",
+      "expected": "8000",
+      "observed": "8000"
+    },
+    {
+      "id": "source.payment.null_rows",
+      "status": "passed",
+      "expected": "0",
+      "observed": "0"
+    },
+    {
+      "id": "source.payment.invalid_amounts",
+      "status": "passed",
+      "expected": "0",
+      "observed": "0"
+    },
+    {
+      "id": "source.payment.invalid_methods",
+      "status": "passed",
+      "expected": "0",
+      "observed": "0"
+    },
+    {
+      "id": "source.payment.invalid_timestamps",
+      "status": "passed",
+      "expected": "0",
+      "observed": "0"
+    },
+    {
+      "id": "reconciliation.customer.row_count",
+      "status": "passed",
+      "expected": "1000",
+      "observed": "1000"
+    },
+    {
+      "id": "source_stability.customer.row_count",
+      "status": "passed",
+      "expected": "1000",
+      "observed": "1000"
+    },
+    {
+      "id": "reconciliation.customer.distinct_ids",
+      "status": "passed",
+      "expected": "1000",
+      "observed": "1000"
+    },
+    {
+      "id": "source_stability.customer.distinct_ids",
+      "status": "passed",
+      "expected": "1000",
+      "observed": "1000"
+    },
+    {
+      "id": "reconciliation.customer.id_sum",
+      "status": "passed",
+      "expected": "500500",
+      "observed": "500500"
+    },
+    {
+      "id": "source_stability.customer.id_sum",
+      "status": "passed",
+      "expected": "500500",
+      "observed": "500500"
+    },
+    {
+      "id": "reconciliation.customer.null_rows",
+      "status": "passed",
+      "expected": "0",
+      "observed": "0"
+    },
+    {
+      "id": "source_stability.customer.null_rows",
+      "status": "passed",
+      "expected": "0",
+      "observed": "0"
+    },
+    {
+      "id": "reconciliation.customer.duplicate_emails",
+      "status": "passed",
+      "expected": "0",
+      "observed": "0"
+    },
+    {
+      "id": "source_stability.customer.duplicate_emails",
+      "status": "passed",
+      "expected": "0",
+      "observed": "0"
+    },
+    {
+      "id": "reconciliation.customer.invalid_emails",
+      "status": "passed",
+      "expected": "0",
+      "observed": "0"
+    },
+    {
+      "id": "source_stability.customer.invalid_emails",
+      "status": "passed",
+      "expected": "0",
+      "observed": "0"
+    },
+    {
+      "id": "reconciliation.customer.invalid_timestamps",
+      "status": "passed",
+      "expected": "0",
+      "observed": "0"
+    },
+    {
+      "id": "source_stability.customer.invalid_timestamps",
+      "status": "passed",
+      "expected": "0",
+      "observed": "0"
+    },
+    {
+      "id": "reconciliation.invoice.row_count",
+      "status": "passed",
+      "expected": "5000",
+      "observed": "5000"
+    },
+    {
+      "id": "source_stability.invoice.row_count",
+      "status": "passed",
+      "expected": "5000",
+      "observed": "5000"
+    },
+    {
+      "id": "reconciliation.invoice.distinct_ids",
+      "status": "passed",
+      "expected": "5000",
+      "observed": "5000"
+    },
+    {
+      "id": "source_stability.invoice.distinct_ids",
+      "status": "passed",
+      "expected": "5000",
+      "observed": "5000"
+    },
+    {
+      "id": "reconciliation.invoice.id_sum",
+      "status": "passed",
+      "expected": "12502500",
+      "observed": "12502500"
+    },
+    {
+      "id": "source_stability.invoice.id_sum",
+      "status": "passed",
+      "expected": "12502500",
+      "observed": "12502500"
+    },
+    {
+      "id": "reconciliation.invoice.null_rows",
+      "status": "passed",
+      "expected": "0",
+      "observed": "0"
+    },
+    {
+      "id": "source_stability.invoice.null_rows",
+      "status": "passed",
+      "expected": "0",
+      "observed": "0"
+    },
+    {
+      "id": "reconciliation.invoice.amount_sum",
+      "status": "passed",
+      "expected": "4892425.00",
+      "observed": "4892425.00"
+    },
+    {
+      "id": "source_stability.invoice.amount_sum",
+      "status": "passed",
+      "expected": "4892425.00",
+      "observed": "4892425.00"
+    },
+    {
+      "id": "reconciliation.invoice.invalid_amounts",
+      "status": "passed",
+      "expected": "0",
+      "observed": "0"
+    },
+    {
+      "id": "source_stability.invoice.invalid_amounts",
+      "status": "passed",
+      "expected": "0",
+      "observed": "0"
+    },
+    {
+      "id": "reconciliation.invoice.invalid_statuses",
+      "status": "passed",
+      "expected": "0",
+      "observed": "0"
+    },
+    {
+      "id": "source_stability.invoice.invalid_statuses",
+      "status": "passed",
+      "expected": "0",
+      "observed": "0"
+    },
+    {
+      "id": "reconciliation.invoice.invalid_timestamps",
+      "status": "passed",
+      "expected": "0",
+      "observed": "0"
+    },
+    {
+      "id": "source_stability.invoice.invalid_timestamps",
+      "status": "passed",
+      "expected": "0",
+      "observed": "0"
+    },
+    {
+      "id": "reconciliation.payment.row_count",
+      "status": "passed",
+      "expected": "8000",
+      "observed": "8000"
+    },
+    {
+      "id": "source_stability.payment.row_count",
+      "status": "passed",
+      "expected": "8000",
+      "observed": "8000"
+    },
+    {
+      "id": "reconciliation.payment.distinct_ids",
+      "status": "passed",
+      "expected": "8000",
+      "observed": "8000"
+    },
+    {
+      "id": "source_stability.payment.distinct_ids",
+      "status": "passed",
+      "expected": "8000",
+      "observed": "8000"
+    },
+    {
+      "id": "reconciliation.payment.id_sum",
+      "status": "passed",
+      "expected": "39988500",
+      "observed": "39988500"
+    },
+    {
+      "id": "source_stability.payment.id_sum",
+      "status": "passed",
+      "expected": "39988500",
+      "observed": "39988500"
+    },
+    {
+      "id": "reconciliation.payment.null_rows",
+      "status": "passed",
+      "expected": "0",
+      "observed": "0"
+    },
+    {
+      "id": "source_stability.payment.null_rows",
+      "status": "passed",
+      "expected": "0",
+      "observed": "0"
+    },
+    {
+      "id": "reconciliation.payment.amount_sum",
+      "status": "passed",
+      "expected": "3913605.00",
+      "observed": "3913605.00"
+    },
+    {
+      "id": "source_stability.payment.amount_sum",
+      "status": "passed",
+      "expected": "3913605.00",
+      "observed": "3913605.00"
+    },
+    {
+      "id": "reconciliation.payment.invalid_amounts",
+      "status": "passed",
+      "expected": "0",
+      "observed": "0"
+    },
+    {
+      "id": "source_stability.payment.invalid_amounts",
+      "status": "passed",
+      "expected": "0",
+      "observed": "0"
+    },
+    {
+      "id": "reconciliation.payment.invalid_methods",
+      "status": "passed",
+      "expected": "0",
+      "observed": "0"
+    },
+    {
+      "id": "source_stability.payment.invalid_methods",
+      "status": "passed",
+      "expected": "0",
+      "observed": "0"
+    },
+    {
+      "id": "reconciliation.payment.invalid_timestamps",
+      "status": "passed",
+      "expected": "0",
+      "observed": "0"
+    },
+    {
+      "id": "source_stability.payment.invalid_timestamps",
+      "status": "passed",
+      "expected": "0",
+      "observed": "0"
+    },
+    {
+      "id": "reconciliation.orphan_invoices.violations",
+      "status": "passed",
+      "expected": "0",
+      "observed": "0"
+    },
+    {
+      "id": "source_stability.orphan_invoices.violations",
+      "status": "passed",
+      "expected": "0",
+      "observed": "0"
+    },
+    {
+      "id": "reconciliation.orphan_payments.violations",
+      "status": "passed",
+      "expected": "0",
+      "observed": "0"
+    },
+    {
+      "id": "source_stability.orphan_payments.violations",
+      "status": "passed",
+      "expected": "0",
+      "observed": "0"
+    },
+    {
+      "id": "reconciliation.payment_dates.violations",
+      "status": "passed",
+      "expected": "0",
+      "observed": "0"
+    },
+    {
+      "id": "source_stability.payment_dates.violations",
+      "status": "passed",
+      "expected": "0",
+      "observed": "0"
+    },
+    {
+      "id": "reconciliation.invoice_balances.violations",
+      "status": "passed",
+      "expected": "0",
+      "observed": "0"
+    },
+    {
+      "id": "source_stability.invoice_balances.violations",
+      "status": "passed",
+      "expected": "0",
+      "observed": "0"
+    },
+    {
+      "id": "source.orphan_invoices",
+      "status": "passed",
+      "expected": "0",
+      "observed": "0"
+    },
+    {
+      "id": "lake.orphan_invoices",
+      "status": "passed",
+      "expected": "0",
+      "observed": "0"
+    },
+    {
+      "id": "source.orphan_payments",
+      "status": "passed",
+      "expected": "0",
+      "observed": "0"
+    },
+    {
+      "id": "lake.orphan_payments",
+      "status": "passed",
+      "expected": "0",
+      "observed": "0"
+    },
+    {
+      "id": "source.payment_dates",
+      "status": "passed",
+      "expected": "0",
+      "observed": "0"
+    },
+    {
+      "id": "lake.payment_dates",
+      "status": "passed",
+      "expected": "0",
+      "observed": "0"
+    },
+    {
+      "id": "source.invoice_balances",
+      "status": "passed",
+      "expected": "0",
+      "observed": "0"
+    },
+    {
+      "id": "lake.invoice_balances",
+      "status": "passed",
+      "expected": "0",
+      "observed": "0"
+    }
+  ],
+  "catalog_tables": {
+    "Payment": "hive.runs.payment_b8940d00",
+    "Customer": "hive.runs.customer_1ef3ae65",
+    "Invoice": "hive.runs.invoice_c273c95b"
+  },
+  "source_id": "sqlserver"
+}

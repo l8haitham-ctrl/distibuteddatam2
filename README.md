@@ -24,6 +24,7 @@ n'est fusionnee dans master. Voir [la feuille de route](docs/roadmap.md).
 | Structure SQL Server | `GET /sources/{id}/tables`, `GET /sources/{id}/tables/{table}?schema=dbo`, `POST /connections/explore` |
 | Stockage | `GET /storage/status` |
 | Catalogue / SQL | `GET /catalog/tables`, `POST /sql/query` |
+| Qualite metier | `POST /quality/reports` avec les trois UUID Customer/Invoice/Payment |
 | Jobs Spark | `POST /storage/jobs`, `GET /storage/jobs`, `GET /storage/jobs/{id}`, `GET /storage/jobs/{id}/result` |
 
 Un job cree renvoie 202 et ecrit une extraction Parquet ou CSV dans MinIO. Son resultat
@@ -479,3 +480,8 @@ ecart de comptes ou de montants. Le [rapport de resultats](docs/benchmark-report
 presente les medianes, l'effet des petits fichiers et les limites : Zstd
 reduit ici la taille de 86,96 % face au CSV brut, mais les partitions
 mensuelles ne reduisent pas la latence du filtre sur ce petit jeu.
+
+`feature/data-quality-report`, base `feature/reproducible-benchmarks`, ajoute
+la reconciliation Customer/Invoice/Payment entre les sources et les extractions
+Trino : completude, unicite, references, dates et soldes. Voir
+[les regles et limites du controle qualite](docs/data-quality.md).
