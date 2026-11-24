@@ -26,6 +26,17 @@ describe('Explorer workflow',()=>{
   it('supports an empty table list',()=>{
     const store=TestBed.inject(ExplorerStore);http.expectOne('/api/sources').flush([mockSource]);http.expectOne('/api/sources/sqlserver/test').flush({status:'connected'});http.expectOne('/api/sources/sqlserver/tables').flush({tables:[]});expect(store.selected()).toBeNull();expect(store.loading()).toBe(false);
   });
+  it('opens the precise source and table requested by a glossary link',()=>{
+    const store=load();http.expectOne('/api/sources/sqlserver/tables/Invoice?schema=dbo').flush(mockExploration.tables[1]);
+    store.loadDefault('postgresql',{schema_name:'public',table_name:'invoice'});
+    http.expectOne('/api/sources').flush([{...mockSource,id:'postgresql',engine:'postgresql'}]);http.expectOne('/api/sources/postgresql/test').flush({status:'connected'});http.expectOne('/api/sources/postgresql/tables').flush({tables:[{schema_name:'public',table_name:'invoice'}]});
+    http.expectOne('/api/sources/postgresql/tables/invoice?schema=public').flush({...mockExploration.tables[1],schema_name:'public',table_name:'invoice'});expect(store.source()?.id).toBe('postgresql');expect(store.details()?.table_name).toBe('invoice');
+  });
+  it('reports a removed linked table instead of opening a different table',()=>{
+    const store=load();http.expectOne('/api/sources/sqlserver/tables/Invoice?schema=dbo').flush(mockExploration.tables[1]);
+    store.loadDefault('sqlserver',{schema_name:'dbo',table_name:'Removed'});http.expectOne('/api/sources').flush([mockSource]);http.expectOne('/api/sources/sqlserver/test').flush({status:'connected'});http.expectOne('/api/sources/sqlserver/tables').flush({tables:mockExploration.tables});
+    expect(store.details()).toBeNull();expect(store.selected()).toBeNull();expect(store.detailError()).toContain('introuvable');
+  });
   it('preserves Unicode lengths, MAX and decimal precision',()=>{
     const column=mockExploration.tables[0].columns[1];expect(formatType(column)).toBe('nvarchar(100)');expect(formatType({...column,max_length_bytes:-1})).toBe('nvarchar(max)');expect(formatType({...column,data_type:'decimal',precision:12,scale:2})).toBe('decimal(12, 2)');expect(groupTables(mockExploration.tables,'INVOICE').get('dbo')?.[0].table_name).toBe('Invoice');
   });

@@ -13,7 +13,7 @@
 <div id="panel-columns" role="tabpanel" aria-labelledby="tab-columns" [hidden]="tab() !== 'columns'">
   <div class="column-table-wrapper"><table class="column-table"><caption class="sr-only">Colonnes de {{table().schema_name}}.{{table().table_name}}</caption>
     <thead><tr><th scope="col" class="column-number">#</th><th scope="col">Nom de la colonne</th><th scope="col">Type de données</th><th scope="col">Valeur nulle</th><th scope="col">Clé</th></tr></thead>
-    <tbody>@for(column of table().columns; track column.name){<tr>
+    <tbody>@for(column of table().columns; track column.name){<tr [class.glossary-highlight]="column.name===focusedColumn()">
       <td class="column-number">{{column.position.toString().padStart(2,'0')}}</td>
       <th scope="row"><span class="column-name">@if(primary().has(column.name)){<app-icon class="key-primary" name="KeyRound" [size]="14"/>}@else if(foreign().has(column.name)){<app-icon class="key-foreign" name="Link2" [size]="14"/>}@else{<span class="column-mark"></span>}{{column.name}}</span>@if(column.is_identity){<small class="identity-label">Identité</small>}</th>
       <td><code class="data-type">{{formatType(column)}}</code></td>
@@ -31,4 +31,5 @@
     </div>}
   }@else{<div class="empty-relations"><app-icon name="GitBranch" [size]="28"/><h3>Aucune relation sortante</h3><p>Aucune clé étrangère n’est déclarée sur cette table.</p></div>}
 </div>
+@if(sourceId()&&!mockup()) {<app-table-glossary [sourceId]="sourceId()" [schema]="table().schema_name" [table]="table().table_name" [columns]="columnNames()" [initialColumn]="focusedColumn()"/>}
 <div class="structure-bottom"><span><app-icon name="ShieldCheck" [size]="15"/>{{mockup() ? 'Métadonnées illustratives' : 'Métadonnées lues depuis la source'}}</span><span><app-icon name="Check" [size]="13"/>Structure consultée en lecture seule</span></div>

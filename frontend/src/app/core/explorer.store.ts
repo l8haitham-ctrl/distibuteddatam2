@@ -23,6 +23,7 @@ export class ExplorerStore {
   private cache: Exploration|null = null;
   private loader?: Subscription;
   private selections = new Subject<TableRef|null>();
+  private requestedTarget?:TableRef;
 
   constructor() {
     this.selections.pipe(switchMap(table => {
@@ -40,9 +41,10 @@ export class ExplorerStore {
     } else this.loadDefault();
   }
   select(table: TableRef|null) { this.selected.set(table); this.selections.next(table); }
-  retryDetails() { this.select(this.selected()); }
-  loadDefault(sourceId?: string) {
+  retryDetails() { if(this.selected())this.select(this.selected());else this.loadDefault(this.source()?.id,this.requestedTarget); }
+  loadDefault(sourceId?: string, target?:TableRef) {
     if (this.mockup) return;
+    this.requestedTarget=target;
     this.loader?.unsubscribe(); this.select(null); this.loading.set(true); this.error.set('');
     this.cache = null; this.tables.set([]); this.source.set(null); this.external.set(false);
     this.loader = this.api.sources().pipe(switchMap(sources => {
@@ -51,7 +53,8 @@ export class ExplorerStore {
       if(!source){this.error.set('Source introuvable. Sélectionnez une source disponible.');return EMPTY;}
       return this.api.testSource(source.id).pipe(switchMap(() => this.api.tables(source.id)), tap(result => {
         this.source.set(source); this.tables.set(result.tables);
-        this.select(result.tables.find(t => t.table_name === 'Invoice') ?? result.tables[0] ?? null);
+        if(target){const table=result.tables.find(t=>t.schema_name===target.schema_name&&t.table_name===target.table_name);if(table)this.select(table);else this.detailError.set('La table demandée est introuvable ou inaccessible.');}
+        else this.select(result.tables.find(t => t.table_name === 'Invoice') ?? result.tables[0] ?? null);
       }));
     }), catchError(e => {this.error.set(errorMessage(e)); return EMPTY;}), finalize(() => this.loading.set(false))).subscribe();
   }

@@ -1,0 +1,37 @@
+<div class="wf-page-heading"><div><h1>Glossaire métier</h1><p>Des définitions partagées, reliées aux tables et aux colonnes de vos sources.</p></div><button class="wf-button wf-primary" (click)="create()" [disabled]="busy()"><app-icon name="Plus"/>Nouveau terme</button></div>
+@if(context()){<p class="glossary-context">Donnée à associer : <strong>{{context()}}</strong>. Sélectionnez un terme ou créez une définition, puis confirmez l’association.</p>}
+<div class="glossary-layout">
+  <section class="glossary-card glossary-index" aria-label="Rechercher des termes">
+    <form (ngSubmit)="search()" class="glossary-search"><label for="term-search">Rechercher un terme</label><div><input id="term-search" name="q" [(ngModel)]="q" maxlength="160" placeholder="Nom ou définition…"/><button class="wf-button" type="submit" [disabled]="loading()">Rechercher</button></div></form>
+    @if(loading()){<p role="status">Chargement des termes…</p>}
+    @else if(listError()){<p role="alert">{{listError()}}</p><button class="wf-button" (click)="search(false)">Réessayer</button>}
+    @else{<ul class="term-list">@for(t of terms();track t.id){<li><button (click)="choose(t.id)" [disabled]="busy()" [class.selected]="term()?.id===t.id" [attr.aria-current]="term()?.id===t.id?'true':null"><strong>{{t.name}}</strong><span>{{t.status==='VALIDATED'?'Validé':'Brouillon'}}</span><p>{{t.definition}}</p></button></li>}@empty{<li class="glossary-empty">{{q?'Aucun terme ne correspond à cette recherche.':'Aucun terme pour le moment. Créez votre première définition.'}}</li>}</ul>}
+    <div class="glossary-pagination"><button class="wf-button" (click)="page(-1)" [disabled]="loading()||offset===0">Précédent</button><span>Page {{offset/20+1}}</span><button class="wf-button" (click)="page(1)" [disabled]="loading()||terms().length<20">Suivant</button></div>
+  </section>
+  <section class="glossary-card glossary-detail" aria-label="Fiche du terme" [attr.aria-busy]="detailLoading()||busy()">
+    @if(error()){<p class="pipeline-error" role="alert">{{error()}}</p>}
+    @if(message()){<p class="glossary-notice" role="status">{{message()}}</p>}
+    @if(detailLoading()){<p role="status">Chargement de la définition…</p>}
+    @else if(editing()){
+      <h2>{{term()?'Modifier le terme':'Nouveau terme'}}</h2><form #termForm="ngForm" (ngSubmit)="save()" class="glossary-form">
+      <fieldset [disabled]="busy()"><label>Nom du terme<input name="name" [(ngModel)]="draft.name" required maxlength="160"/></label>
+      <label>Définition<textarea name="definition" [(ngModel)]="draft.definition" required maxlength="8000" rows="4"></textarea></label>
+      <label>Règle de calcul <span class="muted">(facultatif)</span><textarea name="rule" [(ngModel)]="draft.calculation_rule" maxlength="8000" rows="3"></textarea></label>
+      <div class="glossary-fields"><label>Responsable<input name="owner" [(ngModel)]="draft.owner" maxlength="160"/></label><label>Statut<select name="status" [(ngModel)]="draft.status"><option value="DRAFT">Brouillon</option><option value="VALIDATED">Validé</option></select></label></div>
+      <p class="muted">La règle de calcul est explicative. Le statut est déclaratif, sans circuit d’approbation.</p>
+      <div class="glossary-actions"><button type="button" class="wf-button" (click)="editing.set(false)">Annuler</button><button class="wf-button wf-primary" type="submit" [disabled]="termForm.invalid||!draft.name.trim()||!draft.definition.trim()">{{busy()?'Enregistrement…':'Enregistrer le terme'}}</button></div></fieldset></form>
+    }@else if(term();as t){
+      <div class="glossary-title"><div><span class="job-badge">{{t.status==='VALIDATED'?'Validé':'Brouillon'}}</span><h2>{{t.name}}</h2></div><button class="wf-button" (click)="edit()" [disabled]="busy()">Modifier</button></div>
+      <dl class="term-definition"><dt>Définition</dt><dd>{{t.definition}}</dd><dt>Règle de calcul</dt><dd>{{t.calculation_rule||'Non renseignée'}}</dd><dt>Responsable</dt><dd>{{t.owner||'Non renseigné'}}</dd><dt>Dernière modification</dt><dd>{{t.updated_at|date:'dd/MM/yyyy HH:mm'}}</dd></dl>
+      <h3>Données associées <span class="muted">({{t.links?.length||0}})</span></h3><ul class="term-links">@for(link of t.links;track link.id){<li><div><strong>{{link.source_id}}</strong><a routerLink="/explorer" [queryParams]="{source_id:link.source_id,schema_name:link.schema_name,table_name:link.table_name,column_name:link.column_name}">{{link.schema_name}}.{{link.table_name}}@if(link.column_name){ · {{link.column_name}}}</a></div><button class="wf-button" (click)="removeLink(link.id)" [disabled]="busy()" [attr.aria-label]="'Retirer le lien '+link.schema_name+'.'+link.table_name+(link.column_name?'.'+link.column_name:'')">Retirer</button></li>}@empty{<li class="muted">Aucune table ou colonne associée.</li>}</ul>
+    }@else{<div class="glossary-empty"><app-icon name="BookOpen" [size]="30"/><h2>Donnez du sens à vos données</h2><p>Sélectionnez un terme ou créez une définition métier.</p></div>}
+    @if(term()&&!editing()&&!detailLoading()){
+      <form (ngSubmit)="addLink()" class="glossary-form link-form"><h3>Associer une donnée</h3><p class="muted">Sélectionnez une source configurée. Le lien sera vérifié avant son enregistrement.</p><fieldset [disabled]="busy()">
+      <label>Source<select name="source" [ngModel]="sourceId" (ngModelChange)="sourceChanged($event)"><option value="">Choisir une source</option>@for(s of sources();track s.id){<option [value]="s.id">{{s.id}} · {{s.database}}</option>}</select></label>
+      <label>Table<select name="table" [ngModel]="tableKey" (ngModelChange)="tableChanged($event)" [disabled]="targetLoading()||!sourceId"><option value="">Choisir une table</option>@for(table of tables();track key(table)){<option [value]="key(table)">{{table.schema_name}}.{{table.table_name}}</option>}</select></label>
+      <label>Colonne<select name="column" [(ngModel)]="column" [disabled]="targetLoading()||!tableKey"><option value="">Toute la table</option>@for(c of columns();track c.name){<option [value]="c.name">{{c.name}}</option>}</select></label>
+      @if(targetLoading()){<p role="status">Lecture de la structure…</p>}@if(targetError()){<p role="alert">{{targetError()}}</p><button type="button" class="wf-button" (click)="retryTarget()">Recharger la structure</button>}
+      <button class="wf-button" type="submit" [disabled]="!selectedTable()||targetLoading()||!!targetError()">Associer au terme</button></fieldset></form>
+    }
+  </section>
+</div>

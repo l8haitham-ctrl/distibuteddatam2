@@ -1,0 +1,53 @@
+{
+  "date": "2026-11-24",
+  "branch": "feature/business-glossary-ui",
+  "base": "6c399f35bf25b329f1adf04ada3e59e36e70ca10",
+  "angular_tests": {
+    "files": 11,
+    "failures": 0,
+    "passed": 44
+  },
+  "production_build": "passed",
+  "frontend_image": "sha256:24df7b448010ac2684f5aa5fada4264323407c4ae11ef694b1b37d620fac700e",
+  "browser_checks": [
+    "create draft term",
+    "associate Invoice.amount",
+    "reject duplicate association",
+    "associate Payment.amount",
+    "edit owner without losing links",
+    "reload persisted term",
+    "open exact source and table from glossary",
+    "highlight amount column",
+    "show amount in reverse lookup filter",
+    "find associated term in explorer",
+    "prefill source table and column from explorer"
+  ],
+  "demo_term": {
+    "id": "2197f9da-b652-4573-831d-8cac438123bc",
+    "links": [
+      {
+        "source_id": "sqlserver",
+        "schema_name": "dbo",
+        "table_name": "Invoice",
+        "column_name": "amount"
+      },
+      {
+        "source_id": "sqlserver",
+        "schema_name": "dbo",
+        "table_name": "Payment",
+        "column_name": "amount"
+      }
+    ],
+    "status": "DRAFT"
+  },
+  "existing_jobs": {
+    "before": 44,
+    "after": 44,
+    "preserved": true
+  },
+  "screenshots": [
+    "docs/evidence/glossary-page.jpg",
+    "docs/evidence/glossary-explorer.jpg"
+  ],
+  "initial_build_export_issue": "Compilation and 42 tests passed; exporting the build-stage image failed with a Docker lease error. Final runtime image built successfully with 44 tests."
+}
