@@ -15,7 +15,7 @@ docker compose up -d --build --wait --wait-timeout 300
 docker compose ps -a
 ```
 
-Le script cree .env uniquement s'il n'existe pas, genere 16 secrets distincts
+Le script cree .env uniquement s'il n'existe pas, genere 17 secrets distincts
 et ne les affiche pas. Conserver ce fichier avec les volumes ; modifier un
 mot de passe dans .env ne change pas celui d'une base deja initialisee.
 Ne pas committer ce fichier. Le script ne remplace jamais une configuration
@@ -37,6 +37,7 @@ la console SQL Angular passe par l'API et ne necessite pas de visite de son UI.
 git fetch origin
 git switch feature/release-readiness
 powershell -NoProfile -File scripts/setup-env.ps1
+powershell -NoProfile -File scripts/setup-login.ps1
 docker compose up -d --build --wait --wait-timeout 300
 ```
 
@@ -95,7 +96,8 @@ Ne pas lancer les tests d'ingestion et une autre extraction au meme moment.
 [Rapport de validation](release-validation.md), [qualite](data-quality.md),
 [benchmarks](benchmark-report.md), [demonstration](demo-guide.md) et
 [integration](integration-plan.md) constituent les preuves de cette version.
-Il s'agit d'une livraison pedagogique locale. L'authentification utilisateur,
-la sauvegarde permanente des sources creees dans l'UI et le deploiement cloud
+Il s'agit d'une livraison pedagogique locale. L'authentification locale est ajoutee
+sur `feature/platform-authentication` ; voir [le guide](authentication.md).
+La sauvegarde permanente des sources creees dans l'UI et le deploiement cloud
 ne sont pas presentes comme des fonctionnalites validees. Le glossaire reste
 differe et les bonus sont exclus.

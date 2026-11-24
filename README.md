@@ -13,6 +13,9 @@ Son interface et la navigation avec l'explorateur sont sur
 `feature/business-glossary-ui` : [guide d'utilisation](docs/business-glossary-ui.md).
 La branche `feature/explicit-source-selection` attend le choix de l'utilisateur
 avant de connecter une source : [fonctionnement](docs/source-selection.md).
+La branche `feature/platform-authentication` ajoute le login et protege les API :
+[compte local, sessions et tests](docs/authentication.md). Sur une installation
+existante, executer `scripts/setup-login.ps1` avant le prochain Compose.
 `master` conserve le socle historique ; aucune fusion supplementaire n'est faite.
 Le prototype d'architecture live reste une experimentation locale non publiee.
 
@@ -29,6 +32,7 @@ Les preuves Docker, tests et parcours Angular figurent dans
 
 | Usage | Endpoints |
 | --- | --- |
+| Session plateforme | `GET /auth/session`, `POST /auth/login`, `POST /auth/logout` ; cookie de session et CSRF requis pour les ecritures |
 | Sante et documentation | `GET /health`, `GET /actuator/health/readiness`, `/docs`, `/openapi.json` |
 | Sources | `GET /sources`, `POST /sources/{id}/test`, `POST /connections/test` |
 | Structure SQL Server | `GET /sources/{id}/tables`, `GET /sources/{id}/tables/{table}?schema=dbo`, `POST /connections/explore` |

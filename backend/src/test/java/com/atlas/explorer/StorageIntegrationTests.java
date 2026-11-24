@@ -100,7 +100,7 @@ class StorageIntegrationTests {
     }
 
     @Test void statusEndpointIsAvailableAndContainsNoCredentials() throws Exception {
-        var response = HttpClient.newHttpClient().send(HttpRequest.newBuilder(URI.create("http://localhost:" + port + "/storage/status"))
+        var response = com.atlas.explorer.support.AuthenticatedHttp.send(HttpRequest.newBuilder(URI.create("http://localhost:" + port + "/storage/status"))
                 .GET().build(), HttpResponse.BodyHandlers.ofString());
         assertEquals(200, response.statusCode());
         assertTrue(response.body().contains("ready"));

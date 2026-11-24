@@ -19,7 +19,7 @@ class ConnectionIntegrationTests {
     @LocalServerPort int port;
     @Autowired SourceService sources;
     private HttpResponse<String> call(String method,String path) throws Exception {
-        return HttpClient.newHttpClient().send(HttpRequest.newBuilder(URI.create("http://localhost:"+port+path))
+        return com.atlas.explorer.support.AuthenticatedHttp.send(HttpRequest.newBuilder(URI.create("http://localhost:"+port+path))
                 .method(method,HttpRequest.BodyPublishers.noBody()).build(),HttpResponse.BodyHandlers.ofString());
     }
     @Test void connectsWithReaderAndHidesCredentials() throws Exception {

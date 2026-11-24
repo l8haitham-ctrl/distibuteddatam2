@@ -4,8 +4,10 @@ import {performance} from 'node:perf_hooks';
 import {schedule,request,queries,validate} from './plan.mjs';
 import {report} from './report.mjs';
 import {audit} from './audit.mjs';
+import {createPlatformSession} from '../scripts/platform-session.mjs';
 
 const api=process.env.BENCH_API_URL??'http://backend:8000';
+const platformFetch=createPlatformSession(api);
 const sparkUrl=process.env.BENCH_SPARK_URL??'http://spark-master:8080/json/';
 const runId=process.argv.find(a=>a.startsWith('--run-id='))?.slice(9)??new Date().toISOString().replace(/[:.]/g,'-');
 if(!/^[a-zA-Z0-9_-]{1,100}$/.test(runId))throw Error('Invalid run id');
@@ -25,7 +27,7 @@ if(process.argv.includes('--resume')){
 async function save(){await writeFile(path+'.tmp',JSON.stringify(state,null,2)+'\n');await rename(path+'.tmp',path);}
 function event(type,values={}){console.log(JSON.stringify({time:new Date().toISOString(),type,...values}));}
 async function call(route,body){
-  const response=await fetch(api+route,{method:body===undefined?'GET':'POST',headers:{'Content-Type':'application/json'},body:body===undefined?undefined:JSON.stringify(body),signal:AbortSignal.timeout(90000)});
+  const response=await platformFetch(route,{method:body===undefined?'GET':'POST',headers:{'Content-Type':'application/json'},body:body===undefined?undefined:JSON.stringify(body),signal:AbortSignal.timeout(90000)});
   if(!response.ok)throw Error(`API ${response.status} for ${route}`);
   return response.json();
 }

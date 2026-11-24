@@ -88,6 +88,10 @@ etend l'application avec une page dediee et la navigation depuis les tables/colo
 
 ## Prochaine etape
 
+L'acces a la plateforme est protege sur `feature/platform-authentication`,
+base `feature/explicit-source-selection` : login local, session serveur,
+deconnexion, protection des routes Angular et des API. Voir [le guide](authentication.md).
+
 Le choix explicite de la source est ajoute sur `feature/explicit-source-selection`,
 base `feature/business-glossary-ui`. L'explorateur ne se connecte plus a la
 premiere source a son ouverture ; voir [le parcours](source-selection.md).

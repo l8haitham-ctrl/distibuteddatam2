@@ -41,9 +41,9 @@ class QualityIntegrationTests {
         var body=new LinkedHashMap<String,String>();body.put("source_id","sqlserver");
         body.put("customer_job_id",System.getenv("QUALITY_CUSTOMER_JOB"));body.put("invoice_job_id",System.getenv("QUALITY_INVOICE_JOB"));body.put("payment_job_id",System.getenv("QUALITY_PAYMENT_JOB"));
         var request=HttpRequest.newBuilder(URI.create("http://backend:8000/quality/reports")).timeout(java.time.Duration.ofSeconds(120)).header("Content-Type","application/json");
-        var response=http.send(request.POST(HttpRequest.BodyPublishers.ofString(mapper.writeValueAsString(body))).build(),HttpResponse.BodyHandlers.ofString());
+        var response=com.atlas.explorer.support.AuthenticatedHttp.send(request.POST(HttpRequest.BodyPublishers.ofString(mapper.writeValueAsString(body))).build(),HttpResponse.BodyHandlers.ofString());
         assertEquals(200,response.statusCode(),response.body());var json=mapper.readTree(response.body());assertEquals("passed",json.get("status").asText());assertTrue(json.get("checks").size()>50);
         body.put("customer_job_id",body.get("invoice_job_id"));
-        var invalid=http.send(request.POST(HttpRequest.BodyPublishers.ofString(mapper.writeValueAsString(body))).build(),HttpResponse.BodyHandlers.ofString());assertEquals(422,invalid.statusCode());
+        var invalid=com.atlas.explorer.support.AuthenticatedHttp.send(request.POST(HttpRequest.BodyPublishers.ofString(mapper.writeValueAsString(body))).build(),HttpResponse.BodyHandlers.ofString());assertEquals(422,invalid.statusCode());
     }
 }

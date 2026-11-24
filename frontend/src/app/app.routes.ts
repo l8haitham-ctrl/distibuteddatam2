@@ -1,5 +1,8 @@
 import { Routes } from '@angular/router';
+import { authGuard } from './features/auth/auth.guard';
 export const routes: Routes = [
+  {path:'login',loadComponent:()=>import('./features/auth/login-page.component').then(m=>m.LoginPageComponent)},
+  {path:'',canActivateChild:[authGuard],loadComponent:()=>import('./features/auth/platform-shell.component').then(m=>m.PlatformShellComponent),children:[
   {path:'glossary',loadComponent:()=>import('./features/glossary/glossary-page.component').then(m=>m.GlossaryPageComponent)},
   {path:'sources/native',loadComponent:()=>import('./features/native-sources.component').then(m=>m.NativeSourcesComponent)},
   {path:'sources/new',loadComponent:()=>import('./features/source-form.component').then(m=>m.SourceFormComponent)},
@@ -11,4 +14,4 @@ export const routes: Routes = [
   {path:'sql',loadComponent:()=>import('./features/sql-page.component').then(m=>m.SqlPageComponent)},
   {path:'',redirectTo:'sources',pathMatch:'full'},
   {path:'**',redirectTo:'sources'}
-];
+]}];

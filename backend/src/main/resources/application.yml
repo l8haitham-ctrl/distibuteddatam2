@@ -6,6 +6,16 @@ server:
     include-message: never
     include-binding-errors: never
     include-stacktrace: never
+  servlet:
+    session:
+      timeout: 30m
+      tracking-modes: cookie
+      cookie:
+        name: ATLAS_SESSION
+        path: /
+        http-only: true
+        same-site: strict
+        secure: ${APP_COOKIE_SECURE:false}
 spring:
   application:
     name: atlas-data-explorer
@@ -34,6 +44,9 @@ source:
   username: ${SOURCE_USERNAME:lake_reader}
   password: ${SOURCE_PASSWORD:}
   trust-server-certificate: ${SOURCE_TRUST_SERVER_CERTIFICATE:false}
+auth:
+  username: ${APP_LOGIN_USERNAME:admin}
+  password: ${APP_LOGIN_PASSWORD:}
 storage:
   enabled: ${STORAGE_ENABLED:false}
   endpoint: ${STORAGE_ENDPOINT:http://minio:9000}

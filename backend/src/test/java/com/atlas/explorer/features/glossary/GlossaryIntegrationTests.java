@@ -28,7 +28,7 @@ class GlossaryIntegrationTests {
         var builder=HttpRequest.newBuilder(URI.create("http://localhost:"+port+path));
         if(body==null)builder.method(method,HttpRequest.BodyPublishers.noBody());
         else builder.header("Content-Type","application/json").method(method,HttpRequest.BodyPublishers.ofString(body));
-        return HttpClient.newHttpClient().send(builder.build(),HttpResponse.BodyHandlers.ofString());
+        return com.atlas.explorer.support.AuthenticatedHttp.send(builder.build(),HttpResponse.BodyHandlers.ofString());
     }
     @BeforeEach void isolate() { assertTrue(properties.jdbcUrl().endsWith("/atlas_test")); }
     @AfterEach void cleanup() {

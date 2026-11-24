@@ -23,6 +23,8 @@ services:
       dockerfile: benchmarks/Dockerfile
     environment:
       BENCH_API_URL: http://backend:8000
+      APP_LOGIN_USERNAME: ${APP_LOGIN_USERNAME:-admin}
+      APP_LOGIN_PASSWORD: ${APP_LOGIN_PASSWORD:?Define APP_LOGIN_PASSWORD in .env}
       BENCH_SPARK_URL: http://spark-master:8080/json/
     volumes:
       - ./benchmarks/results:/results

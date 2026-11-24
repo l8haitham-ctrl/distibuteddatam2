@@ -20,7 +20,7 @@ class PostgresqlIntegrationTests {
     private HttpResponse<String> call(String method,String path,String body)throws Exception{
         var builder=HttpRequest.newBuilder(URI.create("http://localhost:"+port+path));
         if(body==null)builder.method(method,HttpRequest.BodyPublishers.noBody());else builder.header("Content-Type","application/json").method(method,HttpRequest.BodyPublishers.ofString(body));
-        return HttpClient.newHttpClient().send(builder.build(),HttpResponse.BodyHandlers.ofString());
+        return com.atlas.explorer.support.AuthenticatedHttp.send(builder.build(),HttpResponse.BodyHandlers.ofString());
     }
     @Test void sameApisDiscoverBothEnginesAndPostgresqlTables()throws Exception{
         List<String> engines=JsonPath.read(call("GET","/connectors",null).body(),"$[*].engine");assertTrue(engines.containsAll(List.of("sqlserver","postgresql")));

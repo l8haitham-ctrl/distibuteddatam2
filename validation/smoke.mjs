@@ -1,5 +1,6 @@
 import {readFile,writeFile,rename,mkdir} from 'node:fs/promises';
 import {setTimeout as delay} from 'node:timers/promises';
+import {createPlatformSession} from '../scripts/platform-session.mjs';
 const option=(key,fallback)=>process.argv.find(a=>a.startsWith(`--${key}=`))?.slice(key.length+3)??fallback;
 const id=option('run-id',new Date().toISOString().replace(/[:.]/g,'-'));
 if(!/^[a-zA-Z0-9_-]{1,100}$/.test(id))throw Error('Invalid validation id');
@@ -10,7 +11,8 @@ else{try{await readFile(file);throw Error('Validation already exists; resume ins
 async function save(){await writeFile(file+'.tmp',JSON.stringify(report,null,2)+'\n');await rename(file+'.tmp',file);}
 function check(name,passed,details){report.checks.push({name,status:passed?'passed':'failed',details});if(!passed)throw Error(name);}
 const api=process.env.CHECK_API_URL??'http://backend:8000';
-async function json(url,body){const r=await fetch(url,{method:body===undefined?'GET':'POST',headers:{'Content-Type':'application/json'},body:body===undefined?undefined:JSON.stringify(body),signal:AbortSignal.timeout(90000)});if(!r.ok)throw Error(`HTTP ${r.status} for ${new URL(url).pathname}`);return r.json();}
+const platformFetch=createPlatformSession(api);
+async function json(url,body){const options={method:body===undefined?'GET':'POST',headers:{'Content-Type':'application/json'},body:body===undefined?undefined:JSON.stringify(body),signal:AbortSignal.timeout(90000)};const r=await (url.startsWith(api+'/')?platformFetch(url.slice(api.length),options):fetch(url,options));if(!r.ok)throw Error(`HTTP ${r.status} for ${new URL(url).pathname}`);return r.json();}
 async function call(path,body){return json(api+path,body);}
 try{
   check('readiness',(await call('/actuator/health/readiness')).status==='UP');

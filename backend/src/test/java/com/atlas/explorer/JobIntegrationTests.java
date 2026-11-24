@@ -69,7 +69,7 @@ class JobIntegrationTests {
         var builder=HttpRequest.newBuilder(URI.create("http://localhost:"+port+path));
         if(body==null)builder.method(method,HttpRequest.BodyPublishers.noBody());
         else builder.header("Content-Type","application/json").method(method,HttpRequest.BodyPublishers.ofString(body));
-        return HttpClient.newHttpClient().send(builder.build(),HttpResponse.BodyHandlers.ofString());
+        return com.atlas.explorer.support.AuthenticatedHttp.send(builder.build(),HttpResponse.BodyHandlers.ofString());
     }
     @Test void apiValidatesBeforeQueuingAndExposesPendingStatus() throws Exception {
         assertEquals(422,call("POST","/storage/jobs","{\"source_id\":\"sqlserver\",\"table\":\"Invoice\",\"fetch_size\":0}").statusCode());

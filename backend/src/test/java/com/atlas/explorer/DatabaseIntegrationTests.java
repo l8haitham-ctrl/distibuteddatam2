@@ -21,7 +21,7 @@ class DatabaseIntegrationTests {
     private HttpResponse<String> call(String method, String path) throws Exception {
         var request = HttpRequest.newBuilder(URI.create("http://localhost:" + port + path))
                 .method(method, HttpRequest.BodyPublishers.noBody()).build();
-        return HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+        return com.atlas.explorer.support.AuthenticatedHttp.send(request, HttpResponse.BodyHandlers.ofString());
     }
     @Test void configuredSourceConnectsAndListsTablesWithoutPassword() throws Exception {
         assertFalse(call("GET", "/sources").body().contains("password"));
@@ -56,7 +56,7 @@ class DatabaseIntegrationTests {
         var json=com.jayway.jsonpath.Configuration.defaultConfiguration().jsonProvider().toJson(body);
         var request=HttpRequest.newBuilder(URI.create("http://localhost:"+port+"/connections/explore"))
                 .header("Content-Type","application/json").POST(HttpRequest.BodyPublishers.ofString(json)).build();
-        var response=HttpClient.newHttpClient().send(request,HttpResponse.BodyHandlers.ofString());
+        var response=com.atlas.explorer.support.AuthenticatedHttp.send(request,HttpResponse.BodyHandlers.ofString());
         assertEquals(200,response.statusCode(),response.body());
         assertEquals(3,((List<?>)JsonPath.read(response.body(),"$.tables")).size());
         assertFalse(response.body().contains(config.password()));

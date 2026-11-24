@@ -186,6 +186,9 @@ services:
         condition: service_healthy
     environment:
       <<: *catalog-env
+      APP_LOGIN_USERNAME: ${APP_LOGIN_USERNAME:-admin}
+      APP_LOGIN_PASSWORD: ${APP_LOGIN_PASSWORD:?Run scripts/setup-login.ps1 or define APP_LOGIN_PASSWORD in .env}
+      APP_COOKIE_SECURE: ${APP_COOKIE_SECURE:-false}
       SOURCE_HOST: sqlserver
       SOURCE_DATABASE: BusinessDB
       SOURCE_USERNAME: lake_reader
@@ -236,6 +239,8 @@ services:
         condition: service_healthy
     environment:
       <<: *catalog-env
+      APP_LOGIN_USERNAME: ${APP_LOGIN_USERNAME:-admin}
+      APP_LOGIN_PASSWORD: ${APP_LOGIN_PASSWORD:?Define APP_LOGIN_PASSWORD in .env}
       RUN_DB_TESTS: "true"
       RUN_STORAGE_TESTS: "true"
       RUN_JOB_TESTS: "true"
