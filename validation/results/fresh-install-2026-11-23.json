@@ -1,0 +1,313 @@
+{
+  "run_id": "fresh-install-2026-11-23",
+  "started_at": "2026-11-23T23:55:25.190Z",
+  "checks": [
+    {
+      "name": "readiness",
+      "status": "passed"
+    },
+    {
+      "name": "minio_ready",
+      "status": "passed"
+    },
+    {
+      "name": "angular_served",
+      "status": "passed"
+    },
+    {
+      "name": "nginx_api_proxy",
+      "status": "passed"
+    },
+    {
+      "name": "sqlserver_configured",
+      "status": "passed"
+    },
+    {
+      "name": "source_connection",
+      "status": "passed"
+    },
+    {
+      "name": "business_tables",
+      "status": "passed"
+    },
+    {
+      "name": "invoice_structure",
+      "status": "passed"
+    },
+    {
+      "name": "spark_alive",
+      "status": "passed"
+    },
+    {
+      "name": "fresh_job_history",
+      "status": "passed",
+      "details": {
+        "count": 0
+      }
+    },
+    {
+      "name": "no_other_active_jobs",
+      "status": "passed"
+    },
+    {
+      "name": "source_job_identity",
+      "status": "passed"
+    },
+    {
+      "name": "stored_rows",
+      "status": "passed",
+      "details": {
+        "rows": 5000
+      }
+    },
+    {
+      "name": "stored_files",
+      "status": "passed",
+      "details": {
+        "files": 48,
+        "bytes": 197634
+      }
+    },
+    {
+      "name": "catalog_registered",
+      "status": "passed"
+    },
+    {
+      "name": "sql_reconciliation",
+      "status": "passed",
+      "details": {
+        "rows": [
+          [
+            5000,
+            "4892425.00"
+          ]
+        ]
+      }
+    },
+    {
+      "name": "native_minio_connected",
+      "status": "passed"
+    }
+  ],
+  "submission_attempted_at": "2026-11-23T23:55:28.523Z",
+  "request": {
+    "source_id": "sqlserver",
+    "table": "Invoice",
+    "format": "parquet",
+    "compression": "snappy",
+    "partition_by": [
+      "invoice_date"
+    ],
+    "fetch_size": 1000,
+    "num_partitions": 2
+  },
+  "job_id": "e1eb3aff-65c2-470e-af44-08fe2a6f896d",
+  "job": {
+    "id": "e1eb3aff-65c2-470e-af44-08fe2a6f896d",
+    "status": "COMPLETED",
+    "request": {
+      "source_id": "sqlserver",
+      "schema": "dbo",
+      "table": "Invoice",
+      "format": "parquet",
+      "partition_by": [
+        "invoice_date"
+      ],
+      "fetch_size": 1000,
+      "compression": "snappy",
+      "partition_granularity": "month",
+      "num_partitions": 2
+    },
+    "created_at": "2026-11-23T23:55:29.149085Z",
+    "started_at": "2026-11-23T23:55:30.257553Z",
+    "finished_at": "2026-11-23T23:56:52.093253Z",
+    "submission_id": "driver-20261123235532-0000",
+    "error_code": null,
+    "result": {
+      "version": 2,
+      "job_id": "e1eb3aff-65c2-470e-af44-08fe2a6f896d",
+      "prefix": "sqlserver/dbo/Invoice/e1eb3aff-65c2-470e-af44-08fe2a6f896d",
+      "source_id": "sqlserver",
+      "schema_name": "dbo",
+      "table_name": "Invoice",
+      "source_engine": "sqlserver",
+      "format": "parquet",
+      "compression": "snappy",
+      "row_count": 5000,
+      "file_count": 48,
+      "storage_bytes": 197634,
+      "schema_json": "{\"type\":\"struct\",\"fields\":[{\"name\":\"invoice_id\",\"type\":\"integer\",\"nullable\":true,\"metadata\":{\"isSigned\":true,\"scale\":0,\"isTimestampNTZ\":false,\"preferTimestampNanos\":false,\"jdbcClientType\":\"int\"}},{\"name\":\"customer_id\",\"type\":\"integer\",\"nullable\":true,\"metadata\":{\"isSigned\":true,\"scale\":0,\"isTimestampNTZ\":false,\"preferTimestampNanos\":false,\"jdbcClientType\":\"int\"}},{\"name\":\"invoice_date\",\"type\":\"date\",\"nullable\":true,\"metadata\":{\"isSigned\":false,\"scale\":0,\"isTimestampNTZ\":false,\"preferTimestampNanos\":false,\"jdbcClientType\":\"date\"}},{\"name\":\"amount\",\"type\":\"decimal(12,2)\",\"nullable\":true,\"metadata\":{\"isSigned\":true,\"scale\":2,\"isTimestampNTZ\":false,\"preferTimestampNanos\":false,\"jdbcClientType\":\"decimal\"}},{\"name\":\"status\",\"type\":\"string\",\"nullable\":true,\"metadata\":{\"isSigned\":false,\"scale\":0,\"__CHAR_VARCHAR_TYPE_STRING\":\"varchar(20)\",\"isTimestampNTZ\":false,\"preferTimestampNanos\":false,\"jdbcClientType\":\"varchar\"}},{\"name\":\"updated_at\",\"type\":\"timestamp\",\"nullable\":true,\"metadata\":{\"isSigned\":false,\"scale\":0,\"isTimestampNTZ\":false,\"preferTimestampNanos\":false,\"jdbcClientType\":\"datetime2\"}},{\"name\":\"invoice_date_year\",\"type\":\"integer\",\"nullable\":true,\"metadata\":{}},{\"name\":\"invoice_date_month\",\"type\":\"integer\",\"nullable\":true,\"metadata\":{}}]}",
+      "partition_by": [
+        "invoice_date"
+      ],
+      "partition_granularity": "month",
+      "partition_columns": [
+        {
+          "name": "invoice_date_year",
+          "source_column": "invoice_date",
+          "derived": true,
+          "type": "integer"
+        },
+        {
+          "name": "invoice_date_month",
+          "source_column": "invoice_date",
+          "derived": true,
+          "type": "integer"
+        }
+      ],
+      "partition_file_counts": {
+        "invoice_date_year=2025/invoice_date_month=1": 2,
+        "invoice_date_year=2025/invoice_date_month=10": 2,
+        "invoice_date_year=2025/invoice_date_month=11": 2,
+        "invoice_date_year=2025/invoice_date_month=12": 2,
+        "invoice_date_year=2025/invoice_date_month=2": 2,
+        "invoice_date_year=2025/invoice_date_month=3": 2,
+        "invoice_date_year=2025/invoice_date_month=4": 2,
+        "invoice_date_year=2025/invoice_date_month=5": 2,
+        "invoice_date_year=2025/invoice_date_month=6": 2,
+        "invoice_date_year=2025/invoice_date_month=7": 2,
+        "invoice_date_year=2025/invoice_date_month=8": 2,
+        "invoice_date_year=2025/invoice_date_month=9": 2,
+        "invoice_date_year=2026/invoice_date_month=1": 2,
+        "invoice_date_year=2026/invoice_date_month=10": 2,
+        "invoice_date_year=2026/invoice_date_month=11": 2,
+        "invoice_date_year=2026/invoice_date_month=12": 2,
+        "invoice_date_year=2026/invoice_date_month=2": 2,
+        "invoice_date_year=2026/invoice_date_month=3": 2,
+        "invoice_date_year=2026/invoice_date_month=4": 2,
+        "invoice_date_year=2026/invoice_date_month=5": 2,
+        "invoice_date_year=2026/invoice_date_month=6": 2,
+        "invoice_date_year=2026/invoice_date_month=7": 2,
+        "invoice_date_year=2026/invoice_date_month=8": 2,
+        "invoice_date_year=2026/invoice_date_month=9": 2
+      },
+      "fetch_size": 1000,
+      "max_records_per_file": 100000,
+      "requested_num_partitions": 2,
+      "effective_num_partitions": 2,
+      "jdbc_partition_column": "invoice_id",
+      "jdbc_lower_bound": "1",
+      "jdbc_upper_bound": "5000",
+      "parallel_read_note": "Readers may queue behind the available executor cores; bounds define strides, not a row filter.",
+      "extract_write_ms": 38772,
+      "verify_ms": 4962,
+      "spark_duration_ms": 55394,
+      "spark_application_id": "app-20261123235540-0000",
+      "manifest_key": "sqlserver/dbo/Invoice/e1eb3aff-65c2-470e-af44-08fe2a6f896d/manifest.json",
+      "bucket": "lake",
+      "catalog_table": "hive.runs.invoice_e1eb3aff",
+      "current_view": "hive.sqlserver_dbo.invoice",
+      "registration_ms": 16720,
+      "example_query": "SELECT * FROM hive.runs.invoice_e1eb3aff LIMIT 100"
+    }
+  },
+  "result": {
+    "version": 2,
+    "job_id": "e1eb3aff-65c2-470e-af44-08fe2a6f896d",
+    "prefix": "sqlserver/dbo/Invoice/e1eb3aff-65c2-470e-af44-08fe2a6f896d",
+    "source_id": "sqlserver",
+    "schema_name": "dbo",
+    "table_name": "Invoice",
+    "source_engine": "sqlserver",
+    "format": "parquet",
+    "compression": "snappy",
+    "row_count": 5000,
+    "file_count": 48,
+    "storage_bytes": 197634,
+    "schema_json": "{\"type\":\"struct\",\"fields\":[{\"name\":\"invoice_id\",\"type\":\"integer\",\"nullable\":true,\"metadata\":{\"isSigned\":true,\"scale\":0,\"isTimestampNTZ\":false,\"preferTimestampNanos\":false,\"jdbcClientType\":\"int\"}},{\"name\":\"customer_id\",\"type\":\"integer\",\"nullable\":true,\"metadata\":{\"isSigned\":true,\"scale\":0,\"isTimestampNTZ\":false,\"preferTimestampNanos\":false,\"jdbcClientType\":\"int\"}},{\"name\":\"invoice_date\",\"type\":\"date\",\"nullable\":true,\"metadata\":{\"isSigned\":false,\"scale\":0,\"isTimestampNTZ\":false,\"preferTimestampNanos\":false,\"jdbcClientType\":\"date\"}},{\"name\":\"amount\",\"type\":\"decimal(12,2)\",\"nullable\":true,\"metadata\":{\"isSigned\":true,\"scale\":2,\"isTimestampNTZ\":false,\"preferTimestampNanos\":false,\"jdbcClientType\":\"decimal\"}},{\"name\":\"status\",\"type\":\"string\",\"nullable\":true,\"metadata\":{\"isSigned\":false,\"scale\":0,\"__CHAR_VARCHAR_TYPE_STRING\":\"varchar(20)\",\"isTimestampNTZ\":false,\"preferTimestampNanos\":false,\"jdbcClientType\":\"varchar\"}},{\"name\":\"updated_at\",\"type\":\"timestamp\",\"nullable\":true,\"metadata\":{\"isSigned\":false,\"scale\":0,\"isTimestampNTZ\":false,\"preferTimestampNanos\":false,\"jdbcClientType\":\"datetime2\"}},{\"name\":\"invoice_date_year\",\"type\":\"integer\",\"nullable\":true,\"metadata\":{}},{\"name\":\"invoice_date_month\",\"type\":\"integer\",\"nullable\":true,\"metadata\":{}}]}",
+    "partition_by": [
+      "invoice_date"
+    ],
+    "partition_granularity": "month",
+    "partition_columns": [
+      {
+        "name": "invoice_date_year",
+        "source_column": "invoice_date",
+        "derived": true,
+        "type": "integer"
+      },
+      {
+        "name": "invoice_date_month",
+        "source_column": "invoice_date",
+        "derived": true,
+        "type": "integer"
+      }
+    ],
+    "partition_file_counts": {
+      "invoice_date_year=2025/invoice_date_month=1": 2,
+      "invoice_date_year=2025/invoice_date_month=10": 2,
+      "invoice_date_year=2025/invoice_date_month=11": 2,
+      "invoice_date_year=2025/invoice_date_month=12": 2,
+      "invoice_date_year=2025/invoice_date_month=2": 2,
+      "invoice_date_year=2025/invoice_date_month=3": 2,
+      "invoice_date_year=2025/invoice_date_month=4": 2,
+      "invoice_date_year=2025/invoice_date_month=5": 2,
+      "invoice_date_year=2025/invoice_date_month=6": 2,
+      "invoice_date_year=2025/invoice_date_month=7": 2,
+      "invoice_date_year=2025/invoice_date_month=8": 2,
+      "invoice_date_year=2025/invoice_date_month=9": 2,
+      "invoice_date_year=2026/invoice_date_month=1": 2,
+      "invoice_date_year=2026/invoice_date_month=10": 2,
+      "invoice_date_year=2026/invoice_date_month=11": 2,
+      "invoice_date_year=2026/invoice_date_month=12": 2,
+      "invoice_date_year=2026/invoice_date_month=2": 2,
+      "invoice_date_year=2026/invoice_date_month=3": 2,
+      "invoice_date_year=2026/invoice_date_month=4": 2,
+      "invoice_date_year=2026/invoice_date_month=5": 2,
+      "invoice_date_year=2026/invoice_date_month=6": 2,
+      "invoice_date_year=2026/invoice_date_month=7": 2,
+      "invoice_date_year=2026/invoice_date_month=8": 2,
+      "invoice_date_year=2026/invoice_date_month=9": 2
+    },
+    "fetch_size": 1000,
+    "max_records_per_file": 100000,
+    "requested_num_partitions": 2,
+    "effective_num_partitions": 2,
+    "jdbc_partition_column": "invoice_id",
+    "jdbc_lower_bound": "1",
+    "jdbc_upper_bound": "5000",
+    "parallel_read_note": "Readers may queue behind the available executor cores; bounds define strides, not a row filter.",
+    "extract_write_ms": 38772,
+    "verify_ms": 4962,
+    "spark_duration_ms": 55394,
+    "spark_application_id": "app-20261123235540-0000",
+    "manifest_key": "sqlserver/dbo/Invoice/e1eb3aff-65c2-470e-af44-08fe2a6f896d/manifest.json",
+    "bucket": "lake",
+    "catalog_table": "hive.runs.invoice_e1eb3aff",
+    "current_view": "hive.sqlserver_dbo.invoice",
+    "registration_ms": 16720,
+    "example_query": "SELECT * FROM hive.runs.invoice_e1eb3aff LIMIT 100"
+  },
+  "sql": {
+    "rows": [
+      [
+        5000,
+        "4892425.00"
+      ]
+    ],
+    "execution_ms": 1127,
+    "columns": [
+      {
+        "type": "bigint",
+        "name": "invoices"
+      },
+      {
+        "type": "varchar",
+        "name": "amount_sum"
+      }
+    ],
+    "row_count": 1,
+    "query_id": "20261123_235654_00007_xtfar",
+    "stats": {
+      "cpu_ms": 707,
+      "processed_rows": 5000,
+      "elapsed_ms": 794,
+      "processed_bytes": 201810,
+      "state": "FINISHED"
+    },
+    "truncated": false
+  },
+  "sql_text": "SELECT COUNT(*) AS invoices, CAST(SUM(amount) AS VARCHAR) AS amount_sum FROM hive.runs.invoice_e1eb3aff",
+  "status": "passed",
+  "completed_at": "2026-11-23T23:56:55.068Z"
+}

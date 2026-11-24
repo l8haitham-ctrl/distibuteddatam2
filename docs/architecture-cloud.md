@@ -4,11 +4,12 @@
 
 Angular, Spring Boot, SQL Server de test, PostgreSQL, Spark, MinIO et les outils de compilation sont
 conteneurises. L'API est sans etat, configurable par environnement et dispose
-de sondes de sante et d'un arret gracieux. Les images de production ne tournent
-pas en root. Le navigateur utilise le meme domaine pour l'interface et `/api`.
+de sondes de sante et d'un arret gracieux. Les images de production de l'API
+et du frontend ne tournent pas en root. Le navigateur utilise le meme domaine pour l'interface et `/api`.
 
 Une premiere ingestion Spark/Parquet avec jobs persistants est disponible en
-local. Le catalogue et Trino restent au backlog. Ce document
+local, avec catalogue Hive et acces SQL Trino maintenant implementes et testes.
+Les sources PostgreSQL et Redis/MinIO sont optionnelles. Ce document
 decrit la cible ; il ne signifie pas qu'un environnement cloud est deploye.
 
 ## Application actuellement livree
@@ -19,10 +20,14 @@ flowchart LR
     F -->|/api| B[Spring Boot]
     B -->|JDBC chiffre / compte lecteur| DB[(SQL Server)]
     B -->|SDK S3 / compte limite au bucket| M[(MinIO local)]
-    B --> PG[(PostgreSQL : jobs)]
+    B --> PG[(PostgreSQL : jobs et metastore)]
     B --> SM[Spark master]
     SM --> SW[Spark worker]
     DB --> SW --> M
+    B --> T[Trino]
+    T --> H[Hive Metastore]
+    H --> PG
+    T --> M
     S[Gestionnaire de secrets] -. configuration .-> B
 ```
 

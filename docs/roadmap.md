@@ -23,9 +23,9 @@ de `feature/hive-catalog-trino`, basee sur `feature/partitioning-csv`.
 | 6 | Catalogue technique | Enregistrer schemas, emplacements et partitions dans Hive Metastore/PostgreSQL | Implemente sur feature/hive-catalog-trino |
 | 7 | Acces SQL Trino | Lire les donnees deposees, verifier les jointures Customer/Invoice/Payment et les droits de lecture | Implemente sur feature/hive-catalog-trino |
 | 8 | Parcours Angular complet | Selectionner, lancer, suivre un job, consulter le resultat et executer une requete analytique via l'API | Implemente sur feature/angular-jobs-sql |
-| 9 | Qualite et glossaire | Verifier completude, types, cles et montants ; relier les definitions metier aux tables et colonnes | A faire plus tard |
+| 9 | Qualite et glossaire | Verifier completude, types, cles et montants ; relier les definitions metier aux tables et colonnes | Qualite implementee sur `feature/data-quality-report` : 92 controles passes ; glossaire differe |
 | 10 | Benchmarks | Comparer CSV/Parquet, partitions, compression et lots avec les memes donnees et requetes ; presenter des mesures reelles | Campagne locale 100k terminee sur `feature/reproducible-benchmarks` : 24 extractions, 216 requetes mesurees, rapport et preuves |
-| 11 | Preparation de livraison | Parcours complet reproductible, documentation, secrets et adaptation Azure/AWS | A faire |
+| 11 | Preparation de livraison | Parcours complet reproductible, documentation, secrets et adaptation Azure/AWS | Livraison locale validee sur `feature/release-readiness` : Docker neuf, UI et SQL ; cible cloud documentee, non deployee |
 
 La branche `feature/storage-jobs` utilise PostgreSQL pour l'historique et
 Spark pour l'ingestion, sans Spring Batch. Le catalogue Hive/Trino, les ecrans
@@ -83,7 +83,10 @@ La branche feature/angular-jobs-sql depend explicitement de
 feature/partition-candidates, qui expose les colonnes partitionnables validees
 sur SQL Server. La comparaison des performances est maintenant realisee
 sur 100 000 factures : voir [le rapport](benchmark-report.md).
-La suite principale est la preparation de livraison et la validation finale.
+La livraison locale et la validation finale sont terminees : voir
+[le rapport de validation](release-validation.md) et [le guide de livraison](delivery.md).
+La prochaine action est la revue des branches selon [le plan d'integration](integration-plan.md) ;
+la fusion attend une demande explicite.
 Les bonus restent exclus et le glossaire metier reste au backlog.
 
 L'adaptation visuelle du PDF est implementee sur `feature/wireframe-frontend`,

@@ -6,16 +6,20 @@ La stack retenue est **Angular + Java 21 / Spring Boot**, entierement conteneuri
 
 ## Etat des branches
 
-`master` integre maintenant les fonctionnalites jusqu'a
-`feature/job-api-documentation`, par avance rapide sans reecriture d'historique.
+La version complete de livraison est sur `feature/release-readiness`.
+`master` conserve le socle historique ; aucune fusion supplementaire n'est faite.
 Le prototype d'architecture live reste une experimentation locale non publiee.
 
 Services : Angular/Nginx, API Spring Boot, SQL Server avec BusinessDB,
 PostgreSQL pour les jobs et le metastore, Spark master/worker, MinIO, Hive
-Metastore et Trino. Cette branche `feature/hive-catalog-trino` depend de
-`feature/partitioning-csv` et ajoute l'enregistrement des tables et l'API SQL.
+Metastore et Trino. Les branches ajoutees depuis master apportent les formats,
+le catalogue SQL, l'interface complete, les plugins, la qualite et les benchmarks.
 Les lectures Parquet/CSV et les jointures sont verifiees. Aucune de ces nouvelles branches
-n'est fusionnee dans master. Voir [la feuille de route](docs/roadmap.md).
+n'est fusionnee dans master. Voir [la feuille de route](docs/roadmap.md),
+[le guide de livraison](docs/delivery.md), [la demonstration](docs/demo-guide.md)
+et [le plan d'integration](docs/integration-plan.md).
+Les preuves Docker, tests et parcours Angular figurent dans
+[la validation finale](docs/release-validation.md).
 
 | Usage | Endpoints |
 | --- | --- |
@@ -63,15 +67,17 @@ local n'est requis : la compilation et les tests unitaires sont dans le Dockerfi
 Pour une premiere installation :
 
 ```powershell
-if (-not (Test-Path -LiteralPath .env)) { Copy-Item .env.example .env }
+powershell -NoProfile -File scripts/setup-env.ps1
 ```
 
-Definir des mots de passe forts dans `.env` **avant la premiere initialisation**.
+Le script genere les secrets d'une nouvelle installation sans les afficher.
+Un `.env` existant est conserve. Pour une configuration manuelle, definir
+les mots de passe dans `.env` **avant la premiere initialisation**.
 Si la base existe deja, conserver `MSSQL_SA_PASSWORD` : changer le fichier ne
 change pas le mot de passe enregistre dans le volume SQL Server.
 
 ```powershell
-docker compose up -d --build
+docker compose up -d --build --wait --wait-timeout 300
 docker compose ps -a
 ```
 

@@ -1,0 +1,57 @@
+[
+  {
+    "Service": "backend",
+    "State": "running",
+    "Health": "healthy"
+  },
+  {
+    "Service": "frontend",
+    "State": "running",
+    "Health": "healthy"
+  },
+  {
+    "Service": "hive-metastore",
+    "State": "running",
+    "Health": "healthy"
+  },
+  {
+    "Service": "metadata",
+    "State": "running",
+    "Health": "healthy"
+  },
+  {
+    "Service": "minio",
+    "State": "running",
+    "Health": "healthy"
+  },
+  {
+    "Service": "postgres-source",
+    "State": "running",
+    "Health": "healthy"
+  },
+  {
+    "Service": "redis-source",
+    "State": "running",
+    "Health": "healthy"
+  },
+  {
+    "Service": "spark-master",
+    "State": "running",
+    "Health": "healthy"
+  },
+  {
+    "Service": "spark-worker",
+    "State": "running",
+    "Health": "healthy"
+  },
+  {
+    "Service": "sqlserver",
+    "State": "running",
+    "Health": "healthy"
+  },
+  {
+    "Service": "trino",
+    "State": "running",
+    "Health": "healthy"
+  }
+]

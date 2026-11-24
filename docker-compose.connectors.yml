@@ -22,7 +22,7 @@ services:
       - postgres-source-data:/var/lib/postgresql/data
       - postgres-source-tls:/var/lib/postgresql/tls
     healthcheck:
-      test: ["CMD-SHELL", "test -f /var/lib/postgresql/data/source-ready && pg_isready -U postgres_source_admin -d business"]
+      test: ["CMD-SHELL", "test -f /var/lib/postgresql/data/source-ready && pg_isready -h 127.0.0.1 -U postgres_source_admin -d business"]
       interval: 5s
       timeout: 5s
       retries: 20

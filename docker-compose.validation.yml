@@ -1,0 +1,14 @@
+services:
+  validation:
+    profiles: [tools]
+    image: distributed-data-validation:local
+    build:
+      context: .
+      dockerfile: validation/Dockerfile
+    environment:
+      CHECK_API_URL: http://backend:8000
+      CHECK_FRONTEND_URL: http://frontend:8080
+      CHECK_SPARK_URL: http://spark-master:8080/json/
+    volumes:
+      - ./validation/results:/reports
+    mem_limit: 128m

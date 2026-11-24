@@ -19,7 +19,7 @@ services:
       - metadata-data:/var/lib/postgresql/data
       - ./infra/postgres:/docker-entrypoint-initdb.d:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U atlas_admin -d atlas"]
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U atlas_admin -d atlas"]
       interval: 5s
       timeout: 5s
       retries: 15
@@ -39,7 +39,7 @@ services:
     ports:
       - "127.0.0.1:${SPARK_UI_PORT:-8088}:8080"
     healthcheck:
-      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://localhost:8080/json/"]
+      test: ["CMD-SHELL", "wget -q -O - http://localhost:8080/json/ | grep -E '\"status\"[[:space:]]*:[[:space:]]*\"ALIVE\"' > /dev/null"]
       interval: 5s
       timeout: 5s
       retries: 15

@@ -1,0 +1,79 @@
+{
+  "main_restart_exit": 0,
+  "main_jobs_before": 43,
+  "disposable_volumes": [
+    "atlas-release-check-20261123_metadata-data",
+    "atlas-release-check-20261123_minio-data",
+    "atlas-release-check-20261123_spark-recovery",
+    "atlas-release-check-20261123_sqlserver-data"
+  ],
+  "fresh_containers": [
+    {
+      "Service": "backend",
+      "State": "running",
+      "Health": "healthy"
+    },
+    {
+      "Service": "frontend",
+      "State": "running",
+      "Health": "healthy"
+    },
+    {
+      "Service": "hive-metastore",
+      "State": "running",
+      "Health": "healthy"
+    },
+    {
+      "Service": "metadata",
+      "State": "running",
+      "Health": "healthy"
+    },
+    {
+      "Service": "minio",
+      "State": "running",
+      "Health": "healthy"
+    },
+    {
+      "Service": "spark-master",
+      "State": "running",
+      "Health": "healthy"
+    },
+    {
+      "Service": "spark-worker",
+      "State": "running",
+      "Health": "healthy"
+    },
+    {
+      "Service": "sqlserver",
+      "State": "running",
+      "Health": "healthy"
+    },
+    {
+      "Service": "trino",
+      "State": "running",
+      "Health": "healthy"
+    }
+  ],
+  "main_history_preserved": true,
+  "status": "passed",
+  "main_env_preserved": true,
+  "started_at": "2026-11-23T23:53:05.7347124Z",
+  "main_jobs_after": 43,
+  "quality_after_restore": "passed",
+  "new_project_verified": true,
+  "main_volumes_before": [
+    "distributed-data_frontend-modules",
+    "distributed-data_maven-cache",
+    "distributed-data_metadata-data",
+    "distributed-data_minio-data",
+    "distributed-data_postgres-source-data",
+    "distributed-data_postgres-source-tls",
+    "distributed-data_spark-recovery",
+    "distributed-data_sqlserver-data"
+  ],
+  "fresh_status": "passed",
+  "completed_at": "2026-11-23T23:59:27.2913199Z",
+  "project": "atlas-release-check-20261123",
+  "disposable_volumes_removed": true,
+  "main_volumes_preserved": true
+}

@@ -1,0 +1,25 @@
+{
+  "main_volumes_before": [
+    "distributed-data_frontend-modules",
+    "distributed-data_maven-cache",
+    "distributed-data_metadata-data",
+    "distributed-data_minio-data",
+    "distributed-data_postgres-source-data",
+    "distributed-data_postgres-source-tls",
+    "distributed-data_spark-recovery",
+    "distributed-data_sqlserver-data"
+  ],
+  "disposable_volumes_removed": true,
+  "project": "atlas-release-check-20261123",
+  "main_restart_exit": 0,
+  "new_project_verified": true,
+  "disposable_volumes": [
+    "atlas-release-check-20261123_metadata-data",
+    "atlas-release-check-20261123_minio-data",
+    "atlas-release-check-20261123_spark-recovery",
+    "atlas-release-check-20261123_sqlserver-data"
+  ],
+  "started_at": "2026-11-23T23:48:02.9026567Z",
+  "error": "Fresh stack startup failed",
+  "main_jobs_before": 43
+}

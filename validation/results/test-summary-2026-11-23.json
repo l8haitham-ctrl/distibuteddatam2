@@ -1,0 +1,31 @@
+{
+  "application_commit": "9e58927",
+  "backend_initial": {
+    "tests": 84,
+    "skipped": 0,
+    "errors": 0,
+    "failures": 1
+  },
+  "backend_followup": {
+    "skipped": 0,
+    "failures": 0,
+    "tests": 1,
+    "passed": true,
+    "errors": 0,
+    "test": "JobIntegrationTests.realSparkWritesReadableParquetAndManifest"
+  },
+  "frontend": {
+    "tests": 36,
+    "passed": true,
+    "files": 10
+  },
+  "quality": {
+    "failed": 0,
+    "checks": 92
+  },
+  "initial_spark_issue": {
+    "driver": "driver-20261123233431-0030",
+    "cause": "SQL Server TLS handshake read timeout during concurrent frontend test load",
+    "followup": "Same test passed in isolation; no automatic job retry added"
+  }
+}
