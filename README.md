@@ -7,11 +7,13 @@ La stack retenue est **Angular + Java 21 / Spring Boot**, entierement conteneuri
 ## Etat des branches
 
 La version complete de livraison est sur `feature/release-readiness`.
+L'extension backend du glossaire est sur `feature/business-glossary`, basee
+sur cette livraison : voir [le guide du glossaire](docs/business-glossary.md).
 `master` conserve le socle historique ; aucune fusion supplementaire n'est faite.
 Le prototype d'architecture live reste une experimentation locale non publiee.
 
 Services : Angular/Nginx, API Spring Boot, SQL Server avec BusinessDB,
-PostgreSQL pour les jobs et le metastore, Spark master/worker, MinIO, Hive
+PostgreSQL pour les jobs, le glossaire et le metastore, Spark master/worker, MinIO, Hive
 Metastore et Trino. Les branches ajoutees depuis master apportent les formats,
 le catalogue SQL, l'interface complete, les plugins, la qualite et les benchmarks.
 Les lectures Parquet/CSV et les jointures sont verifiees. Aucune de ces nouvelles branches
@@ -29,6 +31,7 @@ Les preuves Docker, tests et parcours Angular figurent dans
 | Stockage | `GET /storage/status` |
 | Catalogue / SQL | `GET /catalog/tables`, `POST /sql/query` |
 | Qualite metier | `POST /quality/reports` avec les trois UUID Customer/Invoice/Payment |
+| Glossaire metier | `GET/POST /glossary/terms`, `GET/PUT /glossary/terms/{id}`, `POST /glossary/terms/{id}/links`, `GET /glossary/links`, `DELETE /glossary/terms/{id}/links/{linkId}` |
 | Jobs Spark | `POST /storage/jobs`, `GET /storage/jobs`, `GET /storage/jobs/{id}`, `GET /storage/jobs/{id}/result` |
 
 Un job cree renvoie 202 et ecrit une extraction Parquet ou CSV dans MinIO. Son resultat

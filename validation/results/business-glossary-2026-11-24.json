@@ -1,0 +1,40 @@
+{
+  "date": "2026-11-24",
+  "branch": "feature/business-glossary",
+  "base": "a3e4b394403eea08bc1b8304954ca693922c4d70",
+  "targeted_tests": {
+    "errors": 0,
+    "tests": 15,
+    "skipped": 0,
+    "glossary_integration": 4,
+    "failures": 0,
+    "postgresql_link_verified": true,
+    "glossary_unit": 4,
+    "sqlserver_connection": 2,
+    "sqlserver_exploration": 5
+  },
+  "docker_build": {
+    "status": "passed",
+    "integration_skipped": 44,
+    "passed": 46,
+    "tests_discovered": 90
+  },
+  "deployed_api": {
+    "swagger_paths": [
+      "/glossary/terms/{id}",
+      "/glossary/terms",
+      "/glossary/terms/{id}/links",
+      "/glossary/links",
+      "/glossary/terms/{id}/links/{linkId}"
+    ],
+    "reverse_lookup_status": 200,
+    "status": 200,
+    "frontend_proxy_status": 200
+  },
+  "existing_jobs": {
+    "before": 44,
+    "after": 44,
+    "preserved": true
+  },
+  "frontend_glossary": "not implemented in this feature"
+}

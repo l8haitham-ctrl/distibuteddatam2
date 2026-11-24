@@ -23,7 +23,7 @@ de `feature/hive-catalog-trino`, basee sur `feature/partitioning-csv`.
 | 6 | Catalogue technique | Enregistrer schemas, emplacements et partitions dans Hive Metastore/PostgreSQL | Implemente sur feature/hive-catalog-trino |
 | 7 | Acces SQL Trino | Lire les donnees deposees, verifier les jointures Customer/Invoice/Payment et les droits de lecture | Implemente sur feature/hive-catalog-trino |
 | 8 | Parcours Angular complet | Selectionner, lancer, suivre un job, consulter le resultat et executer une requete analytique via l'API | Implemente sur feature/angular-jobs-sql |
-| 9 | Qualite et glossaire | Verifier completude, types, cles et montants ; relier les definitions metier aux tables et colonnes | Qualite implementee sur `feature/data-quality-report` : 92 controles passes ; glossaire differe |
+| 9 | Qualite et glossaire | Verifier completude, types, cles et montants ; relier les definitions metier aux tables et colonnes | Qualite implementee ; backend du glossaire sur `feature/business-glossary`, interface Angular a suivre |
 | 10 | Benchmarks | Comparer CSV/Parquet, partitions, compression et lots avec les memes donnees et requetes ; presenter des mesures reelles | Campagne locale 100k terminee sur `feature/reproducible-benchmarks` : 24 extractions, 216 requetes mesurees, rapport et preuves |
 | 11 | Preparation de livraison | Parcours complet reproductible, documentation, secrets et adaptation Azure/AWS | Livraison locale validee sur `feature/release-readiness` : Docker neuf, UI et SQL ; cible cloud documentee, non deployee |
 
@@ -45,7 +45,15 @@ Angular -> API Spring Boot -> PostgreSQL (jobs) -> Spark -> SQL Server (lots)
 Le catalogue decrit les donnees ; Trino lit les fichiers depuis MinIO en
 consultant ce catalogue. Le depot de fichiers seul ne cree pas une table SQL.
 
-## Glossaire metier (demande utilisateur, a implementer plus tard)
+## Glossaire metier (implementation demandee)
+
+Le backend est implemente sur `feature/business-glossary`, base
+`feature/release-readiness` : termes persistants PostgreSQL, recherche,
+statuts, regles de calcul textuelles et liens verifies vers tables/colonnes
+des sources configurees. Voir [le guide](business-glossary.md).
+L'interface Angular et la navigation depuis l'explorateur restent a developper.
+La liste suivante conserve les objectifs restants, dont synonymes et validation
+metier, au-dela de cette premiere API.
 
 - Definir des termes : chiffre d'affaires, facture impayee, paiement partiel, client actif.
 - Relier chaque terme a une ou plusieurs tables et colonnes, avec le schema et
@@ -74,8 +82,8 @@ relance des traitements en echec et comparaison de tables Iceberg.
 
 `feature/hive-catalog-trino`, base `feature/partitioning-csv`, ajoute les API de
 catalogue/SQL et le statut REGISTERING, avec tests de lecture et de droits. Voir [catalogue et SQL](catalog-trino.md).
-Le wireframe fourni sert de reference au parcours Angular ; le glossaire
-metier et ses liens vers les tables/colonnes restent au backlog.
+Le wireframe fourni sert de reference au parcours Angular ; l'interface du
+glossaire metier et la navigation depuis les tables/colonnes restent a developper.
 
 ## Prochaine etape
 
@@ -87,7 +95,7 @@ La livraison locale et la validation finale sont terminees : voir
 [le rapport de validation](release-validation.md) et [le guide de livraison](delivery.md).
 La prochaine action est la revue des branches selon [le plan d'integration](integration-plan.md) ;
 la fusion attend une demande explicite.
-Les bonus restent exclus et le glossaire metier reste au backlog.
+Les bonus restent exclus ; l'interface du glossaire suit sa premiere feature backend.
 
 L'adaptation visuelle du PDF est implementee sur `feature/wireframe-frontend`,
 base `feature/angular-jobs-sql` : Data Sources, formulaire pleine page,
@@ -110,7 +118,7 @@ Un test analytique optionnel sur `feature/redis-analytics` ajoute un catalogue
 Redis natif a Trino et une jointure avec les factures Parquet de MinIO. Il
 ne remplace pas les sources relationnelles et ne fournit pas d'ingestion Spark
 Redis. Voir [le guide de test](redis-analytics.md). La campagne locale de benchmarks
-est terminee ; le glossaire metier reste au backlog.
+est terminee ; le backend du glossaire est ajoute separement, son interface reste a suivre.
 
 `feature/native-source-connections` puis `feature/native-source-interface`
 ajoutent la connexion/exploration native Redis et MinIO et leur formulaire

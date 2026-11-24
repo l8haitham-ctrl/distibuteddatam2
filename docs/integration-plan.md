@@ -23,6 +23,11 @@ La branche par defaut n'est pas modifiee par cette preparation.
 | feature/reproducible-benchmarks | feature/native-source-interface |
 | feature/data-quality-report | feature/reproducible-benchmarks |
 | feature/release-readiness | feature/data-quality-report |
+| feature/business-glossary | feature/release-readiness |
+
+L'extension business-glossary est posterieure a la validation de livraison :
+son backend peut etre revu separement, voir [le guide du glossaire](business-glossary.md).
+Elle n'ajoute pas encore d'ecran Angular au parcours valide precedemment.
 
 Chaque branche contient ses dependances. Il ne faut pas cherry-pick des
 fonctionnalites dans un ordre arbitraire ni rejouer leurs commits deja inclus.
