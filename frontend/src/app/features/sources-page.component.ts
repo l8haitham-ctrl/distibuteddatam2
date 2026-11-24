@@ -16,9 +16,7 @@ export class SourcesPageComponent {
   date(value:string|null){return value?new Intl.DateTimeFormat('fr-FR',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}).format(new Date(value)):'Jamais';}
   explore(source:SourceEntry){
     if(this.store.mockup){void this.router.navigate(['/explorer'],{queryParams:{maquette:1}});return;}
-    const explorer=this.injector.get(ExplorerStore);
-    if(source.temporary&&source.exploration)explorer.apply(source,source.exploration);
-    else explorer.loadDefault(source.id);
-    void this.router.navigate(['/explorer']);
+    if(source.temporary&&source.exploration){this.injector.get(ExplorerStore).apply(source,source.exploration);void this.router.navigate(['/explorer']);}
+    else void this.router.navigate(['/explorer'],{queryParams:{source_id:source.id}});
   }
 }

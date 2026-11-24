@@ -88,6 +88,10 @@ etend l'application avec une page dediee et la navigation depuis les tables/colo
 
 ## Prochaine etape
 
+Le choix explicite de la source est ajoute sur `feature/explicit-source-selection`,
+base `feature/business-glossary-ui`. L'explorateur ne se connecte plus a la
+premiere source a son ouverture ; voir [le parcours](source-selection.md).
+
 La branche feature/angular-jobs-sql depend explicitement de
 feature/partition-candidates, qui expose les colonnes partitionnables validees
 sur SQL Server. La comparaison des performances est maintenant realisee

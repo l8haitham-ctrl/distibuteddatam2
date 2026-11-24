@@ -25,6 +25,7 @@ La branche par defaut n'est pas modifiee par cette preparation.
 | feature/release-readiness | feature/data-quality-report |
 | feature/business-glossary | feature/release-readiness |
 | feature/business-glossary-ui | feature/business-glossary |
+| feature/explicit-source-selection | feature/business-glossary-ui |
 
 L'extension business-glossary est posterieure a la validation de livraison :
 son backend peut etre revu separement, voir [le guide du glossaire](business-glossary.md).

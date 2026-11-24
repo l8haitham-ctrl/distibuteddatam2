@@ -11,6 +11,8 @@ L'extension backend du glossaire est sur `feature/business-glossary`, basee
 sur cette livraison : voir [le guide du glossaire](docs/business-glossary.md).
 Son interface et la navigation avec l'explorateur sont sur
 `feature/business-glossary-ui` : [guide d'utilisation](docs/business-glossary-ui.md).
+La branche `feature/explicit-source-selection` attend le choix de l'utilisateur
+avant de connecter une source : [fonctionnement](docs/source-selection.md).
 `master` conserve le socle historique ; aucune fusion supplementaire n'est faite.
 Le prototype d'architecture live reste une experimentation locale non publiee.
 

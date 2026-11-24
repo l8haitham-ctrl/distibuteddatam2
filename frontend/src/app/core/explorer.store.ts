@@ -24,6 +24,7 @@ export class ExplorerStore {
   private loader?: Subscription;
   private selections = new Subject<TableRef|null>();
   private requestedTarget?:TableRef;
+  private requestedSourceId?:string;
 
   constructor() {
     this.selections.pipe(switchMap(table => {
@@ -38,18 +39,21 @@ export class ExplorerStore {
     if (this.mockup) {
       this.source.set(mockSource); this.tables.set(mockExploration.tables); this.cache = mockExploration;
       this.select(mockExploration.tables[1]);
-    } else this.loadDefault();
+    }
   }
   select(table: TableRef|null) { this.selected.set(table); this.selections.next(table); }
-  retryDetails() { if(this.selected())this.select(this.selected());else this.loadDefault(this.source()?.id,this.requestedTarget); }
-  loadDefault(sourceId?: string, target?:TableRef) {
+  retryDetails() { if(this.selected())this.select(this.selected());else this.reload(); }
+  reload() { const id=this.source()?.id??this.requestedSourceId;if(id)this.loadSource(id,this.selected()??this.requestedTarget); }
+  loadSource(sourceId: string, target?:TableRef) {
     if (this.mockup) return;
+    if(!sourceId)return;
+    this.requestedSourceId=sourceId;
     this.requestedTarget=target;
     this.loader?.unsubscribe(); this.select(null); this.loading.set(true); this.error.set('');
     this.cache = null; this.tables.set([]); this.source.set(null); this.external.set(false);
     this.loader = this.api.sources().pipe(switchMap(sources => {
       if (!sources.length) { this.error.set('Aucune source configurée. Ajoutez une connexion.'); return EMPTY; }
-      const source = (sourceId ? sources.find(s=>s.id===sourceId) : sources[0]);
+      const source = sources.find(s=>s.id===sourceId);
       if(!source){this.error.set('Source introuvable. Sélectionnez une source disponible.');return EMPTY;}
       return this.api.testSource(source.id).pipe(switchMap(() => this.api.tables(source.id)), tap(result => {
         this.source.set(source); this.tables.set(result.tables);
