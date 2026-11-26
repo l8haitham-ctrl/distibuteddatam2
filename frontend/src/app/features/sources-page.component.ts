@@ -1,4 +1,5 @@
-import { Component, Injector, inject } from '@angular/core';
+import { Component, Injector, inject, signal } from '@angular/core';
+import { SourceTestDialogComponent } from './connection-test/source-test-dialog.component';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { SourcesStore, SourceEntry, SourceState } from '../core/sources.store';
@@ -6,10 +7,12 @@ import { ExplorerStore } from '../core/explorer.store';
 import { ConnectorCatalog } from '../core/connector-catalog';
 import { IconComponent } from '../shared/icon.component';
 
-@Component({selector:'app-sources-page',imports:[FormsModule,RouterLink,IconComponent],templateUrl:'./sources-page.component.html'})
+@Component({selector:'app-sources-page',imports:[FormsModule,RouterLink,IconComponent,SourceTestDialogComponent],templateUrl:'./sources-page.component.html'})
 export class SourcesPageComponent {
   readonly store=inject(SourcesStore);private router=inject(Router);private injector=inject(Injector);
   readonly connectors=inject(ConnectorCatalog);
+  selectedTest=signal<SourceEntry|null>(null);
+  test(source:SourceEntry){this.selectedTest.set(source);this.store.test(source);}
   filters=[{id:'all',label:'Toutes'},{id:'connected',label:'Connectées'},{id:'failed',label:'En échec'},{id:'untested',label:'Non testées'}] as const;
   constructor(){this.store.load();this.connectors.load();}
   label(state:SourceState){return {connected:'Connectée',failed:'Échec',testing:'Test en cours',untested:'Non testée'}[state];}

@@ -1,0 +1,50 @@
+{
+  "date": "2026-11-26",
+  "branch": "feature/source-test-progress",
+  "base": "f09ff01ec75d100e236b6c65f6338e9c8cb58186",
+  "backend_targeted": {
+    "engines": [
+      "sqlserver",
+      "postgresql"
+    ],
+    "failures": 0,
+    "passed": 18,
+    "skipped": 0
+  },
+  "backend_image": {
+    "discovered": 101,
+    "failures": 0,
+    "passed": 55,
+    "skipped": 46
+  },
+  "angular": {
+    "timeouts_unchanged": true,
+    "max_workers": 2,
+    "files": 13,
+    "passed": 56
+  },
+  "browser": {
+    "steps_ms": {
+      "jdbc": 2126,
+      "dns": 5,
+      "validation": 284,
+      "tcp": 4
+    },
+    "screenshot": "docs/evidence/source-test-sqlserver.jpg",
+    "source": "sqlserver",
+    "duration_ms": 2426,
+    "final_state": "passed",
+    "intermediate_observed": [
+      "dns passed",
+      "tcp passed",
+      "jdbc running",
+      "validation waiting"
+    ]
+  },
+  "jobs": {
+    "before": 44,
+    "after": 44,
+    "existing_preserved": true
+  },
+  "initial_test_issue": "Parallel DOM/JIT test rendering exceeded the existing 5s deadline. Limiting workers to 2 resolved contention; the final complete suite passed with unchanged assertions and timeouts."
+}

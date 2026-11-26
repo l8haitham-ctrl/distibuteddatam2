@@ -16,6 +16,8 @@ avant de connecter une source : [fonctionnement](docs/source-selection.md).
 La branche `feature/platform-authentication` ajoute le login et protege les API :
 [compte local, sessions et tests](docs/authentication.md). Sur une installation
 existante, executer `scripts/setup-login.ps1` avant le prochain Compose.
+La branche `feature/source-test-progress` ajoute le suivi en direct du bouton
+Tester dans la liste : [etapes du diagnostic](docs/connection-test-progress.md).
 `master` conserve le socle historique ; aucune fusion supplementaire n'est faite.
 Le prototype d'architecture live reste une experimentation locale non publiee.
 

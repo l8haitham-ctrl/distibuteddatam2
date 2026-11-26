@@ -88,6 +88,10 @@ etend l'application avec une page dediee et la navigation depuis les tables/colo
 
 ## Prochaine etape
 
+Le bouton Tester de la liste des sources affiche les etapes reelles et leur
+progression sur `feature/source-test-progress`, base `feature/platform-authentication`.
+Voir [le diagnostic en direct](connection-test-progress.md).
+
 L'acces a la plateforme est protege sur `feature/platform-authentication`,
 base `feature/explicit-source-selection` : login local, session serveur,
 deconnexion, protection des routes Angular et des API. Voir [le guide](authentication.md).

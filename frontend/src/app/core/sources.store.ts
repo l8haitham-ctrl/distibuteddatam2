@@ -1,5 +1,6 @@
 import { DestroyRef, Injectable, computed, inject, signal } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { finalize, Subscription } from 'rxjs';
+import { diagnosticSteps, SourceTestApi, SourceTestRun } from '../features/connection-test/source-test.api';
 import { ApiService, errorMessage } from './api.service';
 import { Exploration, Source } from '../../types';
 
@@ -20,6 +21,8 @@ export const illustrativeSources: SourceEntry[] = [
 @Injectable({providedIn:'root'})
 export class SourcesStore {
   private api=inject(ApiService);
+  private diagnostics=inject(SourceTestApi);
+  testRuns=signal<Record<string,SourceTestRun>>({});
   readonly mockup=new URLSearchParams(location.search).has('maquette');
   rows=signal<SourceEntry[]>([]); loading=signal(false); error=signal('');
   search=signal(''); filter=signal<'all'|'connected'|'failed'|'untested'>('all');
@@ -40,9 +43,15 @@ export class SourcesStore {
   test(source:SourceEntry){
     if(source.temporary||this.mockup||this.testing.has(source.id))return;
     this.update(source.id,{state:'testing',error:undefined});
-    const request=this.api.testSource(source.id).subscribe({next:()=>{this.update(source.id,{state:'connected',testedAt:new Date().toISOString()});this.testing.delete(source.id);},error:e=>{this.update(source.id,{state:'failed',testedAt:new Date().toISOString(),error:errorMessage(e)});this.testing.delete(source.id);}});
-    this.testing.set(source.id,request);this.pending.add(request);
+    const steps=Object.fromEntries(diagnosticSteps.map(step=>[step,{state:'waiting',message:'',duration_ms:0}])) as SourceTestRun['steps'];
+    this.testRuns.update(runs=>({...runs,[source.id]:{state:'running',steps,message:'Test de connexion en cours…',duration_ms:null}}));
+    const holder=new Subscription();this.testing.set(source.id,holder);this.pending.add(holder);
+    holder.add(this.diagnostics.progress(source.id).pipe(finalize(()=>this.testing.delete(source.id))).subscribe({next:event=>{
+      this.testRuns.update(runs=>{const run=runs[source.id];return {...runs,[source.id]:event.step==='complete'?{...run,state:event.state==='passed'?'passed':'failed',message:event.message,duration_ms:event.duration_ms}:{...run,steps:{...run.steps,[event.step]:{state:event.state,message:event.message,duration_ms:event.duration_ms}}}};});
+      if(event.step==='complete')this.update(source.id,{state:event.state==='passed'?'connected':'failed',testedAt:new Date().toISOString(),error:event.state==='passed'?undefined:event.message});
+    },error:e=>this.interrupted(source.id,errorMessage(e)),complete:()=>{if(this.testRuns()[source.id]?.state==='running')this.interrupted(source.id,'Le suivi a été interrompu : résultat non confirmé.');}}));
   }
+  private interrupted(id:string,message:string){this.testRuns.update(runs=>{const run=runs[id];return {...runs,[id]:{...run,state:'failed',message,steps:Object.fromEntries(Object.entries(run.steps).map(([key,step])=>[key,step.state==='running'?{...step,state:'unknown'}:step])) as SourceTestRun['steps']}};});this.update(id,{state:'failed',testedAt:new Date().toISOString(),error:message});}
   addSession(source:Source,name:string,exploration:Exploration){
     // Keep schema metadata in memory only. Credentials never enter this store.
     const safe:SourceEntry={id:source.id,engine:source.engine,host:source.host,port:source.port,database:source.database,username:source.username,name:name.trim(),state:'connected',testedAt:new Date().toISOString(),temporary:true,exploration};
