@@ -6,6 +6,7 @@ import com.atlas.explorer.features.jobs.connector.JobRepository;
 import com.atlas.explorer.features.jobs.connector.PartitionCardinality;
 import com.atlas.explorer.features.jobs.dto.*;
 import com.atlas.explorer.shared.domain.ExplorerException;
+import com.atlas.explorer.features.nativeingestion.connector.NativeIngestionSources;
 import java.util.*;
 
 public class JobService {
@@ -13,18 +14,24 @@ public class JobService {
     private final SourceService sources;
     private final ExplorationService exploration;
     private final PartitionCardinality cardinality;
+    private final NativeIngestionSources nativeSources;
     public JobService(JobRepository repository,SourceService sources,ExplorationService exploration,PartitionCardinality cardinality) {
+        this(repository,sources,exploration,cardinality,null);
+    }
+    public JobService(JobRepository repository,SourceService sources,ExplorationService exploration,PartitionCardinality cardinality,NativeIngestionSources nativeSources) {
         this.repository=repository;this.sources=sources;this.exploration=exploration;this.cardinality=cardinality;
+        this.nativeSources=nativeSources;
     }
     public StorageJob create(CreateJobRequest request) {
-        if(request.schema()==null)request=new CreateJobRequest(request.sourceId(),sources.defaultSchema(request.sourceId()),request.table(),request.format(),request.partitionBy(),request.fetchSize(),request.compression(),request.partitionGranularity(),request.numPartitions());
+        if(request.schema()==null)request=new CreateJobRequest(request.sourceId(),defaultSchema(request.sourceId()),request.table(),request.format(),request.partitionBy(),request.fetchSize(),request.compression(),request.partitionGranularity(),request.numPartitions());
         validate(request);
         return repository.create(request);
     }
     public List<Map<String,Object>> partitionCandidates(String sourceId,String schema,String table,String granularity) {
-        if(schema==null)schema=sources.defaultSchema(sourceId);
+        if(schema==null)schema=defaultSchema(sourceId);
         if(!schema.matches("[A-Za-z_][A-Za-z0-9_]{0,127}") || !table.matches("[A-Za-z_][A-Za-z0-9_]{0,127}")
                 || !Set.of("month","year","day").contains(granularity))throw new InvalidJobException("partition_by","Schema, table ou granularite invalide.");
+        if(nativeSource(sourceId))return nativeDescribe(sourceId,schema,table).fields().stream().map(field->Map.<String,Object>of("name",field.name(),"data_type",field.type(),"eligible",false,"reason","Cette premiere extraction native ne partitionne pas les fichiers.")).toList();
         var metadata=exploration.describe(sources.get(sourceId),schema,table);
         @SuppressWarnings("unchecked") var columns=(List<Map<String,Object>>)metadata.get("columns");
         var result=new ArrayList<Map<String,Object>>();
@@ -43,6 +50,11 @@ public class JobService {
         var allowed=request.format().equals("csv")?Set.of("gzip","uncompressed"):Set.of("snappy","zstd","uncompressed");
         if(!allowed.contains(request.compression()))throw new InvalidJobException("compression",
                 "Combinaison invalide : parquet accepte snappy, zstd, uncompressed ; csv accepte gzip, uncompressed.");
+        if(nativeSource(request.sourceId())) {
+            nativeDescribe(request.sourceId(),request.schema(),request.table());
+            if(!request.partitionBy().isEmpty())throw new InvalidJobException("partition_by","Cette premiere extraction native ne partitionne pas les fichiers.");
+            return;
+        }
         var source=sources.get(request.sourceId());
         var metadata=exploration.describe(source,request.schema(),request.table());
         @SuppressWarnings("unchecked") var columns=(List<Map<String,Object>>)metadata.get("columns");
@@ -66,6 +78,11 @@ public class JobService {
                     throw new InvalidJobException("partition_by","Une colonne derivee entre en conflit avec une colonne existante.");
             }
         }
+    }
+    private boolean nativeSource(String id){return nativeSources!=null&&nativeSources.supports(id);}
+    private String defaultSchema(String id){return nativeSource(id)?nativeSources.defaultSchema(id):sources.defaultSchema(id);}
+    private com.atlas.explorer.features.nativeingestion.dto.NativeDataset nativeDescribe(String id,String schema,String table){
+        try{return nativeSources.describe(id,schema,table);}catch(IllegalArgumentException e){throw new InvalidJobException("table","Source, table ou type natif incompatible avec l'extraction. Verifiez la structure et les droits du compte.");}
     }
     public StorageJob get(UUID id) { return repository.get(id); }
     public List<StorageJob> list() { return repository.list(); }

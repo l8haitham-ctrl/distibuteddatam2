@@ -1,8 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { ActivatedRoute, provideRouter } from '@angular/router';
-import { afterEach,beforeEach,describe,expect,it } from 'vitest';
+import { ActivatedRoute, Router, provideRouter } from '@angular/router';
+import { afterEach,beforeEach,describe,expect,it,vi } from 'vitest';
 import { NativeSourcesComponent } from './native-sources.component';
 import { NativeSourcesStore } from '../core/native-sources.store';
 
@@ -12,7 +12,7 @@ describe('Native source connections',()=>{
   const profile={id:'redis-demo',engine:'redis',host:'redis-source',port:6379,namespace:'0',username:'atlas_reader',prefix:'analytics:',tls:false};
   const result={engine:'redis',namespace:'0',objects:[{name:'analytics:1',type:'hash',fields:['customer_id']}],truncated:false,limit:100,transport:'plain',note:'Echantillon'};
   beforeEach(()=>{TestBed.configureTestingModule({imports:[NativeSourcesComponent],providers:[provideHttpClient(),provideHttpClientTesting(),provideRouter([])]});http=TestBed.inject(HttpTestingController);});
-  afterEach(()=>{TestBed.resetTestingModule();http.verify();});
+  afterEach(()=>{TestBed.resetTestingModule();http.verify();vi.restoreAllMocks();});
   async function setup(){
     const fixture=TestBed.createComponent(NativeSourcesComponent);
     http.expectOne('/api/native/connectors').flush(connectors);http.expectOne('/api/native/sources').flush([profile]);
@@ -74,5 +74,22 @@ describe('Native source connections',()=>{
     fixture.detectChanges();const request=http.expectOne('/api/native/sources/redis-demo/explore');expect(request.request.body).toEqual({});request.flush(result);
     fixture.detectChanges();await fixture.whenStable();expect(fixture.nativeElement.textContent).toContain('analytics:1');
     http.expectNone('/api/native/sources/redis-demo/test');
+  });
+  it('submits a configured ClickHouse extraction once without credentials and opens its job',async()=>{
+    const fixture=await setup(),c=fixture.componentInstance;const navigate=vi.spyOn(TestBed.inject(Router),'navigate').mockResolvedValue(true);
+    c.activeProfile.set({...profile,engine:'clickhouse',namespace:'analytics',extraction_source_id:'clickhouse'});
+    c.extract('invoice');c.extract('invoice');const request=http.expectOne('/api/storage/jobs');
+    expect(request.request.body).toMatchObject({source_id:'clickhouse',schema:'analytics',table:'invoice',format:'parquet',num_partitions:1,partition_by:[]});
+    expect(JSON.stringify(request.request.body)).not.toContain('password');request.flush({id:'native-job',status:'QUEUED'});
+    expect(navigate).toHaveBeenCalledWith(['/jobs','native-job']);
+  });
+  it('never automatically resubmits an extraction after an uncertain response',async()=>{
+    const fixture=await setup(),c=fixture.componentInstance;c.activeProfile.set({...profile,engine:'clickhouse',namespace:'analytics',extraction_source_id:'clickhouse'});
+    c.extract('invoice');http.expectOne('/api/storage/jobs').flush({detail:'Indisponible'},{status:503,statusText:'Unavailable'});
+    expect(c.uncertain()).toBe(true);c.extract('invoice');http.expectNone('/api/storage/jobs');expect(c.error()).toContain('Storage Jobs');
+  });
+  it('does not reuse a configured extraction identity for a cached temporary connection',async()=>{
+    const fixture=await setup(),c=fixture.componentInstance;c.activeProfile.set({...profile,extraction_source_id:'clickhouse'});
+    c.cached('Temporary source',result);c.extract('invoice');expect(c.activeProfile()).toBeNull();http.expectNone('/api/storage/jobs');
   });
 });

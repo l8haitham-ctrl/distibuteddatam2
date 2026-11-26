@@ -30,7 +30,7 @@ public class JobConfiguration {
     }
     @Bean @DependsOn("jobsFlyway") JobRepository jobRepository(HikariDataSource jobsDataSource) { return new JdbcJobRepository(new JdbcTemplate(jobsDataSource)); }
     @Bean PartitionCardinality partitionCardinality(com.atlas.explorer.features.connectors.connector.PluginRegistry plugins) { return new PartitionCardinality(plugins); }
-    @Bean JobService jobService(JobRepository repository,SourceService sources,ExplorationService exploration,PartitionCardinality cardinality) { return new JobService(repository,sources,exploration,cardinality); }
+    @Bean JobService jobService(JobRepository repository,SourceService sources,ExplorationService exploration,PartitionCardinality cardinality,com.atlas.explorer.features.nativeingestion.connector.NativeIngestionSources nativeSources) { return new JobService(repository,sources,exploration,cardinality,nativeSources); }
     @Bean JobEngine jobEngine(JobProperties properties) { return new SparkJobEngine(properties); }
     @Bean @ConditionalOnProperty(name="jobs.dispatch-enabled",havingValue="true",matchIfMissing=true)
     JobDispatcher jobDispatcher(JobRepository repository,JobEngine engine,StorageService storage,JobProperties properties,CatalogService catalog) { return new JobDispatcher(repository,engine,storage,properties,catalog); }

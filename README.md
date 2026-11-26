@@ -17,6 +17,9 @@ La [liste unifiee des sources](docs/unified-sources.md) affiche SQL Server,
 PostgreSQL, Redis, ClickHouse et MinIO ensemble sur `/sources`, avec les actions
 de test et d'exploration adaptees a chaque moteur.
 
+[Extraction ClickHouse](docs/clickhouse-extraction.md) : bouton Parquet depuis
+l'exploration native, traitement Spark en flux, publication MinIO/Hive/Trino.
+
 ## Etat des branches
 
 La version complete de livraison est sur `feature/release-readiness`.

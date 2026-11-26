@@ -24,8 +24,9 @@ public class NativeSourceProfiles {
         profiles=Collections.unmodifiableMap(map);
     }
     public List<Map<String,Object>> list(){return profiles.entrySet().stream().map(entry->{
-        var c=entry.getValue();return Map.<String,Object>of("id",entry.getKey(),"engine",c.engine(),"host",c.host(),"port",c.port(),
-            "namespace",c.namespace(),"username",c.username(),"prefix",c.prefix(),"tls",c.tls());
+        var c=entry.getValue();Map<String,Object> row=new LinkedHashMap<>(Map.<String,Object>of("id",entry.getKey(),"engine",c.engine(),"host",c.host(),"port",c.port(),
+            "namespace",c.namespace(),"username",c.username(),"prefix",c.prefix(),"tls",c.tls()));
+        if(c.engine().equals("clickhouse"))row.put("extraction_source_id","clickhouse");return row;
     }).toList();}
     public NativeConnection get(String id){var config=profiles.get(id);if(config==null)throw new NativeSourceException();return config;}
 }

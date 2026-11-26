@@ -3,6 +3,7 @@ package com.atlas.ingestion;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.atlas.explorer.features.connectors.connector.*;
 import com.atlas.explorer.features.connectors.dto.JdbcSettings;
+import com.atlas.explorer.features.nativeingestion.connector.NativeIngestionSources;
 import org.apache.hadoop.fs.*;
 import org.apache.spark.sql.*;
 import org.apache.spark.sql.api.java.UDF1;
@@ -41,17 +42,26 @@ public final class IngestionJob {
             hadoop.set("fs.s3a.access.key",required("STORAGE_ACCESS_KEY"));
             hadoop.set("fs.s3a.secret.key",required("STORAGE_SECRET_KEY"));
             hadoop.setBoolean("fs.s3a.path.style.access",true);
+            long extractStarted=System.nanoTime();
+            var nativeSources=new NativeIngestionSources(System::getenv);
+            Dataset<Row> data;ReadPlan plan;String engine;
+            if(nativeSources.supports(args[1])){
+                if(!requested.isEmpty())throw new IllegalArgumentException("Native partitioning is not supported.");
+                var dataset=nativeSources.describe(args[1],args[2],args[3]);engine=args[1];
+                data=NativeSparkReader.read(spark,dataset,fetchSize);
+                plan=new ReadPlan(null,null,null,"Native streaming reader: one partition, row batches bounded by fetch_size and 8 MiB; no transactional snapshot.");
+            }else{
             var plugins=PluginRegistry.discover();
             var source=SourceDefinitions.get(args[1],System::getenv,plugins);
-            var plugin=plugins.get(source.engine());var settings=source.settings();
-            long extractStarted=System.nanoTime();
-            var plan=readPlan(plugin,settings,args[2],args[3],numPartitions);
+            var plugin=plugins.get(source.engine());var settings=source.settings();engine=source.engine();
+            plan=readPlan(plugin,settings,args[2],args[3],numPartitions);
             var reader=spark.read().format("jdbc").options(plugin.sparkOptions(settings))
                     .option("dbtable",plugin.qualified(args[2],args[3]))
                     .option("fetchsize",fetchSize).option("queryTimeout",600);
             if(plan.column()!=null)reader.option("partitionColumn",plan.column()).option("lowerBound",plan.lower())
                     .option("upperBound",plan.upper()).option("numPartitions",numPartitions);
-            Dataset<Row> data=reader.load();
+            data=reader.load();
+            }
             int effectivePartitions=data.rdd().getNumPartitions();
             var partitionColumns=new ArrayList<String>();
             var partitionMetadata=new ArrayList<Map<String,Object>>();
@@ -107,7 +117,7 @@ public final class IngestionJob {
                 var manifest=new LinkedHashMap<String,Object>();
                 manifest.put("version",2);manifest.put("job_id",id.toString());manifest.put("prefix",prefix);
                 manifest.put("source_id",args[1]);manifest.put("schema_name",args[2]);manifest.put("table_name",args[3]);
-                manifest.put("source_engine",source.engine());
+                manifest.put("source_engine",engine);
                 manifest.put("format",format);manifest.put("compression",compression);manifest.put("row_count",rows);
                 manifest.put("file_count",files);manifest.put("storage_bytes",bytes);manifest.put("schema_json",schema.json());
                 manifest.put("partition_by",requested);manifest.put("partition_granularity",granularity);

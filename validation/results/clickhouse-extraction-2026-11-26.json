@@ -1,0 +1,354 @@
+{
+  "branch": "feature/clickhouse-extraction",
+  "base_branch": "feature/unified-source-list",
+  "verified_at": "2026-11-26T20:54:42.501561Z",
+  "backend_targeted_tests": 29,
+  "backend_build": {
+    "skipped": 54,
+    "failures": 0,
+    "passed": 62,
+    "discovered": 116
+  },
+  "spark_scalar_conversion_checks": "passed",
+  "runs": [
+    {
+      "source": "clickhouse",
+      "table": "invoice",
+      "format": "parquet",
+      "request": {
+        "source_id": "clickhouse",
+        "schema": "analytics",
+        "table": "invoice",
+        "format": "parquet",
+        "compression": "snappy",
+        "fetch_size": 100,
+        "partition_by": [],
+        "num_partitions": 1
+      },
+      "reference": [
+        {
+          "total": 5000,
+          "amount": "129972.16",
+          "ids": "12502500",
+          "first_date": "2025-01-01",
+          "last_date": "2025-12-31"
+        }
+      ],
+      "submission_attempted_at": "2026-11-26T20:48:39.085Z",
+      "job_id": "2722a0eb-417a-4510-a661-d678941c4959",
+      "result": {
+        "version": 2,
+        "job_id": "2722a0eb-417a-4510-a661-d678941c4959",
+        "prefix": "clickhouse/analytics/invoice/2722a0eb-417a-4510-a661-d678941c4959",
+        "source_id": "clickhouse",
+        "schema_name": "analytics",
+        "table_name": "invoice",
+        "source_engine": "clickhouse",
+        "format": "parquet",
+        "compression": "snappy",
+        "row_count": 5000,
+        "file_count": 1,
+        "storage_bytes": 59854,
+        "schema_json": "{\"type\":\"struct\",\"fields\":[{\"name\":\"invoice_id\",\"type\":\"decimal(20,0)\",\"nullable\":false,\"metadata\":{}},{\"name\":\"customer_id\",\"type\":\"decimal(20,0)\",\"nullable\":false,\"metadata\":{}},{\"name\":\"invoice_date\",\"type\":\"date\",\"nullable\":false,\"metadata\":{}},{\"name\":\"amount\",\"type\":\"decimal(12,2)\",\"nullable\":false,\"metadata\":{}},{\"name\":\"status\",\"type\":\"string\",\"nullable\":false,\"metadata\":{}}]}",
+        "partition_by": [],
+        "partition_granularity": "month",
+        "partition_columns": [],
+        "partition_file_counts": {
+          "__unpartitioned__": 1
+        },
+        "fetch_size": 100,
+        "max_records_per_file": 100000,
+        "requested_num_partitions": 1,
+        "effective_num_partitions": 1,
+        "jdbc_partition_column": null,
+        "jdbc_lower_bound": null,
+        "jdbc_upper_bound": null,
+        "parallel_read_note": "Native streaming reader: one partition, row batches bounded by fetch_size and 8 MiB; no transactional snapshot.",
+        "extract_write_ms": 18809,
+        "verify_ms": 3622,
+        "spark_duration_ms": 34398,
+        "spark_application_id": "app-20261126204847-0000",
+        "manifest_key": "clickhouse/analytics/invoice/2722a0eb-417a-4510-a661-d678941c4959/manifest.json",
+        "bucket": "lake",
+        "catalog_table": "hive.runs.invoice_2722a0eb",
+        "current_view": "hive.clickhouse_analytics.invoice",
+        "registration_ms": 6965,
+        "example_query": "SELECT * FROM hive.runs.invoice_2722a0eb LIMIT 100"
+      },
+      "sql": {
+        "execution_ms": 1761,
+        "rows": [
+          [
+            5000,
+            "129972.16",
+            "12502500",
+            "2025-01-01",
+            "2025-12-31"
+          ]
+        ],
+        "truncated": false,
+        "stats": {
+          "state": "FINISHED",
+          "processed_bytes": 60028,
+          "elapsed_ms": 1042,
+          "processed_rows": 5000,
+          "cpu_ms": 198
+        },
+        "query_id": "20261125_184727_00015_ejar5",
+        "row_count": 1,
+        "columns": [
+          {
+            "name": "_col0",
+            "type": "bigint"
+          },
+          {
+            "name": "_col1",
+            "type": "varchar"
+          },
+          {
+            "name": "_col2",
+            "type": "varchar"
+          },
+          {
+            "name": "_col3",
+            "type": "varchar"
+          },
+          {
+            "name": "_col4",
+            "type": "varchar"
+          }
+        ]
+      },
+      "completed_at": "2026-11-26T20:49:29.604Z"
+    },
+    {
+      "source": "clickhouse",
+      "table": "customer",
+      "format": "parquet",
+      "request": {
+        "source_id": "clickhouse",
+        "schema": "analytics",
+        "table": "customer",
+        "format": "parquet",
+        "compression": "snappy",
+        "fetch_size": 100,
+        "partition_by": [],
+        "num_partitions": 1
+      },
+      "reference": [
+        {
+          "total": 1000,
+          "ids": "500500",
+          "null_emails": 100,
+          "first_created": "2025-01-01 00:00:00"
+        }
+      ],
+      "submission_attempted_at": "2026-11-26T20:49:55.983Z",
+      "job_id": "795c25ca-0b52-4a77-bacb-f396dece6c9b",
+      "result": {
+        "version": 2,
+        "job_id": "795c25ca-0b52-4a77-bacb-f396dece6c9b",
+        "prefix": "clickhouse/analytics/customer/795c25ca-0b52-4a77-bacb-f396dece6c9b",
+        "source_id": "clickhouse",
+        "schema_name": "analytics",
+        "table_name": "customer",
+        "source_engine": "clickhouse",
+        "format": "parquet",
+        "compression": "snappy",
+        "row_count": 1000,
+        "file_count": 1,
+        "storage_bytes": 18709,
+        "schema_json": "{\"type\":\"struct\",\"fields\":[{\"name\":\"customer_id\",\"type\":\"decimal(20,0)\",\"nullable\":false,\"metadata\":{}},{\"name\":\"first_name\",\"type\":\"string\",\"nullable\":false,\"metadata\":{}},{\"name\":\"last_name\",\"type\":\"string\",\"nullable\":false,\"metadata\":{}},{\"name\":\"email\",\"type\":\"string\",\"nullable\":true,\"metadata\":{}},{\"name\":\"city\",\"type\":\"string\",\"nullable\":false,\"metadata\":{}},{\"name\":\"created_at\",\"type\":\"timestamp\",\"nullable\":false,\"metadata\":{}}]}",
+        "partition_by": [],
+        "partition_granularity": "month",
+        "partition_columns": [],
+        "partition_file_counts": {
+          "__unpartitioned__": 1
+        },
+        "fetch_size": 100,
+        "max_records_per_file": 100000,
+        "requested_num_partitions": 1,
+        "effective_num_partitions": 1,
+        "jdbc_partition_column": null,
+        "jdbc_lower_bound": null,
+        "jdbc_upper_bound": null,
+        "parallel_read_note": "Native streaming reader: one partition, row batches bounded by fetch_size and 8 MiB; no transactional snapshot.",
+        "extract_write_ms": 48375,
+        "verify_ms": 4719,
+        "spark_duration_ms": 73907,
+        "spark_application_id": "app-20261126205005-0001",
+        "manifest_key": "clickhouse/analytics/customer/795c25ca-0b52-4a77-bacb-f396dece6c9b/manifest.json",
+        "bucket": "lake",
+        "catalog_table": "hive.runs.customer_795c25ca",
+        "current_view": "hive.clickhouse_analytics.customer",
+        "registration_ms": 20469,
+        "example_query": "SELECT * FROM hive.runs.customer_795c25ca LIMIT 100"
+      },
+      "sql": {
+        "execution_ms": 844,
+        "rows": [
+          [
+            1000,
+            "500500",
+            100,
+            "2025-01-01 00:00:00.000"
+          ]
+        ],
+        "truncated": false,
+        "stats": {
+          "state": "FINISHED",
+          "processed_bytes": 18850,
+          "elapsed_ms": 504,
+          "processed_rows": 1000,
+          "cpu_ms": 102
+        },
+        "query_id": "20261125_184937_00022_ejar5",
+        "row_count": 1,
+        "columns": [
+          {
+            "name": "_col0",
+            "type": "bigint"
+          },
+          {
+            "name": "_col1",
+            "type": "varchar"
+          },
+          {
+            "name": "_col2",
+            "type": "bigint"
+          },
+          {
+            "name": "_col3",
+            "type": "varchar"
+          }
+        ]
+      },
+      "completed_at": "2026-11-26T20:51:39.194Z"
+    },
+    {
+      "source": "clickhouse",
+      "table": "invoice",
+      "format": "csv",
+      "request": {
+        "source_id": "clickhouse",
+        "schema": "analytics",
+        "table": "invoice",
+        "format": "csv",
+        "compression": "gzip",
+        "fetch_size": 100,
+        "partition_by": [],
+        "num_partitions": 1
+      },
+      "reference": [
+        {
+          "total": 5000,
+          "amount": "129972.16",
+          "ids": "12502500",
+          "first_date": "2025-01-01",
+          "last_date": "2025-12-31"
+        }
+      ],
+      "submission_attempted_at": "2026-11-26T20:52:20.36Z",
+      "job_id": "4f86e980-b24e-4a1d-84c8-cedf9290e5c7",
+      "result": {
+        "version": 2,
+        "job_id": "4f86e980-b24e-4a1d-84c8-cedf9290e5c7",
+        "prefix": "clickhouse/analytics/invoice/4f86e980-b24e-4a1d-84c8-cedf9290e5c7",
+        "source_id": "clickhouse",
+        "schema_name": "analytics",
+        "table_name": "invoice",
+        "source_engine": "clickhouse",
+        "format": "csv",
+        "compression": "gzip",
+        "row_count": 5000,
+        "file_count": 1,
+        "storage_bytes": 44079,
+        "schema_json": "{\"type\":\"struct\",\"fields\":[{\"name\":\"invoice_id\",\"type\":\"decimal(20,0)\",\"nullable\":false,\"metadata\":{}},{\"name\":\"customer_id\",\"type\":\"decimal(20,0)\",\"nullable\":false,\"metadata\":{}},{\"name\":\"invoice_date\",\"type\":\"date\",\"nullable\":false,\"metadata\":{}},{\"name\":\"amount\",\"type\":\"decimal(12,2)\",\"nullable\":false,\"metadata\":{}},{\"name\":\"status\",\"type\":\"string\",\"nullable\":false,\"metadata\":{}}]}",
+        "partition_by": [],
+        "partition_granularity": "month",
+        "partition_columns": [],
+        "partition_file_counts": {
+          "__unpartitioned__": 1
+        },
+        "fetch_size": 100,
+        "max_records_per_file": 100000,
+        "requested_num_partitions": 1,
+        "effective_num_partitions": 1,
+        "jdbc_partition_column": null,
+        "jdbc_lower_bound": null,
+        "jdbc_upper_bound": null,
+        "parallel_read_note": "Native streaming reader: one partition, row batches bounded by fetch_size and 8 MiB; no transactional snapshot.",
+        "extract_write_ms": 38106,
+        "verify_ms": 4572,
+        "spark_duration_ms": 67841,
+        "spark_application_id": "app-20261126205238-0002",
+        "csv_options": {
+          "date_format": "yyyy-MM-dd",
+          "header": false,
+          "timestamp_format": "yyyy-MM-dd HH:mm:ss",
+          "separator": ",",
+          "null_value": "\\N",
+          "quote": "none",
+          "escape": "none",
+          "unsafe_strings": "fail",
+          "decimal_format": "plain",
+          "encoding": "UTF-8"
+        },
+        "csv_preserve_whitespace": true,
+        "manifest_key": "clickhouse/analytics/invoice/4f86e980-b24e-4a1d-84c8-cedf9290e5c7/manifest.json",
+        "bucket": "lake",
+        "catalog_table": "hive.runs.invoice_4f86e980",
+        "current_view": null,
+        "registration_ms": 2278,
+        "example_query": "SELECT * FROM hive.runs.invoice_4f86e980 LIMIT 100"
+      },
+      "sql": {
+        "execution_ms": 1156,
+        "rows": [
+          [
+            5000,
+            "129972.16",
+            "12502500",
+            "2025-01-01",
+            "2025-12-31"
+          ]
+        ],
+        "truncated": false,
+        "stats": {
+          "state": "FINISHED",
+          "processed_bytes": 44253,
+          "elapsed_ms": 659,
+          "processed_rows": 5000,
+          "cpu_ms": 243
+        },
+        "query_id": "20261125_185144_00027_ejar5",
+        "row_count": 1,
+        "columns": [
+          {
+            "name": "_col0",
+            "type": "bigint"
+          },
+          {
+            "name": "_col1",
+            "type": "varchar"
+          },
+          {
+            "name": "_col2",
+            "type": "varchar"
+          },
+          {
+            "name": "_col3",
+            "type": "varchar"
+          },
+          {
+            "name": "_col4",
+            "type": "varchar"
+          }
+        ]
+      },
+      "completed_at": "2026-11-26T20:53:46.763Z"
+    }
+  ],
+  "preserved_existing_jobs": 45,
+  "frontend_tests": 66
+}

@@ -11,6 +11,7 @@
 @if(result();as data){
 <section class="wf-sources-box native-result" [class.native-tabular]="data.engine==='clickhouse'" aria-label="Résultat de l’exploration">
   <header class="native-card"><h2>{{title()}}</h2><p>{{data.objects.length}} éléments affichés · {{data.transport==='TLS' ? 'TLS vérifié' : 'Sans TLS'}}</p><p class="native-note">{{data.note}}</p>
+    @if(activeProfile()?.extraction_source_id){<p class="native-note">Extraction Parquet Snappy disponible sur cette source configurée, sans partitionnement des fichiers. Le traitement sera suivi dans Storage Jobs.</p>}
     @if(data.truncated){<p role="status">Liste partielle : limite de lecture atteinte. Le préfixe permet de cibler les noms recherchés.</p>}
   </header>
   <div class="wf-source-table-scroll"><table class="wf-source-table"><thead><tr>
@@ -24,6 +25,7 @@
         <table aria-label="Colonnes de la table"><thead><tr><th>Colonne</th><th>Type ClickHouse</th><th>Tri / partition</th></tr></thead><tbody>
         @for(column of columns;track column.name){<tr><th scope="row"><code>{{column.name}}</code></th><td><code>{{column.data_type}}</code></td><td>{{column.sorting_key ? 'Tri' : ''}}{{column.sorting_key && column.partition_key ? ' · ' : ''}}{{column.partition_key ? 'Partition' : ''}}{{!column.sorting_key && !column.partition_key ? '—' : ''}}</td></tr>}
         </tbody></table></details>}
+      @if(activeProfile()?.extraction_source_id){<button class="wf-button" [disabled]="extracting()||uncertain()||busy()" (click)="extract(object.name)">Extraire {{object.name}} en Parquet</button>}
     }@else{ {{data.engine==='redis' ? object.fields.join(', ') || '—' : object.size}} }
   </td></tr>}@empty{<tr><td colspan="3">Aucun élément pour ce préfixe.</td></tr>}
   </tbody></table></div>
@@ -35,4 +37,4 @@
 <section class="wf-form-section"><div class="wf-form-grid"><label>{{config.engine==='minio' ? 'Clé d’accès' : 'Utilisateur'}}<input name="username" [(ngModel)]="config.username" required maxlength="128" autocomplete="off" (ngModelChange)="changed()"></label><label>{{config.engine==='minio' ? 'Clé secrète' : 'Mot de passe'}}<input name="password" type="password" [(ngModel)]="config.password" required maxlength="128" autocomplete="new-password" (ngModelChange)="changed()"></label></div><label class="wf-check native-tls"><input name="tls" type="checkbox" [(ngModel)]="config.tls" (ngModelChange)="changed()"><span><strong>Connexion TLS</strong><small>Certificat et nom du serveur vérifiés. Désactiver uniquement pour une démonstration locale isolée.</small></span></label></section>
 </fieldset><footer class="wf-form-footer"><button class="wf-button" type="button" [disabled]="busy()||!store.connectors().length" (click)="custom(false)">Tester la connexion</button><button class="wf-button wf-primary" type="submit" [disabled]="busy()||!store.connectors().length">Connecter et explorer</button></footer></form></section>
 @if(store.sessions().length){<section class="native-custom"><h2>Connexions de cette session</h2><div class="native-profiles">@for(session of store.sessions();track session.id){<article class="wf-connection-card native-card"><h3>{{session.name}}</h3><p>{{store.name(session.source.engine)}} · {{session.source.host}}:{{session.source.port}} · {{session.source.namespace}}</p><button class="wf-button" [disabled]="busy()" (click)="cached(session.name,session.exploration)">Voir la structure mémorisée</button></article>}</div></section>}
-<p class="native-note">L’exploration ne déclenche aucune extraction Spark. ClickHouse est exploré directement, sans ajout automatique d’un catalogue Trino. Les fichiers MinIO doivent être enregistrés dans le catalogue pour être interrogés en SQL. Redis utilise le catalogue Trino Redis configuré par l’administrateur.</p>
+<p class="native-note">L’exploration ne déclenche aucune extraction Spark. Le bouton Extraire crée un traitement séparé et inscrit son résultat dans Hive/Trino. ClickHouse est exploré directement. Les fichiers MinIO doivent être enregistrés dans le catalogue pour être interrogés en SQL. Redis utilise le catalogue Trino Redis configuré par l’administrateur.</p>

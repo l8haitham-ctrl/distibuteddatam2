@@ -1,5 +1,17 @@
 # Apply last, after the five existing demonstration Compose files (including soccer).
 services:
+  native-ingestion-check:
+    profiles: [tools]
+    image: distributed-data-benchmark:local
+    entrypoint: ["node", "/checks/verify-native-ingestion.mjs"]
+    environment:
+      APP_LOGIN_USERNAME: ${APP_LOGIN_USERNAME:-admin}
+      APP_LOGIN_PASSWORD: ${APP_LOGIN_PASSWORD:?Define APP_LOGIN_PASSWORD}
+      CLICKHOUSE_READER_PASSWORD: ${CLICKHOUSE_READER_PASSWORD:?Run scripts/setup-clickhouse.ps1}
+    volumes:
+      - ./scripts:/checks:ro
+      - ./work/native-ingestion:/results
+    mem_limit: 128m
   clickhouse-source:
     image: clickhouse/clickhouse-server@sha256:c6602218b19b36728a0c903372b7748279c9316490f6e114c827e1de995fabde
     environment:
@@ -40,6 +52,9 @@ services:
     depends_on:
       clickhouse-init:
         condition: service_completed_successfully
+  spark-worker:
+    environment:
+      CLICKHOUSE_READER_PASSWORD: ${CLICKHOUSE_READER_PASSWORD:?Run scripts/setup-clickhouse.ps1}
   backend-tests:
     environment:
       CLICKHOUSE_READER_PASSWORD: ${CLICKHOUSE_READER_PASSWORD:?Run scripts/setup-clickhouse.ps1}
