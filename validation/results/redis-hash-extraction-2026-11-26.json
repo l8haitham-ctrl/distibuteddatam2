@@ -1,0 +1,353 @@
+{
+  "branch": "feature/redis-hash-extraction",
+  "base_branch": "feature/clickhouse-extraction",
+  "verified_at": "2026-11-26T21:18:22.6708933Z",
+  "backend_targeted_tests": 24,
+  "backend_build": {
+    "passed": 66,
+    "skipped": 56,
+    "failures": 0,
+    "discovered": 122
+  },
+  "frontend_tests": 67,
+  "spark_scalar_conversion_checks": "passed",
+  "browser": {
+    "sql_result": [
+      1000,
+      1000,
+      5005000
+    ],
+    "screenshots": [
+      "docs/evidence/redis-extraction-completed.jpg",
+      "docs/evidence/redis-extraction-sql.jpg"
+    ],
+    "submitted_job": "597083d0-9509-4966-bb94-356d9f8684f4"
+  },
+  "runs": [
+    {
+      "source": "redis",
+      "table": "customer_segments",
+      "format": "parquet",
+      "request": {
+        "source_id": "redis",
+        "schema": "redis_0",
+        "table": "customer_segments",
+        "format": "parquet",
+        "partition_by": [],
+        "fetch_size": 1000,
+        "compression": "snappy",
+        "partition_granularity": "month",
+        "num_partitions": 1
+      },
+      "job_id": "597083d0-9509-4966-bb94-356d9f8684f4",
+      "submission_attempted_at": "2026-11-26T21:12:12.904225Z",
+      "adopted_from_ui": true,
+      "reference": {
+        "stats": {
+          "elapsed_ms": 2563,
+          "processed_rows": 1000,
+          "cpu_ms": 781,
+          "state": "FINISHED",
+          "processed_bytes": 41259
+        },
+        "query_id": "20261125_191034_00034_ejar5",
+        "row_count": 1,
+        "columns": [
+          {
+            "name": "_col0",
+            "type": "bigint"
+          },
+          {
+            "name": "_col1",
+            "type": "bigint"
+          },
+          {
+            "name": "_col2",
+            "type": "bigint"
+          },
+          {
+            "name": "_col3",
+            "type": "bigint"
+          },
+          {
+            "name": "_col4",
+            "type": "bigint"
+          },
+          {
+            "name": "_col5",
+            "type": "bigint"
+          }
+        ],
+        "execution_ms": 6344,
+        "rows": [
+          [
+            1000,
+            1000,
+            500500,
+            5005000,
+            200,
+            800
+          ]
+        ],
+        "truncated": false
+      },
+      "result": {
+        "version": 2,
+        "job_id": "597083d0-9509-4966-bb94-356d9f8684f4",
+        "prefix": "redis/redis_0/customer_segments/597083d0-9509-4966-bb94-356d9f8684f4",
+        "source_id": "redis",
+        "schema_name": "redis_0",
+        "table_name": "customer_segments",
+        "source_engine": "redis",
+        "format": "parquet",
+        "compression": "snappy",
+        "row_count": 1000,
+        "file_count": 1,
+        "storage_bytes": 13629,
+        "schema_json": "{\"type\":\"struct\",\"fields\":[{\"name\":\"_key\",\"type\":\"string\",\"nullable\":false,\"metadata\":{}},{\"name\":\"customer_id\",\"type\":\"string\",\"nullable\":true,\"metadata\":{}},{\"name\":\"segment\",\"type\":\"string\",\"nullable\":true,\"metadata\":{}},{\"name\":\"loyalty_points\",\"type\":\"string\",\"nullable\":true,\"metadata\":{}}]}",
+        "partition_by": [],
+        "partition_granularity": "month",
+        "partition_columns": [],
+        "partition_file_counts": {
+          "__unpartitioned__": 1
+        },
+        "fetch_size": 1000,
+        "max_records_per_file": 100000,
+        "requested_num_partitions": 1,
+        "effective_num_partitions": 1,
+        "jdbc_partition_column": null,
+        "jdbc_lower_bound": null,
+        "jdbc_upper_bound": null,
+        "parallel_read_note": "Native streaming reader: one partition, row batches bounded by fetch_size and 8 MiB; no transactional snapshot.",
+        "extract_write_ms": 26246,
+        "verify_ms": 1928,
+        "spark_duration_ms": 37047,
+        "spark_application_id": "app-20261126211218-0000",
+        "manifest_key": "redis/redis_0/customer_segments/597083d0-9509-4966-bb94-356d9f8684f4/manifest.json",
+        "bucket": "lake",
+        "catalog_table": "hive.runs.customer_segments_597083d0",
+        "current_view": "hive.redis_redis_0.customer_segments",
+        "registration_ms": 3045,
+        "example_query": "SELECT * FROM hive.runs.customer_segments_597083d0 LIMIT 100"
+      },
+      "sql": {
+        "stats": {
+          "elapsed_ms": 537,
+          "processed_rows": 1000,
+          "cpu_ms": 161,
+          "state": "FINISHED",
+          "processed_bytes": 81789
+        },
+        "query_id": "20261125_191059_00041_ejar5",
+        "row_count": 1,
+        "columns": [
+          {
+            "name": "_col0",
+            "type": "bigint"
+          },
+          {
+            "name": "_col1",
+            "type": "bigint"
+          },
+          {
+            "name": "_col2",
+            "type": "bigint"
+          },
+          {
+            "name": "_col3",
+            "type": "bigint"
+          },
+          {
+            "name": "_col4",
+            "type": "bigint"
+          },
+          {
+            "name": "_col5",
+            "type": "bigint"
+          }
+        ],
+        "execution_ms": 1242,
+        "rows": [
+          [
+            1000,
+            1000,
+            500500,
+            5005000,
+            200,
+            800
+          ]
+        ],
+        "truncated": false
+      },
+      "completed_at": "2026-11-26T21:13:00.732Z"
+    },
+    {
+      "source": "redis",
+      "table": "customer_segments",
+      "format": "csv",
+      "request": {
+        "source_id": "redis",
+        "schema": "redis_0",
+        "table": "customer_segments",
+        "format": "csv",
+        "compression": "gzip",
+        "fetch_size": 100,
+        "partition_by": [],
+        "num_partitions": 1
+      },
+      "reference": {
+        "stats": {
+          "elapsed_ms": 409,
+          "processed_rows": 1000,
+          "cpu_ms": 103,
+          "state": "FINISHED",
+          "processed_bytes": 41259
+        },
+        "query_id": "20261125_191152_00042_ejar5",
+        "row_count": 1,
+        "columns": [
+          {
+            "name": "_col0",
+            "type": "bigint"
+          },
+          {
+            "name": "_col1",
+            "type": "bigint"
+          },
+          {
+            "name": "_col2",
+            "type": "bigint"
+          },
+          {
+            "name": "_col3",
+            "type": "bigint"
+          },
+          {
+            "name": "_col4",
+            "type": "bigint"
+          },
+          {
+            "name": "_col5",
+            "type": "bigint"
+          }
+        ],
+        "execution_ms": 918,
+        "rows": [
+          [
+            1000,
+            1000,
+            500500,
+            5005000,
+            200,
+            800
+          ]
+        ],
+        "truncated": false
+      },
+      "submission_attempted_at": "2026-11-26T21:13:53.751Z",
+      "job_id": "7a816018-afd8-42e6-b6ab-7ae30862c952",
+      "result": {
+        "version": 2,
+        "job_id": "7a816018-afd8-42e6-b6ab-7ae30862c952",
+        "prefix": "redis/redis_0/customer_segments/7a816018-afd8-42e6-b6ab-7ae30862c952",
+        "source_id": "redis",
+        "schema_name": "redis_0",
+        "table_name": "customer_segments",
+        "source_engine": "redis",
+        "format": "csv",
+        "compression": "gzip",
+        "row_count": 1000,
+        "file_count": 1,
+        "storage_bytes": 7335,
+        "schema_json": "{\"type\":\"struct\",\"fields\":[{\"name\":\"_key\",\"type\":\"string\",\"nullable\":false,\"metadata\":{}},{\"name\":\"customer_id\",\"type\":\"string\",\"nullable\":true,\"metadata\":{}},{\"name\":\"segment\",\"type\":\"string\",\"nullable\":true,\"metadata\":{}},{\"name\":\"loyalty_points\",\"type\":\"string\",\"nullable\":true,\"metadata\":{}}]}",
+        "partition_by": [],
+        "partition_granularity": "month",
+        "partition_columns": [],
+        "partition_file_counts": {
+          "__unpartitioned__": 1
+        },
+        "fetch_size": 100,
+        "max_records_per_file": 100000,
+        "requested_num_partitions": 1,
+        "effective_num_partitions": 1,
+        "jdbc_partition_column": null,
+        "jdbc_lower_bound": null,
+        "jdbc_upper_bound": null,
+        "parallel_read_note": "Native streaming reader: one partition, row batches bounded by fetch_size and 8 MiB; no transactional snapshot.",
+        "extract_write_ms": 18422,
+        "verify_ms": 1292,
+        "spark_duration_ms": 30511,
+        "spark_application_id": "app-20261126211406-0001",
+        "csv_options": {
+          "encoding": "UTF-8",
+          "date_format": "yyyy-MM-dd",
+          "header": false,
+          "timestamp_format": "yyyy-MM-dd HH:mm:ss",
+          "separator": ",",
+          "null_value": "\\N",
+          "quote": "none",
+          "escape": "none",
+          "unsafe_strings": "fail",
+          "decimal_format": "plain"
+        },
+        "csv_preserve_whitespace": true,
+        "manifest_key": "redis/redis_0/customer_segments/7a816018-afd8-42e6-b6ab-7ae30862c952/manifest.json",
+        "bucket": "lake",
+        "catalog_table": "hive.runs.customer_segments_7a816018",
+        "current_view": null,
+        "registration_ms": 1133,
+        "example_query": "SELECT * FROM hive.runs.customer_segments_7a816018 LIMIT 100"
+      },
+      "sql": {
+        "stats": {
+          "elapsed_ms": 515,
+          "processed_rows": 1000,
+          "cpu_ms": 68,
+          "state": "FINISHED",
+          "processed_bytes": 75495
+        },
+        "query_id": "20261125_191238_00048_ejar5",
+        "row_count": 1,
+        "columns": [
+          {
+            "name": "_col0",
+            "type": "bigint"
+          },
+          {
+            "name": "_col1",
+            "type": "bigint"
+          },
+          {
+            "name": "_col2",
+            "type": "bigint"
+          },
+          {
+            "name": "_col3",
+            "type": "bigint"
+          },
+          {
+            "name": "_col4",
+            "type": "bigint"
+          },
+          {
+            "name": "_col5",
+            "type": "bigint"
+          }
+        ],
+        "execution_ms": 590,
+        "rows": [
+          [
+            1000,
+            1000,
+            500500,
+            5005000,
+            200,
+            800
+          ]
+        ],
+        "truncated": false
+      },
+      "completed_at": "2026-11-26T21:14:39.618Z"
+    }
+  ]
+}

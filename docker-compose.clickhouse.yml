@@ -3,6 +3,9 @@ services:
   native-ingestion-check:
     profiles: [tools]
     image: distributed-data-benchmark:local
+    build:
+      context: .
+      dockerfile: benchmarks/Dockerfile
     entrypoint: ["node", "/checks/verify-native-ingestion.mjs"]
     environment:
       APP_LOGIN_USERNAME: ${APP_LOGIN_USERNAME:-admin}
@@ -53,8 +56,10 @@ services:
       clickhouse-init:
         condition: service_completed_successfully
   spark-worker:
+    networks: [default, analytics]
     environment:
       CLICKHOUSE_READER_PASSWORD: ${CLICKHOUSE_READER_PASSWORD:?Run scripts/setup-clickhouse.ps1}
+      REDIS_READER_PASSWORD: ${REDIS_READER_PASSWORD:?Define REDIS_READER_PASSWORD}
   backend-tests:
     environment:
       CLICKHOUSE_READER_PASSWORD: ${CLICKHOUSE_READER_PASSWORD:?Run scripts/setup-clickhouse.ps1}

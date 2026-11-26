@@ -20,6 +20,9 @@ de test et d'exploration adaptees a chaque moteur.
 [Extraction ClickHouse](docs/clickhouse-extraction.md) : bouton Parquet depuis
 l'exploration native, traitement Spark en flux, publication MinIO/Hive/Trino.
 
+[Extraction des hashes Redis](docs/redis-hash-extraction.md) : mapping explicite,
+parcours du prefixe complet, conservation des cles et deduplication Spark.
+
 ## Etat des branches
 
 La version complete de livraison est sur `feature/release-readiness`.

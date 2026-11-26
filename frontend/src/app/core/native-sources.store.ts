@@ -5,7 +5,7 @@ import { errorMessage } from './api.service';
 
 export interface NativeConnector { engine:string; name:string; default_port:number; capabilities:string[] }
 export interface NativeConnection { engine:string; host:string; port:number; namespace:string; username:string; password:string; tls:boolean; prefix:string }
-export type NativeProfile=Omit<NativeConnection,'password'> & {id:string;extraction_source_id?:string};
+export type NativeProfile=Omit<NativeConnection,'password'> & {id:string;extraction_source_id?:string;extraction_schema?:string;extraction_dataset?:string};
 export interface NativeColumn {name:string; data_type:string; position:number; sorting_key:boolean; partition_key:boolean}
 export interface NativeObject {name:string; type:string; fields:string[]; size?:number; columns?:NativeColumn[]; columns_truncated?:boolean}
 export interface NativeExploration {engine:string; namespace:string; objects:NativeObject[]; truncated:boolean; limit:number; transport:string; note:string}

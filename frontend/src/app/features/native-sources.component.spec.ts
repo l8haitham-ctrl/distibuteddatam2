@@ -92,4 +92,11 @@ describe('Native source connections',()=>{
     const fixture=await setup(),c=fixture.componentInstance;c.activeProfile.set({...profile,extraction_source_id:'clickhouse'});
     c.cached('Temporary source',result);c.extract('invoice');expect(c.activeProfile()).toBeNull();http.expectNone('/api/storage/jobs');
   });
+  it('submits the complete Redis dataset using its explicit schema rather than database index zero',async()=>{
+    const fixture=await setup(),c=fixture.componentInstance;vi.spyOn(TestBed.inject(Router),'navigate').mockResolvedValue(true);
+    c.activeProfile.set({...profile,extraction_source_id:'redis',extraction_schema:'redis_0',extraction_dataset:'customer_segments'});
+    c.extract('customer_segments');const request=http.expectOne('/api/storage/jobs');
+    expect(request.request.body).toMatchObject({source_id:'redis',schema:'redis_0',table:'customer_segments',format:'parquet'});
+    request.flush({id:'redis-job',status:'QUEUED'});
+  });
 });

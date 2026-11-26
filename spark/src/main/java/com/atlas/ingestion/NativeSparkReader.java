@@ -36,7 +36,9 @@ public final class NativeSparkReader {
                 public Row next(){if(!hasNext())throw new NoSuchElementException();return batch.removeFirst();}
             };
         });
-        return spark.createDataFrame(rdd,schema);
+        Dataset<Row> data=spark.createDataFrame(rdd,schema);
+        // SCAN can repeat keys. Deduplicate through Spark's shuffle, not a driver-sized Set.
+        return dataset.source().equals("redis")?data.dropDuplicates("_key").coalesce(1):data;
     }
     static Object convert(String value,String type){
         if(value==null)return null;

@@ -14,7 +14,7 @@ RUN --mount=type=cache,target=/root/.m2 \
 COPY spark/native-dependencies.pom.xml native-dependencies.pom.xml
 RUN --mount=type=cache,target=/root/.m2 \
     mvn -B -f native-dependencies.pom.xml org.apache.maven.plugins:maven-dependency-plugin:3.10.0:copy-dependencies \
-      -DincludeScope=runtime -DoutputDirectory=/native-jars
+      -DincludeScope=runtime -DexcludeGroupIds=org.slf4j -DoutputDirectory=/native-jars
 COPY spark/src ./src
 COPY backend/src/main/java/com/atlas/explorer/features/connectors/connector /plugin-src/connector
 COPY backend/src/main/java/com/atlas/explorer/features/connectors/dto /plugin-src/dto

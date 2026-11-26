@@ -2,6 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.atlas</groupId><artifactId>native-ingestion-connectors</artifactId><version>0.1.0</version>
   <dependencies>
+    <dependency><groupId>redis.clients</groupId><artifactId>jedis</artifactId><version>6.2.0</version></dependency>
     <dependency><groupId>com.squareup.okhttp3</groupId><artifactId>okhttp-jvm</artifactId><version>5.5.1</version></dependency>
   </dependencies>
 </project>

@@ -13,10 +13,20 @@ function cents(value){const [whole,fraction='']=String(value).split('.');assert.
 let report={source,table,format,request:{source_id:source,schema:source==='redis'?'redis_0':'analytics',table,format,compression:format==='parquet'?'snappy':'gzip',fetch_size:100,partition_by:[],num_partitions:1}};
 try{report=JSON.parse(await readFile(path,'utf8'));}catch(error){if(error.code!=='ENOENT')throw error;}
 async function save(){await writeFile(path,JSON.stringify(report,null,2)+'\n');}
+if(process.argv.includes('--active')){console.log(JSON.stringify((await call('/storage/jobs')).filter(job=>!['COMPLETED','FAILED'].includes(job.status)).map(job=>({id:job.id,status:job.status,source:job.request.source_id,table:job.request.table,created_at:job.created_at})),null,2));process.exit(0);}
+const adopted=option('job-id','');
+if(!report.job_id&&adopted){
+  assert.equal(source,'redis','Explicit adoption is used for the Redis UI check');assert.match(adopted,/^[0-9a-f-]{36}$/);
+  const job=await call('/storage/jobs/'+adopted);
+  for(const key of ['source_id','schema','table','format'])assert.equal(job.request[key],report.request[key]);
+  report.request=job.request;report.job_id=adopted;report.submission_attempted_at=job.created_at;report.adopted_from_ui=true;
+  report.reference=await call('/sql/query',{sql:"SELECT count(*),count(DISTINCT customer_id),sum(customer_id),sum(loyalty_points),count_if(segment='vip'),count_if(segment='standard') FROM redis.analytics.customer_segments",max_rows:1});await save();
+}
 if(!report.job_id){
   assert.ok(!report.submission_attempted_at,'Uncertain prior submission; inspect job history');
   const active=(await call('/storage/jobs')).filter(job=>!['COMPLETED','FAILED'].includes(job.status));assert.equal(active.length,0,'Another extraction is active');
   if(source==='clickhouse')report.reference=await clickhouse(table==='invoice'?'SELECT count() AS total,toString(sum(amount)) AS amount,toString(sum(invoice_id)) AS ids,toString(min(invoice_date)) AS first_date,toString(max(invoice_date)) AS last_date FROM analytics.invoice':'SELECT count() AS total,toString(sum(customer_id)) AS ids,countIf(email IS NULL) AS null_emails,toString(min(created_at)) AS first_created FROM analytics.customer');
+  if(source==='redis')report.reference=await call('/sql/query',{sql:"SELECT count(*),count(DISTINCT customer_id),sum(customer_id),sum(loyalty_points),count_if(segment='vip'),count_if(segment='standard') FROM redis.analytics.customer_segments",max_rows:1});
   report.submission_attempted_at=new Date().toISOString();await save();const job=await call('/storage/jobs',report.request);report.job_id=job.id;await save();
 }
 console.log(`Checking ${source}/${table}/${format} job ${report.job_id}`);
@@ -29,7 +39,7 @@ if(source==='redis')sql=`SELECT count(*),count(DISTINCT _key),sum(CAST(customer_
 else if(table==='invoice')sql=`SELECT count(*),CAST(sum(amount) AS VARCHAR),CAST(sum(invoice_id) AS VARCHAR),CAST(min(invoice_date) AS VARCHAR),CAST(max(invoice_date) AS VARCHAR) FROM ${lake}`;
 else sql=`SELECT count(*),CAST(sum(customer_id) AS VARCHAR),count_if(email IS NULL),CAST(min(created_at) AS VARCHAR) FROM ${lake}`;
 report.sql=await call('/sql/query',{sql,max_rows:10});const values=report.sql.rows[0];
-if(source==='redis')assert.deepEqual(values,[1000,1000,500500,5005000,200,800]);
+if(source==='redis'){assert.deepEqual(values,[1000,1000,500500,5005000,200,800]);assert.deepEqual(values,report.reference.rows[0]);}
 else {const reference=report.reference[0];assert.equal(values[0],Number(reference.total));
   if(table==='invoice'){assert.equal(cents(values[1]),cents(reference.amount));assert.equal(values[2],reference.ids);assert.equal(values[3],reference.first_date);assert.equal(values[4],reference.last_date);}
   else {assert.equal(values[1],reference.ids);assert.equal(values[2],Number(reference.null_emails));assert.ok(values[3].startsWith(reference.first_created));}

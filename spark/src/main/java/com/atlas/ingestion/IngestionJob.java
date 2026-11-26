@@ -62,7 +62,8 @@ public final class IngestionJob {
                     .option("upperBound",plan.upper()).option("numPartitions",numPartitions);
             data=reader.load();
             }
-            int effectivePartitions=data.rdd().getNumPartitions();
+            // Native readers always produce one output partition; avoid materializing an AQE shuffle just to count it.
+            int effectivePartitions=nativeSources.supports(args[1])?1:data.rdd().getNumPartitions();
             var partitionColumns=new ArrayList<String>();
             var partitionMetadata=new ArrayList<Map<String,Object>>();
             for(String name:requested) {

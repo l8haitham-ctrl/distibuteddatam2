@@ -12,6 +12,7 @@
 <section class="wf-sources-box native-result" [class.native-tabular]="data.engine==='clickhouse'" aria-label="Résultat de l’exploration">
   <header class="native-card"><h2>{{title()}}</h2><p>{{data.objects.length}} éléments affichés · {{data.transport==='TLS' ? 'TLS vérifié' : 'Sans TLS'}}</p><p class="native-note">{{data.note}}</p>
     @if(activeProfile()?.extraction_source_id){<p class="native-note">Extraction Parquet Snappy disponible sur cette source configurée, sans partitionnement des fichiers. Le traitement sera suivi dans Storage Jobs.</p>}
+    @if(activeProfile()?.extraction_dataset;as dataset){<p class="native-note">Une clé Redis devient une ligne avec sa colonne _key. Les champs du mapping restent du texte ; les clés répétées par SCAN sont dédupliquées. Le traitement parcourt tout le préfixe configuré, au-delà de cet échantillon.</p><button class="wf-button wf-primary" [disabled]="extracting()||uncertain()||busy()" (click)="extract(dataset)">Extraire {{dataset}} en Parquet</button>}
     @if(data.truncated){<p role="status">Liste partielle : limite de lecture atteinte. Le préfixe permet de cibler les noms recherchés.</p>}
   </header>
   <div class="wf-source-table-scroll"><table class="wf-source-table"><thead><tr>

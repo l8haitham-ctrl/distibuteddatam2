@@ -44,7 +44,7 @@ export class NativeSourcesComponent {
   extract(table:string){
     const profile=this.activeProfile();if(!profile?.extraction_source_id||this.extracting()||this.uncertain()||this.busy())return;
     this.extracting.set(true);this.error.set('');
-    this.submission=this.pipeline.create({source_id:profile.extraction_source_id,schema:profile.namespace,table,format:'parquet',compression:'snappy',partition_by:[],partition_granularity:'month',fetch_size:1000,num_partitions:1}).subscribe({
+    this.submission=this.pipeline.create({source_id:profile.extraction_source_id,schema:profile.extraction_schema??profile.namespace,table,format:'parquet',compression:'snappy',partition_by:[],partition_granularity:'month',fetch_size:1000,num_partitions:1}).subscribe({
       next:job=>{this.message.set('Extraction créée.');void this.router.navigate(['/jobs',job.id]);},
       error:error=>{this.extracting.set(false);const code=(error as {status?:number}).status;if(!code||![400,404,422].includes(code))this.uncertain.set(true);this.error.set(errorMessage(error)+(this.uncertain()?' Soumission non confirmée : vérifiez Storage Jobs avant toute relance.':''));}
     });

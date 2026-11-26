@@ -89,3 +89,6 @@ Les [preuves de controle](../validation/results/clickhouse-extraction-2026-11-26
 conservent les identifiants des trois jobs et leurs resultats. Les 45 anciens
 jobs ne sont pas modifies. Ces controles comparent des agregats, pas un checksum
 integral ni un snapshot transactionnel commun a plusieurs systemes.
+
+Le parcours navigateur a aussi ete verifie : [action d'extraction](evidence/clickhouse-extraction-action.jpg)
+et [job invoice termine](evidence/clickhouse-extraction-completed.jpg).
