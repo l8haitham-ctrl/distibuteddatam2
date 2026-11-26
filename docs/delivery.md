@@ -15,7 +15,7 @@ docker compose up -d --build --wait --wait-timeout 300
 docker compose ps -a
 ```
 
-Le script cree .env uniquement s'il n'existe pas, genere 17 secrets distincts
+Le script cree .env uniquement s'il n'existe pas, genere 19 secrets distincts
 et ne les affiche pas. Conserver ce fichier avec les volumes ; modifier un
 mot de passe dans .env ne change pas celui d'une base deja initialisee.
 Ne pas committer ce fichier. Le script ne remplace jamais une configuration

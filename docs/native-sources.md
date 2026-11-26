@@ -1,5 +1,8 @@
 # Connexion et exploration Redis / MinIO
 
+Extension : [exploration Redis et ClickHouse OLAP](redis-clickhouse-exploration.md).
+La page `/sources/native` propose maintenant aussi les tables et colonnes ClickHouse.
+
 Branche `feature/native-source-connections`, base `feature/redis-analytics`.
 Les sources natives utilisent leur protocole et une interface NativeConnector
 distincte de la SPI JDBC. Les implementations sont dans

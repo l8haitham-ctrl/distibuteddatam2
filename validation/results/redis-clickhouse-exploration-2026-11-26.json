@@ -1,0 +1,104 @@
+{
+  "verified_at": "2026-11-26T20:09:48.4326173Z",
+  "branch": "feature/clickhouse-native-exploration",
+  "base_branch": "feature/kaggle-soccer-source",
+  "targeted_backend_tests": [
+    {
+      "suite": "ConnectionIntegrationTests",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "DatabaseIntegrationTests",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "features.nativesources.NativeSourceTests",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "features.nativesources.NativeSourceIntegrationTests",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "features.nativesources.ClickhouseConnectorTests",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "features.nativesources.ClickhouseIntegrationTests",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  ],
+  "backend_image_build": {
+    "failures": 0,
+    "passed": 60,
+    "skipped": 52,
+    "discovered": 112
+  },
+  "frontend_tests": {
+    "failures": 0,
+    "passed": 58,
+    "files": 13
+  },
+  "clickhouse_version": "25.11.1.558",
+  "fixture_rows": {
+    "payment": 8000,
+    "invoice": 5000,
+    "customer": 1000
+  },
+  "setup_env_idempotent": true,
+  "previous_jobs": 45,
+  "browser": {
+    "url": "http://localhost:3000/sources/native",
+    "redis": {
+      "partial_sample": true,
+      "type": "hash",
+      "fields": [
+        "customer_id",
+        "segment",
+        "loyalty_points"
+      ],
+      "connection": "connected",
+      "sample_keys": 100
+    },
+    "clickhouse": {
+      "custom_form_verified": true,
+      "engine": "MergeTree",
+      "tables": [
+        "customer",
+        "invoice",
+        "payment"
+      ],
+      "connection": "connected",
+      "invoice_column_types": [
+        "UInt64",
+        "UInt64",
+        "Date",
+        "Decimal(12, 2)",
+        "LowCardinality(String)"
+      ]
+    },
+    "screenshots": [
+      "docs/evidence/redis-native-exploration.jpg",
+      "docs/evidence/clickhouse-native-exploration.jpg"
+    ]
+  },
+  "final_jobs": 45
+}

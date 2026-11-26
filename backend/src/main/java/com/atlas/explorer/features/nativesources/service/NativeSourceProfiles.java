@@ -13,6 +13,8 @@ public class NativeSourceProfiles {
         var map=new LinkedHashMap<String,NativeConnection>();
         String redis=env.getProperty("REDIS_READER_PASSWORD","");
         if(!redis.isBlank())map.put("redis-demo",new NativeConnection("redis","redis-source",6379,"0","atlas_reader",redis,false,"analytics:customer_segments:"));
+        String clickhouse=env.getProperty("CLICKHOUSE_READER_PASSWORD","");
+        if(!clickhouse.isBlank())map.put("clickhouse-demo",new NativeConnection("clickhouse","clickhouse-source",8123,"analytics","atlas_reader",clickhouse,false,""));
         if(Boolean.parseBoolean(env.getProperty("storage.enabled","false"))) {
             var uri=URI.create(env.getProperty("storage.endpoint","http://minio:9000"));
             boolean tls="https".equals(uri.getScheme());

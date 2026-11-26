@@ -9,6 +9,10 @@ base `EuropeanSoccer`, source `soccer`. Ajouter `docker-compose.soccer.yml` en
 dernier aux quatre fichiers Compose de la demonstration actuelle. L'import et
 sa verification fonctionnent dans Docker ; les autres bases sont conservees.
 
+Exploration multi-modele : [Redis et ClickHouse (OLAP)](docs/redis-clickhouse-exploration.md)
+depuis `/sources/native`. Le sixieme fichier `docker-compose.clickhouse.yml`
+ajoute une demonstration ClickHouse independante et son compte en lecture seule.
+
 ## Etat des branches
 
 La version complete de livraison est sur `feature/release-readiness`.

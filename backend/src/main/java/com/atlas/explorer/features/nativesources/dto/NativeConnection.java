@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.*;
 
 public record NativeConnection(
-    @NotBlank @Pattern(regexp="redis|minio") String engine,
+    @NotBlank @Pattern(regexp="redis|minio|clickhouse") String engine,
     @NotBlank @Size(max=255) @Pattern(regexp="[a-zA-Z0-9_.:-]+") String host,
     @NotNull @Min(1) @Max(65535) Integer port,
     @NotBlank @Size(max=128) String namespace,
