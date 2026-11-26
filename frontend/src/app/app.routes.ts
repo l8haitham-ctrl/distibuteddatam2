@@ -1,13 +1,16 @@
-import { Routes } from '@angular/router';
+import { inject } from '@angular/core';
+import { Router, Routes } from '@angular/router';
 import { authGuard } from './features/auth/auth.guard';
 export const routes: Routes = [
   {path:'login',loadComponent:()=>import('./features/auth/login-page.component').then(m=>m.LoginPageComponent)},
   {path:'',canActivateChild:[authGuard],loadComponent:()=>import('./features/auth/platform-shell.component').then(m=>m.PlatformShellComponent),children:[
   {path:'glossary',loadComponent:()=>import('./features/glossary/glossary-page.component').then(m=>m.GlossaryPageComponent)},
-  {path:'sources/native',loadComponent:()=>import('./features/native-sources.component').then(m=>m.NativeSourcesComponent)},
+  {path:'sources/native',pathMatch:'full',redirectTo:({queryParams})=>queryParams['source_id']
+    ?inject(Router).createUrlTree(['/explorer'],{queryParams:{source_id:'native:'+String(queryParams['source_id']).replace(/^native:/,'')}})
+    :'/sources'},
   {path:'sources/new',loadComponent:()=>import('./features/source-form.component').then(m=>m.SourceFormComponent)},
   {path:'sources',loadComponent:()=>import('./features/sources-page.component').then(m=>m.SourcesPageComponent)},
-  {path:'explorer',loadComponent:()=>import('./features/explorer-page.component').then(m=>m.ExplorerPageComponent)},
+  {path:'explorer',loadComponent:()=>import('./features/source-explorer.component').then(m=>m.SourceExplorerComponent)},
   {path:'storage',loadComponent:()=>import('./features/storage-page.component').then(m=>m.StoragePageComponent)},
   {path:'jobs/:id',loadComponent:()=>import('./features/jobs-page.component').then(m=>m.JobsPageComponent)},
   {path:'jobs',loadComponent:()=>import('./features/jobs-page.component').then(m=>m.JobsPageComponent)},

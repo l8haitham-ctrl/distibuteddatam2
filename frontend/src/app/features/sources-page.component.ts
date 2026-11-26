@@ -20,7 +20,7 @@ export class SourcesPageComponent {
   engineName(source:SourceEntry){const names:Record<string,string>={redis:'Redis',clickhouse:'ClickHouse',minio:'MinIO / S3'};return source.native_profile?(names[source.engine]??source.engine):this.connectors.shortName(source.engine);}
   explore(source:SourceEntry){
     if(this.store.mockup){void this.router.navigate(['/explorer'],{queryParams:{maquette:1}});return;}
-    if(source.native_profile){void this.router.navigate(['/sources/native'],{queryParams:{source_id:source.native_profile}});return;}
+    if(source.native_profile){void this.router.navigate(['/explorer'],{queryParams:{source_id:'native:'+source.native_profile}});return;}
     if(source.temporary&&source.exploration){this.injector.get(ExplorerStore).apply(source,source.exploration);void this.router.navigate(['/explorer']);}
     else void this.router.navigate(['/explorer'],{queryParams:{source_id:source.id}});
   }

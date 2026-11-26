@@ -1,7 +1,9 @@
 # Connexion et exploration Redis / MinIO
 
 Extension : [exploration Redis et ClickHouse OLAP](redis-clickhouse-exploration.md).
-La page `/sources/native` propose maintenant aussi les tables et colonnes ClickHouse.
+Les sources se choisissent sur `/sources` puis **Explorer**, dans
+l'[explorateur commun](unified-explorer.md). L'ancien ecran `/sources/native`
+et son formulaire personnalise sont retires de l'interface actuelle.
 
 Branche `feature/native-source-connections`, base `feature/redis-analytics`.
 Les sources natives utilisent leur protocole et une interface NativeConnector
@@ -85,7 +87,7 @@ Reference : [client Java Jedis officiel](https://redis.io/docs/latest/develop/cl
 Validation locale : 20 tests cibles passes dans Docker, dont 4 integrations
 Redis/MinIO natives, 5 integrations analytiques et 7 integrations SQL Server.
 
-## Interface Angular
+## Ancienne interface Angular (historique)
 
 La branche `feature/native-source-interface` depend de
 `feature/native-source-connections`. Depuis Data Sources ou le formulaire

@@ -6,9 +6,10 @@ Les sources relationnelles SQL Server, PostgreSQL et Football sont conservees.
 
 ## Parcours utilisateur
 
-Depuis **Sources**, choisir **Explorer Redis, ClickHouse ou MinIO**, ou ouvrir
-[/sources/native](http://localhost:3000/sources/native). Se connecter a la
-plateforme si necessaire.
+Depuis [**Data Sources**](http://localhost:3000/sources), choisir **Tester** ou
+**Explorer** sur la ligne Redis, ClickHouse ou MinIO. L'[explorateur commun](unified-explorer.md)
+affiche la source choisie dans le meme cadre que SQL Server. Se connecter a la
+plateforme si necessaire. L'ancien ecran `/sources/native` redirige.
 
 1. **Tester Redis** verifie l'authentification et le PING de `redis-demo`.
 2. **Explorer Redis** affiche un echantillon de cles, leurs types et les noms
@@ -17,7 +18,7 @@ plateforme si necessaire.
 3. **Tester ClickHouse (OLAP)** verifie l'authentification et l'existence de
    la base `analytics` du profil `clickhouse-demo`.
 4. **Explorer ClickHouse (OLAP)** affiche les tables `customer`, `invoice` et
-   `payment`, leurs moteurs `MergeTree`. Deplier une table affiche les colonnes,
+   `payment`, leurs moteurs `MergeTree`. Selectionner une table affiche les colonnes,
    leurs types exacts (`UInt64`, `Nullable(String)`, `Decimal(12, 2)`, etc.),
    les colonnes de tri et les colonnes de partitionnement.
 

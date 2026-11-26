@@ -10,7 +10,7 @@ dernier aux quatre fichiers Compose de la demonstration actuelle. L'import et
 sa verification fonctionnent dans Docker ; les autres bases sont conservees.
 
 Exploration multi-modele : [Redis et ClickHouse (OLAP)](docs/redis-clickhouse-exploration.md)
-depuis `/sources/native`. Le sixieme fichier `docker-compose.clickhouse.yml`
+depuis la liste `/sources` puis **Explorer**. Le sixieme fichier `docker-compose.clickhouse.yml`
 ajoute une demonstration ClickHouse independante et son compte en lecture seule.
 
 La [liste unifiee des sources](docs/unified-sources.md) affiche SQL Server,
@@ -22,6 +22,11 @@ l'exploration native, traitement Spark en flux, publication MinIO/Hive/Trino.
 
 [Extraction des hashes Redis](docs/redis-hash-extraction.md) : mapping explicite,
 parcours du prefixe complet, conservation des cles et deduplication Spark.
+
+[Explorateur commun](docs/unified-explorer.md) : SQL Server, PostgreSQL, Redis,
+ClickHouse et MinIO utilisent le meme cadre Source Explorer, avec arborescence,
+recherche et panneau de details. L'ancien ecran `/sources/native` est retire ;
+ses liens avec un profil redirigent vers l'explorateur choisi.
 
 ## Etat des branches
 
@@ -502,10 +507,10 @@ les API de connexion et d'exploration Redis (cles/types/champs) et MinIO
 [les sources natives](docs/native-sources.md).
 
 `feature/native-source-interface`, base `feature/native-source-connections`,
-ajoute `/sources/native` : boutons de test/exploration des profils Docker,
-formulaire de connexion Redis/MinIO et structures conservees en session
-sans mots de passe. Le lien « Connecter Redis ou MinIO » est disponible
-dans Data Sources et dans le formulaire de connexion.
+avait ajoute `/sources/native` pour les profils Docker et connexions temporaires.
+`feature/unified-source-explorer`, base `feature/redis-hash-extraction`, remplace
+cet ecran par le parcours commun depuis Data Sources. Le formulaire natif
+personnalise est retire de l'interface ; les API de connexion restent disponibles.
 
 La branche `feature/reproducible-benchmarks`, base `feature/native-source-interface`,
 ajoute un runner Docker pour comparer huit strategies sur 100 000 factures,

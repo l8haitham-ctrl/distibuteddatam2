@@ -1,0 +1,56 @@
+<div class="wf-page-heading"><div><h1>Source Explorer</h1><p>Explorez la structure de votre source, puis sélectionnez les données à extraire.</p></div><div class="page-actions"><button class="wf-button" [disabled]="busy()||store.loading()||extracting()" (click)="refresh()"><app-icon name="RefreshCw" [class.spin]="busy()"/>Actualiser</button><a class="wf-button" routerLink="/sources">Choisir une source</a><a class="wf-button wf-primary" routerLink="/sources/new"><app-icon name="Plus"/>Ajouter une source</a></div></div>
+<section class="explorer-section" aria-labelledby="native-sources-title">
+  <div class="section-heading"><div><h2 id="native-sources-title">Explorateur de source</h2><p>Une vue précise de la structure de votre source.</p></div><span class="section-note"><app-icon name="ShieldCheck" [size]="15"/>Consultation de la structure</span></div>
+  @if(error()){
+    <div class="workspace-error" role="alert"><app-icon name="CircleAlert" [size]="28"/><h3>Impossible de rejoindre la source</h3><p>{{error()}}</p><button class="button secondary" (click)="refresh()"><app-icon name="RefreshCw"/>Réessayer</button></div>
+  }@else if(busy()||store.loading()){
+    <div class="loading-state" role="status"><app-icon name="LoaderCircle" class="spin" [size]="30"/><h3>Connexion à votre source…</h3><p>Vérification de l’accès et lecture de la structure disponible.</p></div>
+  }@else if(result();as data){
+    @if(activeProfile();as profile){
+      <div class="source-strip"><div class="source-icon"><app-icon name="Database" [size]="24"/></div><div class="source-name"><div><h3>{{data.namespace}}</h3><span class="connected-badge"><span class="tiny-dot"></span>Connectée</span></div><p>{{store.name(data.engine)}}<span>·</span><code>{{profile.host}}:{{profile.port}}</code></p></div><div class="source-strip-right"><span>{{data.objects.length}} {{itemsLabel()}}{{data.truncated?' (échantillon)':''}}</span><span class="read-only"><app-icon name="ShieldCheck" [size]="13"/>Lecture seule</span></div></div>
+      <div class="session-note"><app-icon name="Info" [size]="14"/><span>{{data.note}} @if(data.truncated){Liste partielle : {{data.objects.length}} éléments affichés, pas l’ensemble de la source.}</span></div>
+      <div class="explorer-workspace">
+        <app-table-tree [tables]="tables()" [selected]="selectedRef()" [database]="data.namespace" [itemKind]="itemKind()" [bounded]="true" (select)="selectTable($event)"/>
+        @if(selected();as object){
+          <div class="table-structure" role="region" [attr.aria-label]="'Structure de '+object.name">
+            <div class="table-heading">
+              <div class="breadcrumbs">{{profile.id}}<span>/</span>{{data.namespace}}<span>/</span><strong>{{object.name}}</strong></div>
+              <div class="table-title"><span class="table-title-icon"><app-icon [name]="data.engine==='redis'?'KeyRound':data.engine==='minio'?'Box':'Table2'" [size]="23"/></span><h2>{{object.name}}</h2><span class="table-badge">{{data.engine==='redis'?'CLÉ':data.engine==='minio'?'FICHIER':'TABLE'}}</span></div>
+              <p>{{data.engine==='clickhouse'?'Découvrez les colonnes et les propriétés de votre table.':data.engine==='redis'?'Découvrez le type de cette clé et les noms de champs disponibles.':'Consultez les propriétés de cet objet dans le stockage.'}}</p>
+              @if(profile.extraction_source_id){
+                <button class="button primary" [disabled]="extracting()||uncertain()" (click)="extract()"><app-icon name="Network"/>{{extracting()?'Création du job…':data.engine==='redis'?'Extraire le jeu de données':'Extraire cette table'}}</button>
+                <p class="muted">Parquet Snappy · sans partitionnement des fichiers. @if(profile.extraction_dataset){Le job {{profile.extraction_dataset}} lit tout le préfixe {{profile.prefix}}, au-delà de la clé sélectionnée et de cet échantillon. Une clé devient une ligne ; les champs du mapping restent du texte.}</p>
+              }@else{<p class="muted">Consultation des fichiers uniquement. Une table doit être enregistrée dans le catalogue pour être interrogée en SQL.</p>}
+              @if(extractionError()){<div class="wf-alert" role="alert">{{extractionError()}} <a routerLink="/jobs">Voir Storage Jobs</a></div>}
+              <div class="table-metrics"><span><app-icon name="Columns3" [size]="14"/>{{data.engine==='clickhouse'?columns().length+' colonnes':data.engine==='redis'?object.fields.length+' champs affichés':object.size+' octets'}}</span><span><app-icon name="Database" [size]="14"/>{{object.type}}</span><span><app-icon name="ShieldCheck" [size]="14"/>{{data.transport==='TLS'?'TLS vérifié':'Sans TLS · Docker local'}}</span></div>
+            </div>
+            <div class="structure-tabs" role="tablist" aria-label="Détails de la source" (keydown)="tabKey($event)">
+              <button id="native-tab-structure" role="tab" aria-controls="native-panel-structure" [attr.aria-selected]="tab()==='structure'" [tabIndex]="tab()==='structure'?0:-1" [class.active]="tab()==='structure'" (click)="tab.set('structure')"><app-icon name="Columns3"/>{{data.engine==='clickhouse'?'Colonnes':data.engine==='redis'?'Champs':'Fichier'}}</button>
+              <button id="native-tab-properties" role="tab" aria-controls="native-panel-properties" [attr.aria-selected]="tab()==='properties'" [tabIndex]="tab()==='properties'?0:-1" [class.active]="tab()==='properties'" (click)="tab.set('properties')"><app-icon name="Info"/>Propriétés</button>
+            </div>
+            <div id="native-panel-structure" role="tabpanel" aria-labelledby="native-tab-structure" [hidden]="tab()!=='structure'">
+              @if(data.engine==='clickhouse'){
+                @if(object.columns_truncated){<p class="native-detail-note" role="status">Seules les 200 premières colonnes sont affichées.</p>}
+                <div class="column-table-wrapper"><table class="column-table"><caption class="sr-only">Colonnes de {{object.name}}</caption><thead><tr><th class="column-number">#</th><th>Nom de la colonne</th><th>Type de données</th><th>Tri</th><th>Partition</th></tr></thead><tbody>
+                  @for(column of columns();track column.name){<tr><td class="column-number">{{column.position.toString().padStart(2,'0')}}</td><th scope="row"><span class="column-name"><span class="column-mark"></span>{{column.name}}</span></th><td><code class="data-type">{{column.data_type}}</code></td><td>{{column.sorting_key?'Oui':'—'}}</td><td>{{column.partition_key?'Oui':'—'}}</td></tr>}
+                </tbody></table></div>
+              }@else if(data.engine==='redis'){
+                <div class="column-table-wrapper"><table class="column-table"><caption class="sr-only">Champs de {{object.name}}</caption><thead><tr><th class="column-number">#</th><th>Nom du champ</th><th>Type de données</th></tr></thead><tbody>
+                  @for(field of object.fields;track field){<tr><td class="column-number">{{$index+1}}</td><th scope="row"><span class="column-name"><span class="column-mark"></span>{{field}}</span></th><td>Non déclaré par Redis</td></tr>}@empty{<tr><td colspan="3">{{object.type==='hash'?'Aucun champ retourné.':'Cette clé ne possède pas de champs de hash.'}}</td></tr>}
+                </tbody></table></div><p class="native-detail-note">Noms de champs échantillonnés uniquement. Aucune valeur métier n’est chargée dans cet explorateur.</p>
+              }@else{
+                <div class="column-table-wrapper"><table class="column-table"><caption class="sr-only">Objet {{object.name}}</caption><thead><tr><th>Nom du fichier</th><th>Type</th><th>Taille en octets</th></tr></thead><tbody><tr><th scope="row"><code>{{object.name}}</code></th><td>{{object.type}}</td><td>{{object.size}}</td></tr></tbody></table></div>
+              }
+            </div>
+            <div id="native-panel-properties" role="tabpanel" aria-labelledby="native-tab-properties" [hidden]="tab()!=='properties'" class="native-properties">
+              <dl><div><dt>Source</dt><dd>{{profile.id}}</dd></div><div><dt>{{data.engine==='minio'?'Bucket':data.engine==='redis'?'Index de base':'Base de données'}}</dt><dd>{{data.namespace}}</dd></div><div><dt>{{data.engine==='clickhouse'?'Moteur de table':'Type'}}</dt><dd>{{object.type}}</dd></div><div><dt>Préfixe exploré</dt><dd><code>{{profile.prefix||'Aucun'}}</code></dd></div></dl>
+              <p>Les relations par clés étrangères ne sont pas exposées par ce connecteur.</p>
+            </div>
+            <div class="structure-bottom"><span><app-icon name="ShieldCheck" [size]="15"/>Métadonnées lues depuis la source</span><span><app-icon name="Check" [size]="13"/>Structure consultée en lecture seule</span></div>
+          </div>
+        }@else{<div class="detail-placeholder"><app-icon name="Layers3" [size]="32"/><h3>Aucun élément accessible</h3><p>Vérifiez le préfixe configuré et les droits de lecture du compte.</p></div>}
+      </div>
+    }
+  }
+</section>
+<div class="page-footnote"><app-icon name="Info" [size]="15"/><span>L’exploration consulte la structure. Le bouton Extraire déclenche un job séparé.</span><span class="footnote-right">Data Platform · Source Explorer</span></div>

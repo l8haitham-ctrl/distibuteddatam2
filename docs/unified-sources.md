@@ -20,9 +20,9 @@ source sont bloques, leurs resultats restent visibles apres actualisation de
 la liste dans la session courante.
 
 **Explorer** ouvre directement la source choisie : `/explorer?source_id=...`
-pour le relationnel, `/sources/native?source_id=...` pour les profils natifs.
-Ce dernier lien declenche seulement l'exploration du profil explicitement choisi.
-La page native sans parametre attend toujours une action utilisateur.
+pour le relationnel, `/explorer?source_id=native:...` pour les profils natifs.
+L'[explorateur commun](unified-explorer.md) reprend le cadre SQL Server pour
+les trois autres moteurs. Les anciens liens `/sources/native` redirigent.
 
 Cette evolution Angular conserve les API et les capacites propres a chaque
 connecteur. Le backend, les bases et les jobs Spark ne sont pas modifies.

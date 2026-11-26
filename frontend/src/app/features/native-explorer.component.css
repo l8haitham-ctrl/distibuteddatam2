@@ -1,0 +1,8 @@
+:host{display:block}
+.table-title h2,.breadcrumbs strong,.column-name,td code{overflow-wrap:anywhere;min-width:0}
+.native-detail-note{padding:16px 24px;color:var(--muted);font-size:12px;line-height:1.6}
+.native-properties{padding:24px;color:var(--muted);font-size:13px}
+.native-properties dl{margin:0;display:grid;gap:18px}
+.native-properties dl>div{display:grid;grid-template-columns:minmax(120px,1fr) minmax(0,2fr);gap:16px}
+.native-properties dt{font-weight:600}.native-properties dd{margin:0;overflow-wrap:anywhere}
+.native-properties p{line-height:1.6;margin-top:24px}
