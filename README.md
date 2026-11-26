@@ -4,6 +4,11 @@ Projet pedagogique : connecter une base relationnelle, explorer sa structure,
 puis construire un pipeline analytique Parquet / MinIO / catalogue / Trino.
 La stack retenue est **Angular + Java 21 / Spring Boot**, entierement conteneurisee.
 
+Source supplementaire optionnelle : [Football Kaggle dans SQL Server](docs/soccer-source.md),
+base `EuropeanSoccer`, source `soccer`. Ajouter `docker-compose.soccer.yml` en
+dernier aux quatre fichiers Compose de la demonstration actuelle. L'import et
+sa verification fonctionnent dans Docker ; les autres bases sont conservees.
+
 ## Etat des branches
 
 La version complete de livraison est sur `feature/release-readiness`.

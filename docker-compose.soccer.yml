@@ -1,0 +1,40 @@
+# Apply after connectors, analytics and benchmarks to preserve all existing sources.
+x-soccer-env: &soccer-env
+  SOURCE_IDS: sqlserver,postgresql,benchmark,soccer
+  SOURCE_SOCCER_ENGINE: sqlserver
+  SOURCE_SOCCER_HOST: sqlserver
+  SOURCE_SOCCER_PORT: "1433"
+  SOURCE_SOCCER_DATABASE: EuropeanSoccer
+  SOURCE_SOCCER_USERNAME: lake_reader
+  SOURCE_SOCCER_PASSWORD: ${LAKE_READER_PASSWORD:?Define LAKE_READER_PASSWORD in .env}
+  SOURCE_SOCCER_TRUST_SERVER_CERTIFICATE: "true"
+services:
+  soccer-check:
+    profiles: [tools]
+    image: distributed-data-benchmark:local
+    entrypoint: ["node", "/checks/verify-soccer.mjs"]
+    environment:
+      APP_LOGIN_USERNAME: ${APP_LOGIN_USERNAME:-admin}
+      APP_LOGIN_PASSWORD: ${APP_LOGIN_PASSWORD:?Define APP_LOGIN_PASSWORD in .env}
+    volumes:
+      - ./scripts:/checks:ro
+      - ./datasets/soccer/results:/results
+    mem_limit: 128m
+  soccer-import:
+    profiles: [tools]
+    image: distributed-data-soccer-import:local
+    build: ./datasets/soccer
+    environment:
+      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD:?Define MSSQL_SA_PASSWORD in .env}
+    volumes:
+      - ./datasets/soccer/results:/results
+    mem_limit: 256m
+    restart: "no"
+  backend:
+    environment: *soccer-env
+  spark-worker:
+    environment: *soccer-env
+  backend-tests:
+    environment:
+      <<: *soccer-env
+      RUN_SOCCER_TESTS: "true"

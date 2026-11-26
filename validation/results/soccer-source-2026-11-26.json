@@ -1,0 +1,237 @@
+{
+  "verified_at": "2026-11-26T14:03:09.7424773Z",
+  "branch": "feature/kaggle-soccer-source",
+  "base_branch": "feature/source-test-progress",
+  "import": {
+    "dataset": "hugomathien/soccer",
+    "version": 10,
+    "archive_sha256": "5a59c60f417faf2a7b2b57af9e6220da97ff0eaa6bedeea465848e1c2bb60cdb",
+    "database": "EuropeanSoccer",
+    "tables": {
+      "Country": {
+        "rows": 11,
+        "columns": 2,
+        "all_values_verified": true
+      },
+      "League": {
+        "rows": 11,
+        "columns": 3,
+        "all_values_verified": true
+      },
+      "Team": {
+        "rows": 299,
+        "columns": 5,
+        "all_values_verified": true
+      },
+      "Player": {
+        "rows": 11060,
+        "columns": 7,
+        "all_values_verified": true
+      },
+      "Match": {
+        "rows": 25979,
+        "columns": 115,
+        "all_values_verified": true
+      },
+      "Team_Attributes": {
+        "rows": 1458,
+        "columns": 25,
+        "all_values_verified": true
+      },
+      "Player_Attributes": {
+        "rows": 183978,
+        "columns": 42,
+        "all_values_verified": true
+      }
+    },
+    "foreign_keys": [
+      "FK_League_country_id",
+      "FK_Match_country_id",
+      "FK_Match_league_id",
+      "FK_Match_home_team_api_id",
+      "FK_Match_away_team_api_id",
+      "FK_Team_Attributes_team_api_id",
+      "FK_Player_Attributes_player_api_id"
+    ]
+  },
+  "integration_tests": [
+    {
+      "suite": "ConnectionIntegrationTests",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "DatabaseIntegrationTests",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "SoccerIntegrationTests",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  ],
+  "overwrite_guard_verified": true,
+  "previous_jobs": 44,
+  "pipeline": {
+    "source_id": "soccer",
+    "started_at": "2026-11-26T13:59:56.018Z",
+    "connection": {
+      "database_name": "EuropeanSoccer",
+      "database_user": "lake_reader",
+      "status": "connected"
+    },
+    "tables": {
+      "tables": [
+        {
+          "schema_name": "dbo",
+          "table_name": "Country"
+        },
+        {
+          "schema_name": "dbo",
+          "table_name": "League"
+        },
+        {
+          "schema_name": "dbo",
+          "table_name": "Match"
+        },
+        {
+          "schema_name": "dbo",
+          "table_name": "Player"
+        },
+        {
+          "schema_name": "dbo",
+          "table_name": "Player_Attributes"
+        },
+        {
+          "schema_name": "dbo",
+          "table_name": "Team"
+        },
+        {
+          "schema_name": "dbo",
+          "table_name": "Team_Attributes"
+        }
+      ]
+    },
+    "request": {
+      "source_id": "soccer",
+      "schema": "dbo",
+      "table": "Team",
+      "format": "parquet",
+      "compression": "snappy",
+      "fetch_size": 100,
+      "num_partitions": 1,
+      "partition_by": []
+    },
+    "submission_attempted_at": "2026-11-26T13:59:58.36Z",
+    "job_id": "6977593d-6fa8-477c-82fd-2d3ceff37e16",
+    "result": {
+      "version": 2,
+      "job_id": "6977593d-6fa8-477c-82fd-2d3ceff37e16",
+      "prefix": "soccer/dbo/Team/6977593d-6fa8-477c-82fd-2d3ceff37e16",
+      "source_id": "soccer",
+      "schema_name": "dbo",
+      "table_name": "Team",
+      "source_engine": "sqlserver",
+      "format": "parquet",
+      "compression": "snappy",
+      "row_count": 299,
+      "file_count": 1,
+      "storage_bytes": 11288,
+      "schema_json": "{\"type\":\"struct\",\"fields\":[{\"name\":\"id\",\"type\":\"long\",\"nullable\":true,\"metadata\":{\"isSigned\":true,\"scale\":0,\"isTimestampNTZ\":false,\"preferTimestampNanos\":false,\"jdbcClientType\":\"bigint\"}},{\"name\":\"team_api_id\",\"type\":\"long\",\"nullable\":true,\"metadata\":{\"isSigned\":true,\"scale\":0,\"isTimestampNTZ\":false,\"preferTimestampNanos\":false,\"jdbcClientType\":\"bigint\"}},{\"name\":\"team_fifa_api_id\",\"type\":\"long\",\"nullable\":true,\"metadata\":{\"isSigned\":true,\"scale\":0,\"isTimestampNTZ\":false,\"preferTimestampNanos\":false,\"jdbcClientType\":\"bigint\"}},{\"name\":\"team_long_name\",\"type\":\"string\",\"nullable\":true,\"metadata\":{\"isSigned\":false,\"scale\":0,\"isTimestampNTZ\":false,\"preferTimestampNanos\":false,\"jdbcClientType\":\"nvarchar\"}},{\"name\":\"team_short_name\",\"type\":\"string\",\"nullable\":true,\"metadata\":{\"isSigned\":false,\"scale\":0,\"isTimestampNTZ\":false,\"preferTimestampNanos\":false,\"jdbcClientType\":\"nvarchar\"}}]}",
+      "partition_by": [],
+      "partition_granularity": "month",
+      "partition_columns": [],
+      "partition_file_counts": {
+        "__unpartitioned__": 1
+      },
+      "fetch_size": 100,
+      "max_records_per_file": 100000,
+      "requested_num_partitions": 1,
+      "effective_num_partitions": 1,
+      "jdbc_partition_column": null,
+      "jdbc_lower_bound": null,
+      "jdbc_upper_bound": null,
+      "parallel_read_note": "Single reader requested.",
+      "extract_write_ms": 43422,
+      "verify_ms": 8342,
+      "spark_duration_ms": 61841,
+      "spark_application_id": "app-20261126140009-0001",
+      "manifest_key": "soccer/dbo/Team/6977593d-6fa8-477c-82fd-2d3ceff37e16/manifest.json",
+      "bucket": "lake",
+      "catalog_table": "hive.runs.team_6977593d",
+      "current_view": "hive.soccer_dbo.team",
+      "registration_ms": 25168,
+      "example_query": "SELECT * FROM hive.runs.team_6977593d LIMIT 100"
+    },
+    "sql": {
+      "rows": [
+        [
+          299
+        ]
+      ],
+      "execution_ms": 1974,
+      "columns": [
+        {
+          "type": "bigint",
+          "name": "total"
+        }
+      ],
+      "row_count": 1,
+      "query_id": "20261125_172802_00008_ejar5",
+      "stats": {
+        "cpu_ms": 91,
+        "processed_rows": 299,
+        "elapsed_ms": 1310,
+        "processed_bytes": 11332,
+        "state": "FINISHED"
+      },
+      "truncated": false
+    },
+    "completed_at": "2026-11-26T14:02:39.693Z",
+    "sources": [
+      {
+        "username": "lake_reader",
+        "port": 1433,
+        "engine": "sqlserver",
+        "database": "BusinessDB",
+        "id": "sqlserver",
+        "default_schema": "dbo",
+        "host": "sqlserver"
+      },
+      {
+        "username": "atlas_reader",
+        "port": 5432,
+        "engine": "postgresql",
+        "database": "business",
+        "id": "postgresql",
+        "default_schema": "public",
+        "host": "postgres-source"
+      },
+      {
+        "username": "lake_reader",
+        "port": 1433,
+        "engine": "sqlserver",
+        "database": "BusinessBenchmark",
+        "id": "benchmark",
+        "default_schema": "dbo",
+        "host": "sqlserver"
+      },
+      {
+        "username": "lake_reader",
+        "port": 1433,
+        "engine": "sqlserver",
+        "database": "EuropeanSoccer",
+        "id": "soccer",
+        "default_schema": "dbo",
+        "host": "sqlserver"
+      }
+    ]
+  }
+}

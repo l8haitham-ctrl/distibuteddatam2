@@ -10,3 +10,4 @@ frontend/dist/
 backend/target/
 frontend/.angular/
 work/
+datasets/soccer/results/
