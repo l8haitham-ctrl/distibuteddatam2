@@ -1,12 +1,16 @@
 import { AfterViewInit, Component, ElementRef, input, output, viewChild } from '@angular/core';
-import { SourceEntry } from '../../core/sources.store';
+import { NativeTestRun, SourceEntry } from '../../core/sources.store';
 import { DiagnosticStep, SourceTestRun } from './source-test.api';
 import { IconComponent } from '../../shared/icon.component';
 @Component({selector:'app-source-test-dialog',imports:[IconComponent],template:`
   <dialog #dialog class="source-test-dialog" aria-labelledby="source-test-title" (cancel)="$event.preventDefault();closed.emit()" (click)="$event.target===dialog&&closed.emit()">
     <header><div><span class="test-eyebrow">DIAGNOSTIC DE CONNEXION</span><h2 id="source-test-title">Tester {{source().name}}</h2></div><button class="icon-button" aria-label="Fermer le suivi" (click)="closed.emit()"><app-icon name="X" [size]="20"/></button></header>
     <p class="test-target">{{source().host}}:{{source().port}} · {{source().database}}</p>
-    @if(run();as r){<p class="test-result" role="status"><app-icon [name]="r.state==='running'?'LoaderCircle':r.state==='passed'?'Check':'CircleAlert'" [class.spin]="r.state==='running'"/>{{r.message}}@if(r.duration_ms!==null){<span>{{r.duration_ms}} ms</span>}</p>
+    @if(source().native_profile){
+      @if(nativeRun();as r){<p class="test-result" role="status"><app-icon [name]="r.state==='running'?'LoaderCircle':r.state==='passed'?'Check':'CircleAlert'" [class.spin]="r.state==='running'"/>{{r.message}}</p>
+      <p class="test-note">Le connecteur vérifie l’authentification et l’accès à cette source avec son protocole natif.</p>
+      <footer><button class="wf-button" (click)="closed.emit()">Fermer</button><button class="wf-button wf-primary" [disabled]="r.state==='running'" (click)="retry.emit()">Relancer le test</button></footer>}
+    }@else if(run();as r){<p class="test-result" role="status"><app-icon [name]="r.state==='running'?'LoaderCircle':r.state==='passed'?'Check':'CircleAlert'" [class.spin]="r.state==='running'"/>{{r.message}}@if(r.duration_ms!==null){<span>{{r.duration_ms}} ms</span>}</p>
       <ol aria-label="Étapes du test">@for(step of steps;track step.id){<li [class.failed]="r.steps[step.id].state==='failed'"><span class="test-step-icon"><app-icon [name]="r.steps[step.id].state==='passed'?'Check':r.steps[step.id].state==='running'?'LoaderCircle':r.steps[step.id].state==='failed'?'X':'Minus'" [class.spin]="r.steps[step.id].state==='running'"/></span><div><strong>{{step.label}}</strong><p>{{r.steps[step.id].message||step.note}}</p></div><small>{{label(r.steps[step.id],r)}}@if(r.steps[step.id].state==='passed'||r.steps[step.id].state==='failed'){<span>{{r.steps[step.id].duration_ms}} ms</span>}</small></li>}</ol>
       <p class="test-note">TLS, authentification et ouverture de la base sont vérifiés ensemble par le pilote JDBC. Les étapes affichées proviennent du serveur.</p>
       @if(r.state==='running'){<p class="test-note">Vous pouvez fermer cette fenêtre ; le test continue et mettra à jour la liste.</p>}
@@ -17,6 +21,7 @@ import { IconComponent } from '../../shared/icon.component';
 `})
 export class SourceTestDialogComponent implements AfterViewInit {
   source=input.required<SourceEntry>();run=input<SourceTestRun>();closed=output<void>();retry=output<void>();
+  nativeRun=input<NativeTestRun>();
   private dialog=viewChild.required<ElementRef<HTMLDialogElement>>('dialog');
   steps=[{id:'dns',label:'Résolution du serveur',note:'Recherche de l’adresse réseau.'},{id:'tcp',label:'Accès au port',note:'Vérification de la connexion réseau.'},{id:'jdbc',label:'Connexion à la base',note:'TLS, authentification et ouverture de la base.'},{id:'validation',label:'Validation de la session SQL',note:'Vérification de la session par le pilote.'}] as const;
   ngAfterViewInit(){this.dialog().nativeElement.showModal();}

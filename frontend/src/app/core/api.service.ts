@@ -2,12 +2,15 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { timeout } from 'rxjs';
 import type { ConnectorInfo, ConnectionConfig, Exploration, Source, TableDetails, TableRef } from '../../types';
+import type { NativeProfile } from './native-sources.store';
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
   private http = inject(HttpClient);
   connectors() { return this.http.get<ConnectorInfo[]>('/api/connectors').pipe(timeout(15_000)); }
   sources() { return this.http.get<Source[]>('/api/sources').pipe(timeout(15_000)); }
+  nativeSources() { return this.http.get<NativeProfile[]>('/api/native/sources').pipe(timeout(15_000)); }
+  testNativeSource(id:string) { return this.http.post<{status:string}>(`/api/native/sources/${encodeURIComponent(id)}/test`,{}).pipe(timeout(20_000)); }
   testSource(id: string) { return this.http.post(`/api/sources/${encodeURIComponent(id)}/test`, {}).pipe(timeout(20_000)); }
   tables(id: string) { return this.http.get<{tables: TableRef[]}>(`/api/sources/${encodeURIComponent(id)}/tables`).pipe(timeout(20_000)); }
   describe(id: string, table: TableRef) { return this.http.get<TableDetails>(`/api/sources/${encodeURIComponent(id)}/tables/${encodeURIComponent(table.table_name)}`, {params:{schema:table.schema_name}}).pipe(timeout(20_000)); }

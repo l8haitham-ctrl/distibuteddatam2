@@ -1,0 +1,42 @@
+{
+  "verified_at": "2026-11-26T20:24:14.1037090Z",
+  "branch": "feature/unified-source-list",
+  "base_branch": "feature/clickhouse-native-exploration",
+  "frontend_tests": {
+    "files": 13,
+    "passed": 63,
+    "failures": 0
+  },
+  "production_build": "passed",
+  "configured_rows": [
+    "sqlserver",
+    "postgresql",
+    "benchmark",
+    "soccer",
+    "redis-demo",
+    "clickhouse-demo",
+    "minio-lake"
+  ],
+  "browser": {
+    "combined_list_verified": true,
+    "clickhouse_tables_displayed": 3,
+    "redis_exploration_url": "/sources/native?source_id=redis-demo",
+    "redis_keys_displayed": 100,
+    "clickhouse_test": "connected",
+    "redis_test": "connected",
+    "statuses_retained_on_return": true,
+    "clickhouse_exploration_url": "/sources/native?source_id=clickhouse-demo",
+    "sqlserver_diagnostic": {
+      "status": "passed",
+      "duration_ms": 7087,
+      "steps": [
+        "dns",
+        "tcp",
+        "jdbc",
+        "validation"
+      ]
+    }
+  },
+  "backend_changed": false,
+  "screenshot": "docs/evidence/unified-sources.jpg"
+}

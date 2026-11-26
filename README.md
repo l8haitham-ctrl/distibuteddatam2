@@ -13,6 +13,10 @@ Exploration multi-modele : [Redis et ClickHouse (OLAP)](docs/redis-clickhouse-ex
 depuis `/sources/native`. Le sixieme fichier `docker-compose.clickhouse.yml`
 ajoute une demonstration ClickHouse independante et son compte en lecture seule.
 
+La [liste unifiee des sources](docs/unified-sources.md) affiche SQL Server,
+PostgreSQL, Redis, ClickHouse et MinIO ensemble sur `/sources`, avec les actions
+de test et d'exploration adaptees a chaque moteur.
+
 ## Etat des branches
 
 La version complete de livraison est sur `feature/release-readiness`.

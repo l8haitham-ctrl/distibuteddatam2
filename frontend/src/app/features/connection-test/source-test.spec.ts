@@ -24,4 +24,10 @@ describe('Connection progress transport',()=>{
     fixture.componentRef.setInput('run',{state:'failed',message:'Port inaccessible',duration_ms:15,steps:{dns:{state:'passed',message:'Résolu',duration_ms:1},tcp:{state:'failed',message:'Port inaccessible',duration_ms:14},jdbc:{state:'skipped',message:'Non exécutée',duration_ms:0},validation:{state:'skipped',message:'Non exécutée',duration_ms:0}}});fixture.detectChanges();
     const steps=[...fixture.nativeElement.querySelectorAll('li')] as HTMLElement[];expect(steps).toHaveLength(4);expect(steps[0].textContent).toContain('Réussi');expect(steps[1].textContent).toContain('Échec');expect(steps[2].textContent).toContain('Ignoré');expect(fixture.nativeElement.textContent).toContain('vérifiés ensemble');
   });
+  it('renders a native test result without claiming JDBC stages were executed',()=>{
+    HTMLDialogElement.prototype.showModal=vi.fn();TestBed.configureTestingModule({imports:[SourceTestDialogComponent]});const fixture=TestBed.createComponent(SourceTestDialogComponent);
+    fixture.componentRef.setInput('source',{id:'native:redis-demo',native_profile:'redis-demo',name:'redis-demo',host:'redis-source',port:6379,database:'0'});
+    fixture.componentRef.setInput('nativeRun',{state:'passed',message:'Connexion réussie.'});fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Connexion réussie.');expect(fixture.nativeElement.textContent).toContain('protocole natif');expect(fixture.nativeElement.querySelectorAll('li')).toHaveLength(0);expect(fixture.nativeElement.textContent).not.toContain('pilote JDBC');
+  });
 });

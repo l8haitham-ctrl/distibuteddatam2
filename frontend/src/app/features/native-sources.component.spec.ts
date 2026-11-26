@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { provideRouter } from '@angular/router';
+import { ActivatedRoute, provideRouter } from '@angular/router';
 import { afterEach,beforeEach,describe,expect,it } from 'vitest';
 import { NativeSourcesComponent } from './native-sources.component';
 import { NativeSourcesStore } from '../core/native-sources.store';
@@ -66,5 +66,13 @@ describe('Native source connections',()=>{
     expect(text).toContain('MergeTree');expect(text).toContain('Decimal(12, 2)');expect(text).toContain('Partition');
     expect(fixture.nativeElement.querySelector('details summary').textContent).toContain('2 colonnes');
     expect(text).not.toContain('private-test-only');
+  });
+  it('explores only the profile explicitly selected from the unified list',async()=>{
+    TestBed.inject(ActivatedRoute).snapshot.queryParams={source_id:'redis-demo'};
+    const fixture=TestBed.createComponent(NativeSourcesComponent);
+    http.expectOne('/api/native/connectors').flush(connectors);http.expectOne('/api/native/sources').flush([profile]);
+    fixture.detectChanges();const request=http.expectOne('/api/native/sources/redis-demo/explore');expect(request.request.body).toEqual({});request.flush(result);
+    fixture.detectChanges();await fixture.whenStable();expect(fixture.nativeElement.textContent).toContain('analytics:1');
+    http.expectNone('/api/native/sources/redis-demo/test');
   });
 });

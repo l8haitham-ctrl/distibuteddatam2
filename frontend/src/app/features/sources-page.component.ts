@@ -17,8 +17,10 @@ export class SourcesPageComponent {
   constructor(){this.store.load();this.connectors.load();}
   label(state:SourceState){return {connected:'Connectée',failed:'Échec',testing:'Test en cours',untested:'Non testée'}[state];}
   date(value:string|null){return value?new Intl.DateTimeFormat('fr-FR',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}).format(new Date(value)):'Jamais';}
+  engineName(source:SourceEntry){const names:Record<string,string>={redis:'Redis',clickhouse:'ClickHouse',minio:'MinIO / S3'};return source.native_profile?(names[source.engine]??source.engine):this.connectors.shortName(source.engine);}
   explore(source:SourceEntry){
     if(this.store.mockup){void this.router.navigate(['/explorer'],{queryParams:{maquette:1}});return;}
+    if(source.native_profile){void this.router.navigate(['/sources/native'],{queryParams:{source_id:source.native_profile}});return;}
     if(source.temporary&&source.exploration){this.injector.get(ExplorerStore).apply(source,source.exploration);void this.router.navigate(['/explorer']);}
     else void this.router.navigate(['/explorer'],{queryParams:{source_id:source.id}});
   }

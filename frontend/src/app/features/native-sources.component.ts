@@ -1,6 +1,6 @@
-import { Component, DestroyRef, ElementRef, inject, signal, viewChild } from '@angular/core';
+import { Component, DestroyRef, ElementRef, effect, inject, signal, untracked, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { errorMessage } from '../core/api.service';
 import { NativeSourcesStore, NativeConnection, NativeExploration, NativeProfile } from '../core/native-sources.store';
@@ -12,7 +12,12 @@ export class NativeSourcesComponent {
   busy=signal(false);error=signal('');message=signal('');result=signal<NativeExploration|null>(null);title=signal('');
   name='';config:NativeConnection={engine:'redis',host:'',port:6379,namespace:'0',username:'',password:'',tls:true,prefix:''};
   private pending?:Subscription;
-  constructor(){this.store.load();inject(DestroyRef).onDestroy(()=>{this.pending?.unsubscribe();this.config.password='';});}
+  constructor(){
+    const requested=inject(ActivatedRoute).snapshot.queryParamMap.get('source_id');let opened=false;
+    this.store.load();
+    effect(()=>{if(!requested||opened||this.store.loading())return;const profile=this.store.profiles().find(p=>p.id===requested);if(profile){opened=true;untracked(()=>this.configured(profile,true));}else if(!this.store.error()){this.error.set('Source native indisponible.');}});
+    inject(DestroyRef).onDestroy(()=>{this.pending?.unsubscribe();this.config.password='';});
+  }
   engineChanged(engine:string){this.config={...this.config,engine,port:this.store.connectors().find(c=>c.engine===engine)?.default_port??0,namespace:engine==='redis'?'0':'',prefix:'',password:'',tls:true};this.changed();}
   changed(){this.message.set('');this.error.set('');}
   configured(profile:NativeProfile,explore:boolean){
