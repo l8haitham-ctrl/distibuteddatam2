@@ -402,3 +402,9 @@ partitions, reprise d'enregistrement et refus d'ecriture SQL/S3. Le profil small
 fonctionne avec environ 8 Go alloues a Docker (hors Windows). Le metastore utilise
 un heap de 512 Mo et Trino 2 Go ; davantage de marge est utile pour large et les
 builds simultanes. Les premiers echecs et les reprises sont decrits dans le guide.
+
+## Skills du projet
+
+Les consignes par fonctionnalité, le workflow de maintenance et les contrats API
+sont accessibles dans [les skills Atlas](.agents/skills/README.md). Le contexte
+indique les fonctionnalités et routes présentes dans cette branche.
