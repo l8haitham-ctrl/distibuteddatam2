@@ -479,3 +479,9 @@ ecart de comptes ou de montants. Le [rapport de resultats](docs/benchmark-report
 presente les medianes, l'effet des petits fichiers et les limites : Zstd
 reduit ici la taille de 86,96 % face au CSV brut, mais les partitions
 mensuelles ne reduisent pas la latence du filtre sur ce petit jeu.
+
+## Skills du projet
+
+Les consignes par fonctionnalité, le workflow de maintenance et les contrats API
+sont accessibles dans [les skills Atlas](.agents/skills/README.md). Le contexte
+indique les fonctionnalités et routes présentes dans cette branche.
