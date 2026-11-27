@@ -1,0 +1,157 @@
+{
+  "branch": "feature/explicit-source-selection",
+  "base_commit": "13cad989e461242c97e940f2c2f8e655f5097c7e",
+  "global_contract_snapshot": "eee650a12f1895f44bcc61951babd0423cba95e1",
+  "routes": [
+    {
+      "method": "DELETE",
+      "path": "/glossary/terms/{id}/links/{linkId}",
+      "source": "backend/src/main/java/com/atlas/explorer/features/glossary/api/GlossaryController.java"
+    },
+    {
+      "method": "GET",
+      "path": "/catalog/tables",
+      "source": "backend/src/main/java/com/atlas/explorer/features/catalog/api/CatalogController.java"
+    },
+    {
+      "method": "GET",
+      "path": "/connectors",
+      "source": "backend/src/main/java/com/atlas/explorer/features/connectors/api/ConnectorController.java"
+    },
+    {
+      "method": "GET",
+      "path": "/glossary/links",
+      "source": "backend/src/main/java/com/atlas/explorer/features/glossary/api/GlossaryController.java"
+    },
+    {
+      "method": "GET",
+      "path": "/glossary/terms",
+      "source": "backend/src/main/java/com/atlas/explorer/features/glossary/api/GlossaryController.java"
+    },
+    {
+      "method": "GET",
+      "path": "/glossary/terms/{id}",
+      "source": "backend/src/main/java/com/atlas/explorer/features/glossary/api/GlossaryController.java"
+    },
+    {
+      "method": "GET",
+      "path": "/health",
+      "source": "backend/src/main/java/com/atlas/explorer/features/health/HealthController.java"
+    },
+    {
+      "method": "GET",
+      "path": "/native/connectors",
+      "source": "backend/src/main/java/com/atlas/explorer/features/nativesources/api/NativeSourceController.java"
+    },
+    {
+      "method": "GET",
+      "path": "/native/sources",
+      "source": "backend/src/main/java/com/atlas/explorer/features/nativesources/api/NativeConfiguredSourceController.java"
+    },
+    {
+      "method": "GET",
+      "path": "/sources",
+      "source": "backend/src/main/java/com/atlas/explorer/features/connection/api/SourceController.java"
+    },
+    {
+      "method": "GET",
+      "path": "/sources/{id}/tables",
+      "source": "backend/src/main/java/com/atlas/explorer/features/exploration/api/ExplorationController.java"
+    },
+    {
+      "method": "GET",
+      "path": "/sources/{id}/tables/{table}",
+      "source": "backend/src/main/java/com/atlas/explorer/features/exploration/api/ExplorationController.java"
+    },
+    {
+      "method": "GET",
+      "path": "/storage/jobs",
+      "source": "backend/src/main/java/com/atlas/explorer/features/jobs/api/JobController.java"
+    },
+    {
+      "method": "GET",
+      "path": "/storage/jobs/partition-candidates",
+      "source": "backend/src/main/java/com/atlas/explorer/features/jobs/api/JobController.java"
+    },
+    {
+      "method": "GET",
+      "path": "/storage/jobs/{id}",
+      "source": "backend/src/main/java/com/atlas/explorer/features/jobs/api/JobController.java"
+    },
+    {
+      "method": "GET",
+      "path": "/storage/jobs/{id}/result",
+      "source": "backend/src/main/java/com/atlas/explorer/features/jobs/api/JobController.java"
+    },
+    {
+      "method": "GET",
+      "path": "/storage/status",
+      "source": "backend/src/main/java/com/atlas/explorer/features/storage/api/StorageController.java"
+    },
+    {
+      "method": "POST",
+      "path": "/connections/explore",
+      "source": "backend/src/main/java/com/atlas/explorer/features/exploration/api/ExplorationController.java"
+    },
+    {
+      "method": "POST",
+      "path": "/connections/test",
+      "source": "backend/src/main/java/com/atlas/explorer/features/connection/api/ConnectionController.java"
+    },
+    {
+      "method": "POST",
+      "path": "/glossary/terms",
+      "source": "backend/src/main/java/com/atlas/explorer/features/glossary/api/GlossaryController.java"
+    },
+    {
+      "method": "POST",
+      "path": "/glossary/terms/{id}/links",
+      "source": "backend/src/main/java/com/atlas/explorer/features/glossary/api/GlossaryController.java"
+    },
+    {
+      "method": "POST",
+      "path": "/native/connections/explore",
+      "source": "backend/src/main/java/com/atlas/explorer/features/nativesources/api/NativeSourceController.java"
+    },
+    {
+      "method": "POST",
+      "path": "/native/connections/test",
+      "source": "backend/src/main/java/com/atlas/explorer/features/nativesources/api/NativeSourceController.java"
+    },
+    {
+      "method": "POST",
+      "path": "/native/sources/{id}/explore",
+      "source": "backend/src/main/java/com/atlas/explorer/features/nativesources/api/NativeConfiguredSourceController.java"
+    },
+    {
+      "method": "POST",
+      "path": "/native/sources/{id}/test",
+      "source": "backend/src/main/java/com/atlas/explorer/features/nativesources/api/NativeConfiguredSourceController.java"
+    },
+    {
+      "method": "POST",
+      "path": "/quality/reports",
+      "source": "backend/src/main/java/com/atlas/explorer/features/quality/api/QualityController.java"
+    },
+    {
+      "method": "POST",
+      "path": "/sources/{id}/test",
+      "source": "backend/src/main/java/com/atlas/explorer/features/connection/api/SourceController.java"
+    },
+    {
+      "method": "POST",
+      "path": "/sql/query",
+      "source": "backend/src/main/java/com/atlas/explorer/features/sql/api/SqlController.java"
+    },
+    {
+      "method": "POST",
+      "path": "/storage/jobs",
+      "source": "backend/src/main/java/com/atlas/explorer/features/jobs/api/JobController.java"
+    },
+    {
+      "method": "PUT",
+      "path": "/glossary/terms/{id}",
+      "source": "backend/src/main/java/com/atlas/explorer/features/glossary/api/GlossaryController.java"
+    }
+  ]
+}
