@@ -498,6 +498,47 @@ Le [diagnostic et les contrôles de rétablissement](docs/extraction-recovery.md
 documentent ce cas, les tests de surveillance et les extractions SQL Server et
 ClickHouse vérifiées jusqu'à Trino.
 
+## Campagne de scénarios d'extraction
+
+Le script `scripts/extraction-scenarios.mjs` couvre 40 scénarios fonctionnels :
+formats et compressions sur quatre moteurs, tables métier, partitionnements,
+tailles de lots et lecteurs JDBC, ainsi que les sources benchmark et soccer.
+Il crée de vrais jobs par l'API authentifiée et vérifie leurs résultats via Trino.
+Ce contrôle unique par scénario ne remplace pas un benchmark statistique répété.
+
+Préparer d'abord `work/scenario-campaign/references.json` à partir des comptes et
+sommes des sources existantes, sans régénérer leurs données. Le rapport
+`work/scenario-campaign/report.json` conserve les identifiants pour la reprise.
+Ne pas effacer ce rapport pour relancer une demande dont la soumission est
+incertaine. Les demandes invalides sont vérifiées séparément ; elles ne créent
+pas de faux jobs dans l'historique.
+
+Pour réutiliser les mêmes fixtures de démonstration, les références capturées
+sont incluses dans `validation/results/extraction-scenarios-2026-11-27.json`.
+Vérifier d'abord que les métriques des sources correspondent encore à ces
+références ; si les données ont changé, capturer de nouvelles métriques.
+
+```powershell
+New-Item -ItemType Directory -Path work/scenario-campaign -Force
+$proof = Get-Content validation/results/extraction-scenarios-2026-11-27.json -Raw | ConvertFrom-Json
+$referenceJson = $proof.references | ConvertTo-Json -Depth 8
+[IO.File]::WriteAllText((Join-Path $PWD 'work/scenario-campaign/references.json'), $referenceJson, [Text.UTF8Encoding]::new($false))
+```
+
+Ne pas remplacer un fichier de références lorsqu'une campagne est déjà en cours.
+
+```powershell
+docker compose -f docker-compose.yml -f docker-compose.connectors.yml -f docker-compose.analytics.yml -f docker-compose.benchmarks.yml -f docker-compose.soccer.yml -f docker-compose.clickhouse.yml -f docker-compose.scenarios.yml --profile tools run --rm --no-deps --pull never benchmark
+```
+
+L'overlay fixe explicitement le point d'entrée Node et ne modifie pas les
+services de données. Pour afficher seulement le plan, ajouter
+`/project/scripts/extraction-scenarios.mjs --plan` à la commande. Une nouvelle
+campagne exige un autre chemin `--output=...` et des références source à jour.
+
+Les [résultats des 40 scénarios du 27 novembre](docs/extraction-scenarios-2026-11-27.md)
+associent chaque configuration à son job persistant dans l'historique.
+
 ## Skills du projet
 
 Les consignes par fonctionnalité, le workflow de maintenance et les contrats API

@@ -1,0 +1,9 @@
+# Functional extraction coverage; use after the six demonstration Compose files.
+# References must be captured from the existing, unchanged source datasets first.
+services:
+  benchmark:
+    entrypoint: ["node"]
+    command: ["/project/scripts/extraction-scenarios.mjs"]
+    volumes:
+      - ./scripts:/project/scripts:ro
+      - ./work/scenario-campaign:/campaign

@@ -20,13 +20,17 @@ Appliquer ce skill pour les campagnes CSV Parquet compression partitionnement et
 
 ## Invariants propres à cette feature
 
-Préserver campagne local-2026-11-22-100k. 8 scénarios, 3 répétitions : 24 extractions mesurées, 216 mesures SQL, 72 warmups SQL ; un warmup extraction supplémentaire exclu du résumé. extract_write_ms inclut lecture+conversion+écriture ; registration_ms concerne le catalogue, pas le seul transfert. Même fixture et mêmes requêtes. --run-id neuf ; --resume pour reprendre ; jamais relancer automatiquement un POST ambigu. La nouvelle campagne est préparée mais 0 job soumis à cause de Docker/WSL.
+Préserver campagne local-2026-11-22-100k. 8 scénarios, 3 répétitions : 24 extractions mesurées, 216 mesures SQL, 72 warmups SQL ; un warmup extraction supplémentaire exclu du résumé. extract_write_ms inclut lecture+conversion+écriture ; registration_ms concerne le catalogue, pas le seul transfert. Même fixture et mêmes requêtes. --run-id neuf ; --resume pour reprendre ; jamais relancer automatiquement un POST ambigu. La reprise statistique préparée dans work/benchmarks/active-rerun.json et la campagne fonctionnelle de 40 scénarios sont distinctes : vérifier leurs rapports respectifs au lieu de déduire leur état depuis un ancien incident Docker.
 
 ## Travail à effectuer
 
 Identifier l’entrée utilisateur, le service responsable, la dépendance appelée et la sortie observable. Pour une modification, préserver les contrats HTTP et les fonctionnalités existantes. Respecter AGENTS.md et organiser le backend verticalement. Pour expliquer, relier les classes au parcours concret sans présenter un projet envisagé comme opérationnel.
 
 ## Vérification pertinente
+
+Le runner `scripts/extraction-scenarios.mjs`, sur `feature/extraction-scenario-campaign`, couvre 40 contrôles fonctionnels uniques et sept rejets de validation. Il ne constitue pas une campagne statistique répétée. Utiliser `docker-compose.scenarios.yml` avec point d'entrée Node explicite. Chaque job réel reste dans PostgreSQL ; les labels des scénarios et UUID sont dans le rapport persistant. Reprendre le même rapport et ne jamais resoumettre automatiquement un POST ambigu. Les demandes rejetées ne doivent pas être injectées comme faux jobs. Vérifier les métriques source avant/après et distinguer les contre-exemples historiques de petits fichiers des nouvelles extractions.
+
+Sur cette branche, lire les [résultats et liens vers l'historique](../../../docs/extraction-scenarios-2026-11-27.md) pour préparer une démonstration ; ne pas annoncer un résultat simplement parce que son scénario figure dans le plan.
 
 Valider comptes/sommes/groupes, audit de complétude et dispersion. Documenter caches et ordre ; pas de conclusion cluster multicœur à partir du test actuel limité à un cœur.
 

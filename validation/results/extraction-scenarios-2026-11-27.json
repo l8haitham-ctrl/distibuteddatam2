@@ -1,0 +1,1696 @@
+{
+  "campaign": "extraction-scenarios-2026-11-27",
+  "mode": "functional coverage; one execution per scenario, not a statistical benchmark",
+  "started_at": "2026-11-27T12:28:06.173Z",
+  "finished_at": "2026-11-27T12:53:45.327Z",
+  "summary": {
+    "total": 40,
+    "verified": 40,
+    "failed": 0,
+    "validation_rejections": 7
+  },
+  "sources_stable_before_after": true,
+  "history_verification": {
+    "persisted_jobs": 40,
+    "all_completed": true,
+    "requests_and_results_match_report": true,
+    "direct_history_inserts": false,
+    "method": "Read-only SQL verification after authenticated API creation"
+  },
+  "resume_verification": {
+    "jobs_before": 101,
+    "jobs_after": 101,
+    "duplicate_jobs": 0
+  },
+  "references": {
+    "sqlserver/Customer": {
+      "row_count": 1000,
+      "id_sum": "500500",
+      "key": "customer_id"
+    },
+    "postgresql/customer": {
+      "row_count": 1000,
+      "id_sum": "500500",
+      "key": "customer_id"
+    },
+    "clickhouse/customer": {
+      "row_count": 1000,
+      "id_sum": "500500",
+      "key": "customer_id"
+    },
+    "sqlserver/Invoice": {
+      "row_count": 5000,
+      "id_sum": "12502500",
+      "amount_sum": "4892425.00",
+      "key": "invoice_id"
+    },
+    "postgresql/invoice": {
+      "row_count": 5000,
+      "id_sum": "12502500",
+      "amount_sum": "1750250.00",
+      "key": "invoice_id"
+    },
+    "clickhouse/invoice": {
+      "row_count": 5000,
+      "id_sum": "12502500",
+      "amount_sum": "129972.16",
+      "key": "invoice_id"
+    },
+    "sqlserver/Payment": {
+      "row_count": 8000,
+      "id_sum": "39988500",
+      "amount_sum": "3913605.00",
+      "key": "payment_id"
+    },
+    "postgresql/payment": {
+      "row_count": 8000,
+      "id_sum": "32004000",
+      "amount_sum": "1399925.00",
+      "key": "payment_id"
+    },
+    "clickhouse/payment": {
+      "row_count": 8000,
+      "id_sum": "32004000",
+      "amount_sum": "173955.71",
+      "key": "payment_id"
+    },
+    "benchmark/Invoice100k": {
+      "row_count": 100000,
+      "id_sum": "5000050000",
+      "amount_sum": "104634500.00",
+      "key": "invoice_id"
+    },
+    "soccer/Country": {
+      "row_count": 11,
+      "id_sum": "136973",
+      "key": "id",
+      "schema": "dbo",
+      "table": "Country"
+    }
+  },
+  "redis_reference": [
+    1000,
+    1000,
+    500500,
+    5005000,
+    200,
+    800
+  ],
+  "scenarios": [
+    {
+      "id": "sqlserver_parquet_snappy",
+      "job_id": "001742d3-2363-4791-8b18-0d6fc1000599",
+      "request": {
+        "source_id": "sqlserver",
+        "schema": "dbo",
+        "table": "Invoice",
+        "format": "parquet",
+        "compression": "snappy",
+        "fetch_size": 1000,
+        "num_partitions": 1,
+        "partition_by": [],
+        "partition_granularity": "month"
+      },
+      "created_at": "2026-11-27T12:28:10.421883Z",
+      "started_at": "2026-11-27T12:28:11.382305Z",
+      "finished_at": "2026-11-27T12:28:53.020825Z",
+      "duration_ms": 41638,
+      "verified_at": "2026-11-27T12:28:55.474Z",
+      "row_count": 5000,
+      "file_count": 1,
+      "storage_bytes": 61181,
+      "extract_write_ms": 21666,
+      "verify_ms": 2307,
+      "registration_ms": 1911,
+      "requested_num_partitions": 1,
+      "effective_num_partitions": 1,
+      "catalog_table": "hive.runs.invoice_001742d3",
+      "sql_rows": [
+        [
+          5000,
+          5000,
+          "12502500",
+          "4892425.00"
+        ]
+      ],
+      "query_id": "20261127_122855_00043_q3xm5"
+    },
+    {
+      "id": "sqlserver_parquet_uncompressed",
+      "job_id": "2226c1bb-1caf-46ad-83ec-d8be02b303a3",
+      "request": {
+        "source_id": "sqlserver",
+        "schema": "dbo",
+        "table": "Invoice",
+        "format": "parquet",
+        "compression": "uncompressed",
+        "fetch_size": 1000,
+        "num_partitions": 1,
+        "partition_by": [],
+        "partition_granularity": "month"
+      },
+      "created_at": "2026-11-27T12:28:55.585174Z",
+      "started_at": "2026-11-27T12:28:57.082003Z",
+      "finished_at": "2026-11-27T12:29:35.445576Z",
+      "duration_ms": 38363,
+      "verified_at": "2026-11-27T12:29:36.467Z",
+      "row_count": 5000,
+      "file_count": 1,
+      "storage_bytes": 98264,
+      "extract_write_ms": 21242,
+      "verify_ms": 4269,
+      "registration_ms": 962,
+      "requested_num_partitions": 1,
+      "effective_num_partitions": 1,
+      "catalog_table": "hive.runs.invoice_2226c1bb",
+      "sql_rows": [
+        [
+          5000,
+          5000,
+          "12502500",
+          "4892425.00"
+        ]
+      ],
+      "query_id": "20261127_122936_00050_q3xm5"
+    },
+    {
+      "id": "sqlserver_parquet_zstd",
+      "job_id": "38144f51-1ae6-4141-abee-208d5ba49aff",
+      "request": {
+        "source_id": "sqlserver",
+        "schema": "dbo",
+        "table": "Invoice",
+        "format": "parquet",
+        "compression": "zstd",
+        "fetch_size": 1000,
+        "num_partitions": 1,
+        "partition_by": [],
+        "partition_granularity": "month"
+      },
+      "created_at": "2026-11-27T12:29:36.578475Z",
+      "started_at": "2026-11-27T12:29:37.453704Z",
+      "finished_at": "2026-11-27T12:30:07.417456Z",
+      "duration_ms": 29964,
+      "verified_at": "2026-11-27T12:30:09.440Z",
+      "row_count": 5000,
+      "file_count": 1,
+      "storage_bytes": 30397,
+      "extract_write_ms": 12268,
+      "verify_ms": 2908,
+      "registration_ms": 1211,
+      "requested_num_partitions": 1,
+      "effective_num_partitions": 1,
+      "catalog_table": "hive.runs.invoice_38144f51",
+      "sql_rows": [
+        [
+          5000,
+          5000,
+          "12502500",
+          "4892425.00"
+        ]
+      ],
+      "query_id": "20261127_123009_00057_q3xm5"
+    },
+    {
+      "id": "sqlserver_csv_uncompressed",
+      "job_id": "4bc51a91-8b39-4775-90b2-0e2092a22518",
+      "request": {
+        "source_id": "sqlserver",
+        "schema": "dbo",
+        "table": "Invoice",
+        "format": "csv",
+        "compression": "uncompressed",
+        "fetch_size": 1000,
+        "num_partitions": 1,
+        "partition_by": [],
+        "partition_granularity": "month"
+      },
+      "created_at": "2026-11-27T12:30:09.525805Z",
+      "started_at": "2026-11-27T12:30:11.429759Z",
+      "finished_at": "2026-11-27T12:30:38.995437Z",
+      "duration_ms": 27566,
+      "verified_at": "2026-11-27T12:30:40.459Z",
+      "row_count": 5000,
+      "file_count": 1,
+      "storage_bytes": 264509,
+      "extract_write_ms": 12906,
+      "verify_ms": 2065,
+      "registration_ms": 950,
+      "requested_num_partitions": 1,
+      "effective_num_partitions": 1,
+      "catalog_table": "hive.runs.invoice_4bc51a91",
+      "sql_rows": [
+        [
+          5000,
+          5000,
+          "12502500",
+          "4892425.00"
+        ]
+      ],
+      "query_id": "20261127_123040_00062_q3xm5"
+    },
+    {
+      "id": "sqlserver_csv_gzip",
+      "job_id": "19eb1cf1-c500-4777-9e23-c1f97e95bac7",
+      "request": {
+        "source_id": "sqlserver",
+        "schema": "dbo",
+        "table": "Invoice",
+        "format": "csv",
+        "compression": "gzip",
+        "fetch_size": 1000,
+        "num_partitions": 1,
+        "partition_by": [],
+        "partition_granularity": "month"
+      },
+      "created_at": "2026-11-27T12:30:40.583589Z",
+      "started_at": "2026-11-27T12:30:41.005621Z",
+      "finished_at": "2026-11-27T12:31:10.316839Z",
+      "duration_ms": 29311,
+      "verified_at": "2026-11-27T12:31:11.188Z",
+      "row_count": 5000,
+      "file_count": 1,
+      "storage_bytes": 65763,
+      "extract_write_ms": 12980,
+      "verify_ms": 2421,
+      "registration_ms": 636,
+      "requested_num_partitions": 1,
+      "effective_num_partitions": 1,
+      "catalog_table": "hive.runs.invoice_19eb1cf1",
+      "sql_rows": [
+        [
+          5000,
+          5000,
+          "12502500",
+          "4892425.00"
+        ]
+      ],
+      "query_id": "20261127_123111_00067_q3xm5"
+    },
+    {
+      "id": "postgresql_parquet_snappy",
+      "job_id": "3824553f-89de-4584-b0b8-9d27d02283e2",
+      "request": {
+        "source_id": "postgresql",
+        "schema": "public",
+        "table": "invoice",
+        "format": "parquet",
+        "compression": "snappy",
+        "fetch_size": 1000,
+        "num_partitions": 1,
+        "partition_by": [],
+        "partition_granularity": "month"
+      },
+      "created_at": "2026-11-27T12:31:11.455288Z",
+      "started_at": "2026-11-27T12:31:12.330107Z",
+      "finished_at": "2026-11-27T12:31:41.836535Z",
+      "duration_ms": 29506,
+      "verified_at": "2026-11-27T12:31:44.342Z",
+      "row_count": 5000,
+      "file_count": 1,
+      "storage_bytes": 53621,
+      "extract_write_ms": 14090,
+      "verify_ms": 2508,
+      "registration_ms": 801,
+      "requested_num_partitions": 1,
+      "effective_num_partitions": 1,
+      "catalog_table": "hive.runs.invoice_3824553f",
+      "sql_rows": [
+        [
+          5000,
+          5000,
+          "12502500",
+          "1750250.00"
+        ]
+      ],
+      "query_id": "20261127_123144_00074_q3xm5"
+    },
+    {
+      "id": "postgresql_parquet_uncompressed",
+      "job_id": "13ef121f-0d63-4320-aac6-4e7a3bd5aa4c",
+      "request": {
+        "source_id": "postgresql",
+        "schema": "public",
+        "table": "invoice",
+        "format": "parquet",
+        "compression": "uncompressed",
+        "fetch_size": 1000,
+        "num_partitions": 1,
+        "partition_by": [],
+        "partition_granularity": "month"
+      },
+      "created_at": "2026-11-27T12:31:44.542135Z",
+      "started_at": "2026-11-27T12:31:45.845748Z",
+      "finished_at": "2026-11-27T12:32:15.399091Z",
+      "duration_ms": 29554,
+      "verified_at": "2026-11-27T12:32:17.073Z",
+      "row_count": 5000,
+      "file_count": 1,
+      "storage_bytes": 83306,
+      "extract_write_ms": 12304,
+      "verify_ms": 2046,
+      "registration_ms": 791,
+      "requested_num_partitions": 1,
+      "effective_num_partitions": 1,
+      "catalog_table": "hive.runs.invoice_13ef121f",
+      "sql_rows": [
+        [
+          5000,
+          5000,
+          "12502500",
+          "1750250.00"
+        ]
+      ],
+      "query_id": "20261127_123217_00081_q3xm5"
+    },
+    {
+      "id": "postgresql_parquet_zstd",
+      "job_id": "82cc1f10-b215-40a9-8c65-ebbe5d9c68d8",
+      "request": {
+        "source_id": "postgresql",
+        "schema": "public",
+        "table": "invoice",
+        "format": "parquet",
+        "compression": "zstd",
+        "fetch_size": 1000,
+        "num_partitions": 1,
+        "partition_by": [],
+        "partition_granularity": "month"
+      },
+      "created_at": "2026-11-27T12:32:17.173184Z",
+      "started_at": "2026-11-27T12:32:17.408140Z",
+      "finished_at": "2026-11-27T12:32:45.017192Z",
+      "duration_ms": 27609,
+      "verified_at": "2026-11-27T12:32:45.851Z",
+      "row_count": 5000,
+      "file_count": 1,
+      "storage_bytes": 25469,
+      "extract_write_ms": 12409,
+      "verify_ms": 1974,
+      "registration_ms": 983,
+      "requested_num_partitions": 1,
+      "effective_num_partitions": 1,
+      "catalog_table": "hive.runs.invoice_82cc1f10",
+      "sql_rows": [
+        [
+          5000,
+          5000,
+          "12502500",
+          "1750250.00"
+        ]
+      ],
+      "query_id": "20261127_123245_00088_q3xm5"
+    },
+    {
+      "id": "postgresql_csv_uncompressed",
+      "job_id": "40ea31cb-1852-4da9-af21-1973f00fbc04",
+      "request": {
+        "source_id": "postgresql",
+        "schema": "public",
+        "table": "invoice",
+        "format": "csv",
+        "compression": "uncompressed",
+        "fetch_size": 1000,
+        "num_partitions": 1,
+        "partition_by": [],
+        "partition_granularity": "month"
+      },
+      "created_at": "2026-11-27T12:32:45.991007Z",
+      "started_at": "2026-11-27T12:32:47.022549Z",
+      "finished_at": "2026-11-27T12:33:20.864156Z",
+      "duration_ms": 33842,
+      "verified_at": "2026-11-27T12:33:22.831Z",
+      "row_count": 5000,
+      "file_count": 1,
+      "storage_bytes": 262358,
+      "extract_write_ms": 14603,
+      "verify_ms": 2251,
+      "registration_ms": 839,
+      "requested_num_partitions": 1,
+      "effective_num_partitions": 1,
+      "catalog_table": "hive.runs.invoice_40ea31cb",
+      "sql_rows": [
+        [
+          5000,
+          5000,
+          "12502500",
+          "1750250.00"
+        ]
+      ],
+      "query_id": "20261127_123323_00093_q3xm5"
+    },
+    {
+      "id": "postgresql_csv_gzip",
+      "job_id": "d174aabf-c20e-4d6a-be6f-51a71066c1c2",
+      "request": {
+        "source_id": "postgresql",
+        "schema": "public",
+        "table": "invoice",
+        "format": "csv",
+        "compression": "gzip",
+        "fetch_size": 1000,
+        "num_partitions": 1,
+        "partition_by": [],
+        "partition_granularity": "month"
+      },
+      "created_at": "2026-11-27T12:33:22.946739Z",
+      "started_at": "2026-11-27T12:33:24.876436Z",
+      "finished_at": "2026-11-27T12:33:56.496221Z",
+      "duration_ms": 31620,
+      "verified_at": "2026-11-27T12:33:57.583Z",
+      "row_count": 5000,
+      "file_count": 1,
+      "storage_bytes": 49404,
+      "extract_write_ms": 15202,
+      "verify_ms": 2187,
+      "registration_ms": 618,
+      "requested_num_partitions": 1,
+      "effective_num_partitions": 1,
+      "catalog_table": "hive.runs.invoice_d174aabf",
+      "sql_rows": [
+        [
+          5000,
+          5000,
+          "12502500",
+          "1750250.00"
+        ]
+      ],
+      "query_id": "20261127_123357_00098_q3xm5"
+    },
+    {
+      "id": "clickhouse_parquet_snappy",
+      "job_id": "59748881-1562-45ee-b5c2-cba38c4e70d1",
+      "request": {
+        "source_id": "clickhouse",
+        "schema": "analytics",
+        "table": "invoice",
+        "format": "parquet",
+        "compression": "snappy",
+        "fetch_size": 1000,
+        "num_partitions": 1,
+        "partition_by": [],
+        "partition_granularity": "month"
+      },
+      "created_at": "2026-11-27T12:33:57.708832Z",
+      "started_at": "2026-11-27T12:33:58.504398Z",
+      "finished_at": "2026-11-27T12:34:25.863654Z",
+      "duration_ms": 27359,
+      "verified_at": "2026-11-27T12:34:28.313Z",
+      "row_count": 5000,
+      "file_count": 1,
+      "storage_bytes": 61064,
+      "extract_write_ms": 12135,
+      "verify_ms": 3009,
+      "registration_ms": 694,
+      "requested_num_partitions": 1,
+      "effective_num_partitions": 1,
+      "catalog_table": "hive.runs.invoice_59748881",
+      "sql_rows": [
+        [
+          5000,
+          5000,
+          "12502500",
+          "129972.16"
+        ]
+      ],
+      "query_id": "20261127_123428_00105_q3xm5"
+    },
+    {
+      "id": "clickhouse_parquet_uncompressed",
+      "job_id": "66b4dd66-b9ac-44bb-b724-844b510a4a9a",
+      "request": {
+        "source_id": "clickhouse",
+        "schema": "analytics",
+        "table": "invoice",
+        "format": "parquet",
+        "compression": "uncompressed",
+        "fetch_size": 1000,
+        "num_partitions": 1,
+        "partition_by": [],
+        "partition_granularity": "month"
+      },
+      "created_at": "2026-11-27T12:34:28.366056Z",
+      "started_at": "2026-11-27T12:34:29.871083Z",
+      "finished_at": "2026-11-27T12:34:57.610886Z",
+      "duration_ms": 27739,
+      "verified_at": "2026-11-27T12:34:58.984Z",
+      "row_count": 5000,
+      "file_count": 1,
+      "storage_bytes": 135469,
+      "extract_write_ms": 12457,
+      "verify_ms": 2854,
+      "registration_ms": 1005,
+      "requested_num_partitions": 1,
+      "effective_num_partitions": 1,
+      "catalog_table": "hive.runs.invoice_66b4dd66",
+      "sql_rows": [
+        [
+          5000,
+          5000,
+          "12502500",
+          "129972.16"
+        ]
+      ],
+      "query_id": "20261127_123459_00112_q3xm5"
+    },
+    {
+      "id": "clickhouse_parquet_zstd",
+      "job_id": "e2b3e2bc-61e6-40e3-b6cc-1f5f7db92192",
+      "request": {
+        "source_id": "clickhouse",
+        "schema": "analytics",
+        "table": "invoice",
+        "format": "parquet",
+        "compression": "zstd",
+        "fetch_size": 1000,
+        "num_partitions": 1,
+        "partition_by": [],
+        "partition_granularity": "month"
+      },
+      "created_at": "2026-11-27T12:34:59.049509Z",
+      "started_at": "2026-11-27T12:34:59.645086Z",
+      "finished_at": "2026-11-27T12:35:31.124258Z",
+      "duration_ms": 31479,
+      "verified_at": "2026-11-27T12:35:31.711Z",
+      "row_count": 5000,
+      "file_count": 1,
+      "storage_bytes": 26287,
+      "extract_write_ms": 14815,
+      "verify_ms": 2573,
+      "registration_ms": 682,
+      "requested_num_partitions": 1,
+      "effective_num_partitions": 1,
+      "catalog_table": "hive.runs.invoice_e2b3e2bc",
+      "sql_rows": [
+        [
+          5000,
+          5000,
+          "12502500",
+          "129972.16"
+        ]
+      ],
+      "query_id": "20261127_123531_00119_q3xm5"
+    },
+    {
+      "id": "clickhouse_csv_uncompressed",
+      "job_id": "fb77de06-988a-4197-985d-bcaa1910a974",
+      "request": {
+        "source_id": "clickhouse",
+        "schema": "analytics",
+        "table": "invoice",
+        "format": "csv",
+        "compression": "uncompressed",
+        "fetch_size": 1000,
+        "num_partitions": 1,
+        "partition_by": [],
+        "partition_granularity": "month"
+      },
+      "created_at": "2026-11-27T12:35:31.771211Z",
+      "started_at": "2026-11-27T12:35:33.129181Z",
+      "finished_at": "2026-11-27T12:36:00.214805Z",
+      "duration_ms": 27085,
+      "verified_at": "2026-11-27T12:36:02.272Z",
+      "row_count": 5000,
+      "file_count": 1,
+      "storage_bytes": 165789,
+      "extract_write_ms": 11640,
+      "verify_ms": 2103,
+      "registration_ms": 461,
+      "requested_num_partitions": 1,
+      "effective_num_partitions": 1,
+      "catalog_table": "hive.runs.invoice_fb77de06",
+      "sql_rows": [
+        [
+          5000,
+          5000,
+          "12502500",
+          "129972.16"
+        ]
+      ],
+      "query_id": "20261127_123602_00124_q3xm5"
+    },
+    {
+      "id": "clickhouse_csv_gzip",
+      "job_id": "9c39b7aa-27dc-4466-a0f4-9f5f1988ae77",
+      "request": {
+        "source_id": "clickhouse",
+        "schema": "analytics",
+        "table": "invoice",
+        "format": "csv",
+        "compression": "gzip",
+        "fetch_size": 1000,
+        "num_partitions": 1,
+        "partition_by": [],
+        "partition_granularity": "month"
+      },
+      "created_at": "2026-11-27T12:36:02.315891Z",
+      "started_at": "2026-11-27T12:36:04.227368Z",
+      "finished_at": "2026-11-27T12:36:33.551253Z",
+      "duration_ms": 29324,
+      "verified_at": "2026-11-27T12:36:35.304Z",
+      "row_count": 5000,
+      "file_count": 1,
+      "storage_bytes": 44062,
+      "extract_write_ms": 13070,
+      "verify_ms": 3363,
+      "registration_ms": 529,
+      "requested_num_partitions": 1,
+      "effective_num_partitions": 1,
+      "catalog_table": "hive.runs.invoice_9c39b7aa",
+      "sql_rows": [
+        [
+          5000,
+          5000,
+          "12502500",
+          "129972.16"
+        ]
+      ],
+      "query_id": "20261127_123635_00129_q3xm5"
+    },
+    {
+      "id": "redis_parquet_snappy",
+      "job_id": "60893704-f40f-417c-ab9f-345a2daaf109",
+      "request": {
+        "source_id": "redis",
+        "schema": "redis_0",
+        "table": "customer_segments",
+        "format": "parquet",
+        "compression": "snappy",
+        "fetch_size": 1000,
+        "num_partitions": 1,
+        "partition_by": [],
+        "partition_granularity": "month"
+      },
+      "created_at": "2026-11-27T12:36:35.712743Z",
+      "started_at": "2026-11-27T12:36:37.564701Z",
+      "finished_at": "2026-11-27T12:37:11.556974Z",
+      "duration_ms": 33992,
+      "verified_at": "2026-11-27T12:37:12.580Z",
+      "row_count": 1000,
+      "file_count": 1,
+      "storage_bytes": 13629,
+      "extract_write_ms": 16183,
+      "verify_ms": 1967,
+      "registration_ms": 1244,
+      "requested_num_partitions": 1,
+      "effective_num_partitions": 1,
+      "catalog_table": "hive.runs.customer_segments_60893704",
+      "sql_rows": [
+        [
+          1000,
+          1000,
+          500500,
+          5005000,
+          200,
+          800
+        ]
+      ],
+      "query_id": "20261127_123712_00136_q3xm5"
+    },
+    {
+      "id": "redis_parquet_uncompressed",
+      "job_id": "936160d3-a996-47f8-bea2-3cc15d163300",
+      "request": {
+        "source_id": "redis",
+        "schema": "redis_0",
+        "table": "customer_segments",
+        "format": "parquet",
+        "compression": "uncompressed",
+        "fetch_size": 1000,
+        "num_partitions": 1,
+        "partition_by": [],
+        "partition_granularity": "month"
+      },
+      "created_at": "2026-11-27T12:37:12.653446Z",
+      "started_at": "2026-11-27T12:37:13.593672Z",
+      "finished_at": "2026-11-27T12:37:45.197242Z",
+      "duration_ms": 31604,
+      "verified_at": "2026-11-27T12:37:47.460Z",
+      "row_count": 1000,
+      "file_count": 1,
+      "storage_bytes": 51181,
+      "extract_write_ms": 15764,
+      "verify_ms": 1770,
+      "registration_ms": 983,
+      "requested_num_partitions": 1,
+      "effective_num_partitions": 1,
+      "catalog_table": "hive.runs.customer_segments_936160d3",
+      "sql_rows": [
+        [
+          1000,
+          1000,
+          500500,
+          5005000,
+          200,
+          800
+        ]
+      ],
+      "query_id": "20261127_123747_00143_q3xm5"
+    },
+    {
+      "id": "redis_parquet_zstd",
+      "job_id": "c968eec0-7935-4ac1-80a0-2a744fbdae80",
+      "request": {
+        "source_id": "redis",
+        "schema": "redis_0",
+        "table": "customer_segments",
+        "format": "parquet",
+        "compression": "zstd",
+        "fetch_size": 1000,
+        "num_partitions": 1,
+        "partition_by": [],
+        "partition_granularity": "month"
+      },
+      "created_at": "2026-11-27T12:37:47.511276Z",
+      "started_at": "2026-11-27T12:37:49.206006Z",
+      "finished_at": "2026-11-27T12:38:20.897289Z",
+      "duration_ms": 31691,
+      "verified_at": "2026-11-27T12:38:22.170Z",
+      "row_count": 1000,
+      "file_count": 1,
+      "storage_bytes": 3255,
+      "extract_write_ms": 16094,
+      "verify_ms": 1937,
+      "registration_ms": 990,
+      "requested_num_partitions": 1,
+      "effective_num_partitions": 1,
+      "catalog_table": "hive.runs.customer_segments_c968eec0",
+      "sql_rows": [
+        [
+          1000,
+          1000,
+          500500,
+          5005000,
+          200,
+          800
+        ]
+      ],
+      "query_id": "20261127_123822_00150_q3xm5"
+    },
+    {
+      "id": "redis_csv_uncompressed",
+      "job_id": "d2eb6bdd-4f31-4a45-8bef-56850cab9725",
+      "request": {
+        "source_id": "redis",
+        "schema": "redis_0",
+        "table": "customer_segments",
+        "format": "csv",
+        "compression": "uncompressed",
+        "fetch_size": 1000,
+        "num_partitions": 1,
+        "partition_by": [],
+        "partition_granularity": "month"
+      },
+      "created_at": "2026-11-27T12:38:22.226300Z",
+      "started_at": "2026-11-27T12:38:22.932600Z",
+      "finished_at": "2026-11-27T12:38:59.007169Z",
+      "duration_ms": 36075,
+      "verified_at": "2026-11-27T12:39:00.798Z",
+      "row_count": 1000,
+      "file_count": 1,
+      "storage_bytes": 48679,
+      "extract_write_ms": 17248,
+      "verify_ms": 1390,
+      "registration_ms": 775,
+      "requested_num_partitions": 1,
+      "effective_num_partitions": 1,
+      "catalog_table": "hive.runs.customer_segments_d2eb6bdd",
+      "sql_rows": [
+        [
+          1000,
+          1000,
+          500500,
+          5005000,
+          200,
+          800
+        ]
+      ],
+      "query_id": "20261127_123901_00155_q3xm5"
+    },
+    {
+      "id": "redis_csv_gzip",
+      "job_id": "25adf0f6-08b0-4b46-b4b5-1b61e2dcf421",
+      "request": {
+        "source_id": "redis",
+        "schema": "redis_0",
+        "table": "customer_segments",
+        "format": "csv",
+        "compression": "gzip",
+        "fetch_size": 1000,
+        "num_partitions": 1,
+        "partition_by": [],
+        "partition_granularity": "month"
+      },
+      "created_at": "2026-11-27T12:39:00.845655Z",
+      "started_at": "2026-11-27T12:39:01.017721Z",
+      "finished_at": "2026-11-27T12:39:32.264568Z",
+      "duration_ms": 31247,
+      "verified_at": "2026-11-27T12:39:33.368Z",
+      "row_count": 1000,
+      "file_count": 1,
+      "storage_bytes": 7335,
+      "extract_write_ms": 15649,
+      "verify_ms": 1586,
+      "registration_ms": 516,
+      "requested_num_partitions": 1,
+      "effective_num_partitions": 1,
+      "catalog_table": "hive.runs.customer_segments_25adf0f6",
+      "sql_rows": [
+        [
+          1000,
+          1000,
+          500500,
+          5005000,
+          200,
+          800
+        ]
+      ],
+      "query_id": "20261127_123933_00160_q3xm5"
+    },
+    {
+      "id": "sqlserver_partition_year",
+      "job_id": "74f5d347-831d-4ccf-a8f7-31dc44831c3b",
+      "request": {
+        "source_id": "sqlserver",
+        "schema": "dbo",
+        "table": "Invoice",
+        "format": "parquet",
+        "compression": "snappy",
+        "fetch_size": 1000,
+        "num_partitions": 1,
+        "partition_by": [
+          "invoice_date"
+        ],
+        "partition_granularity": "year"
+      },
+      "created_at": "2026-11-27T12:39:33.442680Z",
+      "started_at": "2026-11-27T12:39:34.270094Z",
+      "finished_at": "2026-11-27T12:40:06.247013Z",
+      "duration_ms": 31977,
+      "verified_at": "2026-11-27T12:40:08.153Z",
+      "row_count": 5000,
+      "file_count": 2,
+      "storage_bytes": 77983,
+      "extract_write_ms": 14545,
+      "verify_ms": 2141,
+      "registration_ms": 1239,
+      "requested_num_partitions": 1,
+      "effective_num_partitions": 1,
+      "catalog_table": "hive.runs.invoice_74f5d347",
+      "sql_rows": [
+        [
+          5000,
+          5000,
+          "12502500",
+          "4892425.00"
+        ]
+      ],
+      "query_id": "20261127_124008_00168_q3xm5"
+    },
+    {
+      "id": "sqlserver_partition_month",
+      "job_id": "47c46ebb-4770-409d-96c4-5e1dd7794360",
+      "request": {
+        "source_id": "sqlserver",
+        "schema": "dbo",
+        "table": "Invoice",
+        "format": "parquet",
+        "compression": "snappy",
+        "fetch_size": 1000,
+        "num_partitions": 1,
+        "partition_by": [
+          "invoice_date"
+        ],
+        "partition_granularity": "month"
+      },
+      "created_at": "2026-11-27T12:40:08.274704Z",
+      "started_at": "2026-11-27T12:40:10.254788Z",
+      "finished_at": "2026-11-27T12:40:44.827043Z",
+      "duration_ms": 34573,
+      "verified_at": "2026-11-27T12:40:46.945Z",
+      "row_count": 5000,
+      "file_count": 24,
+      "storage_bytes": 133216,
+      "extract_write_ms": 16817,
+      "verify_ms": 3175,
+      "registration_ms": 1538,
+      "requested_num_partitions": 1,
+      "effective_num_partitions": 1,
+      "catalog_table": "hive.runs.invoice_47c46ebb",
+      "sql_rows": [
+        [
+          5000,
+          5000,
+          "12502500",
+          "4892425.00"
+        ]
+      ],
+      "query_id": "20261127_124047_00176_q3xm5"
+    },
+    {
+      "id": "sqlserver_partition_day",
+      "job_id": "5d361883-63ae-4c1e-b6b6-67b3a837a33a",
+      "request": {
+        "source_id": "sqlserver",
+        "schema": "dbo",
+        "table": "Invoice",
+        "format": "parquet",
+        "compression": "snappy",
+        "fetch_size": 1000,
+        "num_partitions": 1,
+        "partition_by": [
+          "invoice_date"
+        ],
+        "partition_granularity": "day"
+      },
+      "created_at": "2026-11-27T12:40:47.127578Z",
+      "started_at": "2026-11-27T12:40:48.840602Z",
+      "finished_at": "2026-11-27T12:42:23.190230Z",
+      "duration_ms": 94350,
+      "verified_at": "2026-11-27T12:42:26.451Z",
+      "row_count": 5000,
+      "file_count": 730,
+      "storage_bytes": 1890177,
+      "extract_write_ms": 52413,
+      "verify_ms": 15850,
+      "registration_ms": 14356,
+      "requested_num_partitions": 1,
+      "effective_num_partitions": 1,
+      "catalog_table": "hive.runs.invoice_5d361883",
+      "sql_rows": [
+        [
+          5000,
+          5000,
+          "12502500",
+          "4892425.00"
+        ]
+      ],
+      "query_id": "20261127_124224_00184_q3xm5"
+    },
+    {
+      "id": "sqlserver_partition_status",
+      "job_id": "fc5ce42b-732c-4776-912b-3b9eb415bee9",
+      "request": {
+        "source_id": "sqlserver",
+        "schema": "dbo",
+        "table": "Invoice",
+        "format": "parquet",
+        "compression": "snappy",
+        "fetch_size": 1000,
+        "num_partitions": 1,
+        "partition_by": [
+          "status"
+        ],
+        "partition_granularity": "month"
+      },
+      "created_at": "2026-11-27T12:42:26.621647Z",
+      "started_at": "2026-11-27T12:42:27.198978Z",
+      "finished_at": "2026-11-27T12:42:58.865377Z",
+      "duration_ms": 31667,
+      "verified_at": "2026-11-27T12:43:01.350Z",
+      "row_count": 5000,
+      "file_count": 3,
+      "storage_bytes": 70084,
+      "extract_write_ms": 15508,
+      "verify_ms": 2644,
+      "registration_ms": 975,
+      "requested_num_partitions": 1,
+      "effective_num_partitions": 1,
+      "catalog_table": "hive.runs.invoice_fc5ce42b",
+      "sql_rows": [
+        [
+          5000,
+          5000,
+          "12502500",
+          "4892425.00"
+        ]
+      ],
+      "query_id": "20261127_124301_00192_q3xm5"
+    },
+    {
+      "id": "sqlserver_csv_gzip_month",
+      "job_id": "c155ee84-f9bd-4d5c-a07c-78bb9d86b9fb",
+      "request": {
+        "source_id": "sqlserver",
+        "schema": "dbo",
+        "table": "Invoice",
+        "format": "csv",
+        "compression": "gzip",
+        "fetch_size": 1000,
+        "num_partitions": 1,
+        "partition_by": [
+          "invoice_date"
+        ],
+        "partition_granularity": "month"
+      },
+      "created_at": "2026-11-27T12:43:01.471687Z",
+      "started_at": "2026-11-27T12:43:02.873130Z",
+      "finished_at": "2026-11-27T12:43:42.055481Z",
+      "duration_ms": 39182,
+      "verified_at": "2026-11-27T12:43:44.281Z",
+      "row_count": 5000,
+      "file_count": 24,
+      "storage_bytes": 54537,
+      "extract_write_ms": 20421,
+      "verify_ms": 3125,
+      "registration_ms": 1976,
+      "requested_num_partitions": 1,
+      "effective_num_partitions": 1,
+      "catalog_table": "hive.runs.invoice_c155ee84",
+      "sql_rows": [
+        [
+          5000,
+          5000,
+          "12502500",
+          "4892425.00"
+        ]
+      ],
+      "query_id": "20261127_124344_00198_q3xm5"
+    },
+    {
+      "id": "sqlserver_month_and_status",
+      "job_id": "6bf18071-547a-4e0f-a626-29ca604658b9",
+      "request": {
+        "source_id": "sqlserver",
+        "schema": "dbo",
+        "table": "Invoice",
+        "format": "parquet",
+        "compression": "snappy",
+        "fetch_size": 1000,
+        "num_partitions": 1,
+        "partition_by": [
+          "invoice_date",
+          "status"
+        ],
+        "partition_granularity": "month"
+      },
+      "created_at": "2026-11-27T12:43:44.479038Z",
+      "started_at": "2026-11-27T12:43:46.067775Z",
+      "finished_at": "2026-11-27T12:44:29.384043Z",
+      "duration_ms": 43317,
+      "verified_at": "2026-11-27T12:44:31.506Z",
+      "row_count": 5000,
+      "file_count": 72,
+      "storage_bytes": 219504,
+      "extract_write_ms": 23796,
+      "verify_ms": 4698,
+      "registration_ms": 2263,
+      "requested_num_partitions": 1,
+      "effective_num_partitions": 1,
+      "catalog_table": "hive.runs.invoice_6bf18071",
+      "sql_rows": [
+        [
+          5000,
+          5000,
+          "12502500",
+          "4892425.00"
+        ]
+      ],
+      "query_id": "20261127_124431_00206_q3xm5"
+    },
+    {
+      "id": "postgresql_partition_month",
+      "job_id": "b6c3aa45-1b33-4ee2-afab-e73b114e4601",
+      "request": {
+        "source_id": "postgresql",
+        "schema": "public",
+        "table": "invoice",
+        "format": "parquet",
+        "compression": "snappy",
+        "fetch_size": 1000,
+        "num_partitions": 1,
+        "partition_by": [
+          "invoice_date"
+        ],
+        "partition_granularity": "month"
+      },
+      "created_at": "2026-11-27T12:44:31.725511Z",
+      "started_at": "2026-11-27T12:44:33.396180Z",
+      "finished_at": "2026-11-27T12:45:06.629921Z",
+      "duration_ms": 33233,
+      "verified_at": "2026-11-27T12:45:09.409Z",
+      "row_count": 5000,
+      "file_count": 24,
+      "storage_bytes": 128159,
+      "extract_write_ms": 16526,
+      "verify_ms": 2791,
+      "registration_ms": 2645,
+      "requested_num_partitions": 1,
+      "effective_num_partitions": 1,
+      "catalog_table": "hive.runs.invoice_b6c3aa45",
+      "sql_rows": [
+        [
+          5000,
+          5000,
+          "12502500",
+          "1750250.00"
+        ]
+      ],
+      "query_id": "20261127_124508_00214_q3xm5"
+    },
+    {
+      "id": "sqlserver_fetch_100",
+      "job_id": "8ec7ea7f-4e4d-40e1-b827-d0af4ed0b31c",
+      "request": {
+        "source_id": "sqlserver",
+        "schema": "dbo",
+        "table": "Invoice",
+        "format": "parquet",
+        "compression": "snappy",
+        "fetch_size": 100,
+        "num_partitions": 1,
+        "partition_by": [],
+        "partition_granularity": "month"
+      },
+      "created_at": "2026-11-27T12:45:09.649233Z",
+      "started_at": "2026-11-27T12:45:10.648890Z",
+      "finished_at": "2026-11-27T12:45:51.611323Z",
+      "duration_ms": 40963,
+      "verified_at": "2026-11-27T12:45:52.434Z",
+      "row_count": 5000,
+      "file_count": 1,
+      "storage_bytes": 61181,
+      "extract_write_ms": 16263,
+      "verify_ms": 3610,
+      "registration_ms": 1041,
+      "requested_num_partitions": 1,
+      "effective_num_partitions": 1,
+      "catalog_table": "hive.runs.invoice_8ec7ea7f",
+      "sql_rows": [
+        [
+          5000,
+          5000,
+          "12502500",
+          "4892425.00"
+        ]
+      ],
+      "query_id": "20261127_124552_00221_q3xm5"
+    },
+    {
+      "id": "sqlserver_fetch_10000",
+      "job_id": "ac544d9b-61fb-4aa0-9268-6f09e47d902b",
+      "request": {
+        "source_id": "sqlserver",
+        "schema": "dbo",
+        "table": "Invoice",
+        "format": "parquet",
+        "compression": "snappy",
+        "fetch_size": 10000,
+        "num_partitions": 1,
+        "partition_by": [],
+        "partition_granularity": "month"
+      },
+      "created_at": "2026-11-27T12:45:52.528889Z",
+      "started_at": "2026-11-27T12:45:53.638470Z",
+      "finished_at": "2026-11-27T12:46:39.556511Z",
+      "duration_ms": 45918,
+      "verified_at": "2026-11-27T12:46:41.778Z",
+      "row_count": 5000,
+      "file_count": 1,
+      "storage_bytes": 61181,
+      "extract_write_ms": 23640,
+      "verify_ms": 4092,
+      "registration_ms": 1803,
+      "requested_num_partitions": 1,
+      "effective_num_partitions": 1,
+      "catalog_table": "hive.runs.invoice_ac544d9b",
+      "sql_rows": [
+        [
+          5000,
+          5000,
+          "12502500",
+          "4892425.00"
+        ]
+      ],
+      "query_id": "20261127_124641_00228_q3xm5"
+    },
+    {
+      "id": "sqlserver_readers_2",
+      "job_id": "983d434e-5424-48a3-9189-41376a1b8966",
+      "request": {
+        "source_id": "sqlserver",
+        "schema": "dbo",
+        "table": "Invoice",
+        "format": "parquet",
+        "compression": "snappy",
+        "fetch_size": 1000,
+        "num_partitions": 2,
+        "partition_by": [],
+        "partition_granularity": "month"
+      },
+      "created_at": "2026-11-27T12:46:41.977178Z",
+      "started_at": "2026-11-27T12:46:43.584115Z",
+      "finished_at": "2026-11-27T12:47:23.924054Z",
+      "duration_ms": 40340,
+      "verified_at": "2026-11-27T12:47:24.814Z",
+      "row_count": 5000,
+      "file_count": 2,
+      "storage_bytes": 78291,
+      "extract_write_ms": 16199,
+      "verify_ms": 3346,
+      "registration_ms": 630,
+      "requested_num_partitions": 2,
+      "effective_num_partitions": 2,
+      "catalog_table": "hive.runs.invoice_983d434e",
+      "sql_rows": [
+        [
+          5000,
+          5000,
+          "12502500",
+          "4892425.00"
+        ]
+      ],
+      "query_id": "20261127_124725_00235_q3xm5"
+    },
+    {
+      "id": "sqlserver_readers_4",
+      "job_id": "7483f8dc-2279-4544-8472-dc3200bb5030",
+      "request": {
+        "source_id": "sqlserver",
+        "schema": "dbo",
+        "table": "Invoice",
+        "format": "parquet",
+        "compression": "snappy",
+        "fetch_size": 1000,
+        "num_partitions": 4,
+        "partition_by": [],
+        "partition_granularity": "month"
+      },
+      "created_at": "2026-11-27T12:47:24.960573Z",
+      "started_at": "2026-11-27T12:47:25.930834Z",
+      "finished_at": "2026-11-27T12:47:59.497145Z",
+      "duration_ms": 33567,
+      "verified_at": "2026-11-27T12:48:01.484Z",
+      "row_count": 5000,
+      "file_count": 4,
+      "storage_bytes": 105302,
+      "extract_write_ms": 18840,
+      "verify_ms": 2519,
+      "registration_ms": 834,
+      "requested_num_partitions": 4,
+      "effective_num_partitions": 4,
+      "catalog_table": "hive.runs.invoice_7483f8dc",
+      "sql_rows": [
+        [
+          5000,
+          5000,
+          "12502500",
+          "4892425.00"
+        ]
+      ],
+      "query_id": "20261127_124801_00242_q3xm5"
+    },
+    {
+      "id": "postgresql_readers_2",
+      "job_id": "ae95dcc7-dd87-4e13-9d69-bf76367600db",
+      "request": {
+        "source_id": "postgresql",
+        "schema": "public",
+        "table": "invoice",
+        "format": "parquet",
+        "compression": "snappy",
+        "fetch_size": 1000,
+        "num_partitions": 2,
+        "partition_by": [],
+        "partition_granularity": "month"
+      },
+      "created_at": "2026-11-27T12:48:01.593178Z",
+      "started_at": "2026-11-27T12:48:03.512093Z",
+      "finished_at": "2026-11-27T12:48:48.345645Z",
+      "duration_ms": 44833,
+      "verified_at": "2026-11-27T12:48:50.546Z",
+      "row_count": 5000,
+      "file_count": 2,
+      "storage_bytes": 66125,
+      "extract_write_ms": 21026,
+      "verify_ms": 2208,
+      "registration_ms": 573,
+      "requested_num_partitions": 2,
+      "effective_num_partitions": 2,
+      "catalog_table": "hive.runs.invoice_ae95dcc7",
+      "sql_rows": [
+        [
+          5000,
+          5000,
+          "12502500",
+          "1750250.00"
+        ]
+      ],
+      "query_id": "20261127_124850_00249_q3xm5"
+    },
+    {
+      "id": "sqlserver_customer",
+      "job_id": "73ce50e8-0e88-4f8a-a068-4ed268b7ee08",
+      "request": {
+        "source_id": "sqlserver",
+        "schema": "dbo",
+        "table": "Customer",
+        "format": "parquet",
+        "compression": "snappy",
+        "fetch_size": 1000,
+        "num_partitions": 1,
+        "partition_by": [],
+        "partition_granularity": "month"
+      },
+      "created_at": "2026-11-27T12:48:50.663768Z",
+      "started_at": "2026-11-27T12:48:52.355054Z",
+      "finished_at": "2026-11-27T12:49:23.770218Z",
+      "duration_ms": 31415,
+      "verified_at": "2026-11-27T12:49:25.239Z",
+      "row_count": 1000,
+      "file_count": 1,
+      "storage_bytes": 26071,
+      "extract_write_ms": 15544,
+      "verify_ms": 2853,
+      "registration_ms": 653,
+      "requested_num_partitions": 1,
+      "effective_num_partitions": 1,
+      "catalog_table": "hive.runs.customer_73ce50e8",
+      "sql_rows": [
+        [
+          1000,
+          1000,
+          "500500"
+        ]
+      ],
+      "query_id": "20261127_124925_00256_q3xm5"
+    },
+    {
+      "id": "sqlserver_payment",
+      "job_id": "26b3a0ab-8923-4fbb-bebb-5c888bf90072",
+      "request": {
+        "source_id": "sqlserver",
+        "schema": "dbo",
+        "table": "Payment",
+        "format": "parquet",
+        "compression": "snappy",
+        "fetch_size": 1000,
+        "num_partitions": 1,
+        "partition_by": [],
+        "partition_granularity": "month"
+      },
+      "created_at": "2026-11-27T12:49:25.333471Z",
+      "started_at": "2026-11-27T12:49:25.774694Z",
+      "finished_at": "2026-11-27T12:49:54.973420Z",
+      "duration_ms": 29199,
+      "verified_at": "2026-11-27T12:49:55.802Z",
+      "row_count": 8000,
+      "file_count": 1,
+      "storage_bytes": 108096,
+      "extract_write_ms": 13677,
+      "verify_ms": 2806,
+      "registration_ms": 550,
+      "requested_num_partitions": 1,
+      "effective_num_partitions": 1,
+      "catalog_table": "hive.runs.payment_26b3a0ab",
+      "sql_rows": [
+        [
+          8000,
+          8000,
+          "39988500",
+          "3913605.00"
+        ]
+      ],
+      "query_id": "20261127_124956_00263_q3xm5"
+    },
+    {
+      "id": "postgresql_customer",
+      "job_id": "f6987136-2ebe-4ca5-a4b9-f4834ce02bb9",
+      "request": {
+        "source_id": "postgresql",
+        "schema": "public",
+        "table": "customer",
+        "format": "parquet",
+        "compression": "snappy",
+        "fetch_size": 1000,
+        "num_partitions": 1,
+        "partition_by": [],
+        "partition_granularity": "month"
+      },
+      "created_at": "2026-11-27T12:49:55.934395Z",
+      "started_at": "2026-11-27T12:49:56.981044Z",
+      "finished_at": "2026-11-27T12:50:24.209338Z",
+      "duration_ms": 27228,
+      "verified_at": "2026-11-27T12:50:26.374Z",
+      "row_count": 1000,
+      "file_count": 1,
+      "storage_bytes": 36719,
+      "extract_write_ms": 12117,
+      "verify_ms": 3117,
+      "registration_ms": 665,
+      "requested_num_partitions": 1,
+      "effective_num_partitions": 1,
+      "catalog_table": "hive.runs.customer_f6987136",
+      "sql_rows": [
+        [
+          1000,
+          1000,
+          "500500"
+        ]
+      ],
+      "query_id": "20261127_125026_00270_q3xm5"
+    },
+    {
+      "id": "postgresql_payment",
+      "job_id": "00f08413-afce-4170-9a49-dd0852c30ff0",
+      "request": {
+        "source_id": "postgresql",
+        "schema": "public",
+        "table": "payment",
+        "format": "parquet",
+        "compression": "snappy",
+        "fetch_size": 1000,
+        "num_partitions": 1,
+        "partition_by": [],
+        "partition_granularity": "month"
+      },
+      "created_at": "2026-11-27T12:50:26.505975Z",
+      "started_at": "2026-11-27T12:50:28.216084Z",
+      "finished_at": "2026-11-27T12:50:57.399435Z",
+      "duration_ms": 29183,
+      "verified_at": "2026-11-27T12:50:59.144Z",
+      "row_count": 8000,
+      "file_count": 1,
+      "storage_bytes": 103128,
+      "extract_write_ms": 14579,
+      "verify_ms": 2317,
+      "registration_ms": 480,
+      "requested_num_partitions": 1,
+      "effective_num_partitions": 1,
+      "catalog_table": "hive.runs.payment_00f08413",
+      "sql_rows": [
+        [
+          8000,
+          8000,
+          "32004000",
+          "1399925.00"
+        ]
+      ],
+      "query_id": "20261127_125059_00277_q3xm5"
+    },
+    {
+      "id": "clickhouse_customer",
+      "job_id": "ffd615d9-715a-4148-acf3-7377c7117991",
+      "request": {
+        "source_id": "clickhouse",
+        "schema": "analytics",
+        "table": "customer",
+        "format": "parquet",
+        "compression": "snappy",
+        "fetch_size": 1000,
+        "num_partitions": 1,
+        "partition_by": [],
+        "partition_granularity": "month"
+      },
+      "created_at": "2026-11-27T12:50:59.196728Z",
+      "started_at": "2026-11-27T12:50:59.407586Z",
+      "finished_at": "2026-11-27T12:51:26.613105Z",
+      "duration_ms": 27206,
+      "verified_at": "2026-11-27T12:51:27.688Z",
+      "row_count": 1000,
+      "file_count": 1,
+      "storage_bytes": 18709,
+      "extract_write_ms": 13172,
+      "verify_ms": 2995,
+      "registration_ms": 638,
+      "requested_num_partitions": 1,
+      "effective_num_partitions": 1,
+      "catalog_table": "hive.runs.customer_ffd615d9",
+      "sql_rows": [
+        [
+          1000,
+          1000,
+          "500500"
+        ]
+      ],
+      "query_id": "20261127_125128_00284_q3xm5"
+    },
+    {
+      "id": "clickhouse_payment",
+      "job_id": "b7a93c34-89ae-4d9b-8d95-13a8beb8a0f3",
+      "request": {
+        "source_id": "clickhouse",
+        "schema": "analytics",
+        "table": "payment",
+        "format": "parquet",
+        "compression": "snappy",
+        "fetch_size": 1000,
+        "num_partitions": 1,
+        "partition_by": [],
+        "partition_granularity": "month"
+      },
+      "created_at": "2026-11-27T12:51:27.738275Z",
+      "started_at": "2026-11-27T12:51:28.617609Z",
+      "finished_at": "2026-11-27T12:51:55.942435Z",
+      "duration_ms": 27325,
+      "verified_at": "2026-11-27T12:51:58.246Z",
+      "row_count": 8000,
+      "file_count": 1,
+      "storage_bytes": 102021,
+      "extract_write_ms": 13154,
+      "verify_ms": 2491,
+      "registration_ms": 653,
+      "requested_num_partitions": 1,
+      "effective_num_partitions": 1,
+      "catalog_table": "hive.runs.payment_b7a93c34",
+      "sql_rows": [
+        [
+          8000,
+          8000,
+          "32004000",
+          "173955.71"
+        ]
+      ],
+      "query_id": "20261127_125158_00291_q3xm5"
+    },
+    {
+      "id": "benchmark_100k",
+      "job_id": "eca8427c-a8c3-4abc-8ed2-4da0ccbc3eb3",
+      "request": {
+        "source_id": "benchmark",
+        "schema": "benchmark",
+        "table": "Invoice100k",
+        "format": "parquet",
+        "compression": "snappy",
+        "fetch_size": 1000,
+        "num_partitions": 2,
+        "partition_by": [],
+        "partition_granularity": "month"
+      },
+      "created_at": "2026-11-27T12:51:58.346449Z",
+      "started_at": "2026-11-27T12:51:59.950201Z",
+      "finished_at": "2026-11-27T12:52:31.546610Z",
+      "duration_ms": 31596,
+      "verified_at": "2026-11-27T12:52:33.117Z",
+      "row_count": 100000,
+      "file_count": 2,
+      "storage_bytes": 1289934,
+      "extract_write_ms": 17492,
+      "verify_ms": 2270,
+      "registration_ms": 940,
+      "requested_num_partitions": 2,
+      "effective_num_partitions": 2,
+      "catalog_table": "hive.runs.invoice100k_eca8427c",
+      "sql_rows": [
+        [
+          100000,
+          100000,
+          "5000050000",
+          "104634500.00"
+        ]
+      ],
+      "query_id": "20261127_125233_00298_q3xm5"
+    },
+    {
+      "id": "soccer_country",
+      "job_id": "4cecbdb4-101e-4667-87d2-3c096a58dc0e",
+      "request": {
+        "source_id": "soccer",
+        "schema": "dbo",
+        "table": "Country",
+        "format": "parquet",
+        "compression": "snappy",
+        "fetch_size": 1000,
+        "num_partitions": 1,
+        "partition_by": [],
+        "partition_granularity": "month"
+      },
+      "created_at": "2026-11-27T12:52:33.737083Z",
+      "started_at": "2026-11-27T12:52:35.554189Z",
+      "finished_at": "2026-11-27T12:53:06.973622Z",
+      "duration_ms": 31419,
+      "verified_at": "2026-11-27T12:53:08.195Z",
+      "row_count": 11,
+      "file_count": 1,
+      "storage_bytes": 1114,
+      "extract_write_ms": 15914,
+      "verify_ms": 2473,
+      "registration_ms": 633,
+      "requested_num_partitions": 1,
+      "effective_num_partitions": 1,
+      "catalog_table": "hive.runs.country_4cecbdb4",
+      "sql_rows": [
+        [
+          11,
+          11,
+          "136973"
+        ]
+      ],
+      "query_id": "20261127_125308_00305_q3xm5"
+    }
+  ],
+  "validation_checks": [
+    {
+      "id": "parquet_gzip",
+      "expected_status": 422,
+      "observed_status": 422,
+      "checked_at": "2026-11-27T12:53:08.301Z"
+    },
+    {
+      "id": "csv_snappy",
+      "expected_status": 422,
+      "observed_status": 422,
+      "checked_at": "2026-11-27T12:53:08.322Z"
+    },
+    {
+      "id": "primary_key_partition",
+      "expected_status": 422,
+      "observed_status": 422,
+      "checked_at": "2026-11-27T12:53:08.361Z"
+    },
+    {
+      "id": "redis_partition",
+      "expected_status": 422,
+      "observed_status": 422,
+      "checked_at": "2026-11-27T12:53:08.376Z"
+    },
+    {
+      "id": "minio_not_an_extraction_source",
+      "expected_status": 404,
+      "observed_status": 404,
+      "checked_at": "2026-11-27T12:53:08.389Z"
+    },
+    {
+      "id": "missing_table",
+      "expected_status": 404,
+      "observed_status": 404,
+      "checked_at": "2026-11-27T12:53:08.414Z"
+    },
+    {
+      "id": "zero_readers",
+      "expected_status": 422,
+      "observed_status": 422,
+      "checked_at": "2026-11-27T12:53:08.537Z"
+    }
+  ],
+  "existing_small_file_counterexamples": [
+    {
+      "job_id": "9230be9f-620b-476c-b4e7-ad8adabf044e",
+      "files": 4000
+    },
+    {
+      "job_id": "0a7fa971-ff80-40c7-a8bf-86406570079a",
+      "files": 4770
+    }
+  ]
+}

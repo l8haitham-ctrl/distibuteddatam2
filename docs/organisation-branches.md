@@ -5,6 +5,18 @@
 - `feature/atlas-platform` : version complète de référence et documentation de présentation.
 - `master` : socle historique, conservé sans fusion automatique.
 
+## Corrections et validations récentes
+
+- `feature/extraction-failure-monitoring` : correction du suivi lorsqu'un échec
+  Spark coïncide avec une panne du stockage ; base `feature/atlas-platform`
+  au commit `31125eb`.
+- `feature/extraction-scenario-campaign` : runner, overlay Docker et résultats des
+  40 scénarios d'extraction ; base `feature/extraction-failure-monitoring`
+  au commit `dd339d6`.
+
+Ces branches restent séparées et ne sont pas fusionnées automatiquement dans
+la version de référence ou dans `master`.
+
 Chaque fonctionnalité conserve sa branche sur GitHub. La branche de référence
 sert à exécuter et présenter l'ensemble du projet ; elle ne remplace pas les
 branches de fonctionnalités. Les 36 branches retirées lors du précédent
