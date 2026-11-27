@@ -1,5 +1,7 @@
 # Atlas — plateforme de donnees
 
+Support de soutenance en francais : [presentation du projet et architecture globale](docs/presentation-professeur.md).
+
 Projet pedagogique : connecter une base relationnelle, explorer sa structure,
 puis construire un pipeline analytique Parquet / MinIO / catalogue / Trino.
 La stack retenue est **Angular + Java 21 / Spring Boot**, entierement conteneurisee.
