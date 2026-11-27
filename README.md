@@ -143,3 +143,9 @@ colonnes, puis l'extraction, MinIO, le catalogue, Trino et les benchmarks.
 References techniques : [Spring Boot](https://docs.spring.io/spring-boot/system-requirements.html),
 [JDBC SQL Server](https://learn.microsoft.com/en-us/sql/connect/jdbc/configuring-the-client-for-ssl-encryption),
 [Angular](https://angular.dev/reference/versions).
+
+## Skills du projet
+
+Les consignes par fonctionnalité, le workflow de maintenance et les contrats API
+sont accessibles dans [les skills Atlas](.agents/skills/README.md). Le contexte
+indique les fonctionnalités et routes présentes dans cette branche.
