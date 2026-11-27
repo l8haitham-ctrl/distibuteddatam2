@@ -1,8 +1,8 @@
 # Atlas — Présentation du projet et architecture globale
 
-**Projet :** gestion distribuée des données et plateforme analytique extensible  
-**Support de soutenance — version du 27 novembre 2026**  
-**Équipe :** à compléter  
+**Projet :** gestion distribuée des données et plateforme analytique extensible
+**Support de soutenance — version du 27 novembre 2026**
+**Équipe :** à compléter
 **Enseignant :** à compléter
 
 > **Périmètre présenté.** Ce document décrit les fonctionnalités validées jusqu'à
@@ -799,52 +799,64 @@ l'instant de cette présentation.
 
 ### 20.2 Questions probables du professeur
 
-**Pourquoi ne pas analyser directement SQL Server ?**  
+**Pourquoi ne pas analyser directement SQL Server ?**
+
 Le lac conserve des snapshots et permet les analyses sur des fichiers adaptés.
 Les requêtes Trino Hive ne relisent pas la base source. L'extraction garde un coût.
 
-**Pourquoi Parquet ?**  
+**Pourquoi Parquet ?**
+
 Il conserve un schéma typé et une organisation colonnaire. Le benchmark montre
 un gain de stockage ; il ne montre pas une accélération universelle de toutes les requêtes.
 
-**Pourquoi MinIO et non un dossier local ?**  
+**Pourquoi MinIO et non un dossier local ?**
+
 MinIO fournit l'API objet S3 utilisée par Spark et Trino, et matérialise la
 séparation entre calcul et stockage dans l'environnement local.
 
-**Pourquoi faut-il Hive Metastore ?**  
+**Pourquoi faut-il Hive Metastore ?**
+
 Les fichiers ne déclarent pas à eux seuls une table SQL exploitable par Trino.
 Le catalogue fournit schéma, emplacement et partitions.
 
-**Spark est-il réellement utilisé ?**  
+**Spark est-il réellement utilisé ?**
+
 Oui : les jobs sont soumis au master et exécutent des lectures et écritures Spark.
 La configuration validée reste toutefois limitée à un cœur par application.
 
-**Où est la dimension distribuée ?**  
+**Où est la dimension distribuée ?**
+
 Les responsabilités sont réparties entre services et moteurs distincts, avec
 Spark et un stockage objet. La démonstration locale n'établit pas une montée
 en charge multiworker/multimachine : cela reste une perspective à valider.
 
-**Un lot correspond-il à un fichier ?**  
+**Un lot correspond-il à un fichier ?**
+
 Non. Le fetch JDBC, les partitions de lecture et les partitions de stockage
 sont trois réglages différents.
 
-**Le partitionnement est-il toujours plus rapide ?**  
+**Le partitionnement est-il toujours plus rapide ?**
+
 Non. Notre campagne montre moins de lignes traitées pour janvier, mais pas
 une latence inférieure sur ce petit dataset, avec 48 petits fichiers.
 
-**Comment évitez-vous les doublons de réextraction ?**  
+**Comment évitez-vous les doublons de réextraction ?**
+
 Chaque run est isolé, et la vue courante Parquet pointe vers un seul snapshot.
 Cela ne rend pas la création de job idempotente.
 
-**Peut-on connecter n'importe quelle base ?**  
+**Peut-on connecter n'importe quelle base ?**
+
 L'architecture relationnelle est extensible. SQL Server et PostgreSQL sont
 validés ; un nouveau moteur demande son plugin, pilote et tests.
 
-**Le glossaire génère-t-il les requêtes métier ?**  
+**Le glossaire génère-t-il les requêtes métier ?**
+
 Non. Il documente le sens des tables et colonnes et permet de retrouver les
 associations. Il ne remplace pas un moteur sémantique.
 
-**Iceberg et l'incrémental sont-ils présents ?**  
+**Iceberg et l'incrémental sont-ils présents ?**
+
 Non. Le socle utilise des tables Hive externes et des extractions complètes.
 Ces fonctionnalités sont des perspectives, pas des résultats revendiqués.
 
