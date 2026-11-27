@@ -475,3 +475,9 @@ et ne prouve pas que tous les autres bonus sont réalisés.
 La documentation présente des capacités vérifiées et des limites explicites,
 sans transformer des travaux préparés ou des possibilités des technologies en
 fonctionnalités effectivement livrées.
+
+## Skills du projet
+
+Les consignes par fonctionnalité, le workflow de maintenance et les contrats API
+sont accessibles dans [les skills Atlas](.agents/skills/README.md). Le contexte
+indique les fonctionnalités et routes présentes dans cette branche.
