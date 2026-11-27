@@ -1,0 +1,85 @@
+{
+  "date": "2026-11-27",
+  "branch": "feature/extraction-failure-monitoring",
+  "base_commit": "31125eb",
+  "tests": {
+    "JobTests": 18,
+    "CatalogTests": 3,
+    "failures": 0,
+    "errors": 0,
+    "runtime": "Docker"
+  },
+  "checks": [
+    {
+      "source_id": "sqlserver",
+      "job_id": "044ec343-d910-4923-b3a4-96c68cb186a5",
+      "request": {
+        "source_id": "sqlserver",
+        "schema": "dbo",
+        "table": "Invoice",
+        "format": "parquet",
+        "compression": "snappy",
+        "partition_by": [],
+        "num_partitions": 1,
+        "fetch_size": 1000
+      },
+      "reference": [
+        5000,
+        "4892425.00",
+        "12502500"
+      ],
+      "observed_sql": [
+        [
+          5000,
+          "4892425.00",
+          "12502500"
+        ]
+      ],
+      "row_count": 5000,
+      "file_count": 1,
+      "extract_write_ms": 13900,
+      "registration_ms": 2279,
+      "catalog_table": "hive.runs.invoice_044ec343",
+      "query_id": "20261127_114529_00021_q3xm5",
+      "verified_at": "2026-11-27T11:45:33.233Z"
+    },
+    {
+      "source_id": "clickhouse",
+      "job_id": "a7c1ea50-8aa9-4553-a52f-89d8d5e7d523",
+      "request": {
+        "source_id": "clickhouse",
+        "schema": "analytics",
+        "table": "invoice",
+        "format": "parquet",
+        "compression": "snappy",
+        "partition_by": [],
+        "num_partitions": 1,
+        "fetch_size": 1000
+      },
+      "reference": [
+        5000,
+        "129972.16",
+        "12502500"
+      ],
+      "observed_sql": [
+        [
+          5000,
+          "129972.16",
+          "12502500"
+        ]
+      ],
+      "row_count": 5000,
+      "file_count": 1,
+      "extract_write_ms": 12916,
+      "registration_ms": 1176,
+      "catalog_table": "hive.runs.invoice_a7c1ea50",
+      "query_id": "20261127_114605_00028_q3xm5",
+      "verified_at": "2026-11-27T11:46:05.319Z"
+    }
+  ],
+  "notes": [
+    "MinIO network attachment restored; source data and volumes preserved.",
+    "One accidental benchmark submission completed before runner stop; not a benchmark campaign.",
+    "Existing 5000-row job partitioned by customer_id,status completed with 4000 files."
+  ]
+}

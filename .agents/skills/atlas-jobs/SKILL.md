@@ -29,6 +29,8 @@ Identifier l’entrée utilisateur, le service responsable, la dépendance appel
 
 ## Vérification pertinente
 
+Sur la branche `feature/extraction-failure-monitoring`, une indisponibilité du manifeste ne doit pas masquer un échec Spark explicite. Le suivi consulte alors Spark et termine le job pour ERROR/FAILED/KILLED/LOST ; FINISHED ou UNKNOWN ne suffisent pas à déclarer un échec si le manifeste est inaccessible. Une panne simultanée des deux services conserve le timeout et n'entraîne aucune resoumission automatique.
+
 Transitions, soumission unique, limites de paramètres, erreurs Spark, timeout, résultat manquant et publication catalogue ; ne pas remplacer ces vérifications par un simple FINISHED Spark.
 
 Pour une demande de contrats HTTP complets, lire [le skill API](../atlas-api/SKILL.md). Pour une modification de code ou une intervention Docker/Git, appliquer [le workflow de maintenance](../atlas-maintenance-flow/SKILL.md). Ne pas lancer de benchmark ou modifier une source juste pour documenter cette feature.

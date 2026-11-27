@@ -69,13 +69,23 @@ public class JobDispatcher {
                 repository.failed(job.id(),state.equals("FINISHED")?"RESULT_MISSING":"SPARK_"+state);
             }
         } catch(ExplorerException exception) {
-            // A temporarily unavailable Spark/MinIO service does not erase the active execution.
+            // A storage outage must not hide an explicit Spark failure until the global timeout.
             if(exception.code()==ExplorerException.Code.JOB_RESULT_INVALID)repository.failed(job.id(),"RESULT_INVALID");
+            else if(exception.code()==ExplorerException.Code.STORAGE_UNAVAILABLE && recordSparkFailure(job))return;
             else if(job.startedAt().plusSeconds(timeout).isBefore(Instant.now())) {
                 try { engine.kill(job.submissionId()); } catch(Exception ignored) { }
                 repository.failed(job.id(),"EXECUTION_TIMEOUT");
             }
         }
+    }
+    private boolean recordSparkFailure(StorageJob job) {
+        String state;
+        try { state=engine.state(job.submissionId()); }
+        catch(ExplorerException unavailable) { return false; }
+        // FINISHED still needs its manifest; UNKNOWN is not proof of failure during an outage.
+        if(state==null || !Set.of("ERROR","FAILED","KILLED","LOST").contains(state))return false;
+        repository.failed(job.id(),"SPARK_"+state);
+        return true;
     }
     private void register(StorageJob job,Map<String,Object> manifest) {
         if(catalog==null)throw new IllegalStateException("Catalogue required before completion.");

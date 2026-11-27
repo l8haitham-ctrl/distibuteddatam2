@@ -476,6 +476,28 @@ La documentation présente des capacités vérifiées et des limites explicites,
 sans transformer des travaux préparés ou des possibilités des technologies en
 fonctionnalités effectivement livrées.
 
+## Diagnostic des extractions lentes ou bloquées
+
+Un conteneur MinIO sain localement ne garantit pas son accès depuis Spark.
+Vérifier son raccordement au réseau Compose et la résolution de `minio` depuis
+le worker avant de relancer un job. Préserver les volumes et ne pas resoumettre
+automatiquement une demande dont la soumission reste incertaine.
+
+Si le manifeste est temporairement inaccessible, le suivi consulte aussi Spark :
+un état explicite `ERROR`, `FAILED`, `KILLED` ou `LOST` termine le job en échec
+sans attendre le timeout global. `FINISHED` ne suffit pas à publier un résultat :
+le manifeste et le catalogue restent obligatoires. Une indisponibilité simultanée
+du stockage et de Spark conserve le traitement jusqu'au délai maximal.
+
+Le partitionnement par identifiant client et statut peut produire des milliers
+de petits fichiers même pour quelques milliers de lignes. Pour un premier test,
+utiliser une extraction sans partition ; pour les factures, évaluer ensuite un
+partitionnement mensuel sur `invoice_date` selon le volume et les requêtes.
+
+Le [diagnostic et les contrôles de rétablissement](docs/extraction-recovery.md)
+documentent ce cas, les tests de surveillance et les extractions SQL Server et
+ClickHouse vérifiées jusqu'à Trino.
+
 ## Skills du projet
 
 Les consignes par fonctionnalité, le workflow de maintenance et les contrats API

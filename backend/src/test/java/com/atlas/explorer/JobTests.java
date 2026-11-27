@@ -151,6 +151,35 @@ class JobTests {
         new JobDispatcher(repository,engine,storage,properties()).tick();
         verify(repository,never()).failed(any(),any());verify(repository,never()).completed(any(),any());
     }
+    @Test void storageOutageDoesNotHideExplicitSparkFailure() {
+        for(String state:List.of("ERROR","FAILED","KILLED","LOST")) {
+            var repository=mock(JobRepository.class);var engine=mock(JobEngine.class);var storage=mock(StorageService.class);var job=job("RUNNING","driver-test-1",Instant.now());
+            when(repository.active()).thenReturn(List.of(job));when(repository.claim()).thenReturn(Optional.empty());
+            when(storage.open(any())).thenThrow(new ExplorerException(ExplorerException.Code.STORAGE_UNAVAILABLE));
+            when(engine.state(job.submissionId())).thenReturn(state);
+            new JobDispatcher(repository,engine,storage,properties()).tick();
+            verify(repository).failed(job.id(),"SPARK_"+state);
+            verify(repository,never()).completed(any(),any());verify(engine,never()).submit(any());verify(engine,never()).kill(any());
+        }
+    }
+    @Test void unavailableManifestDoesNotProveFinishedOrUnknownDriverHasFailed() {
+        for(String state:List.of("RUNNING","FINISHED","UNKNOWN")) {
+            var repository=mock(JobRepository.class);var engine=mock(JobEngine.class);var storage=mock(StorageService.class);var job=job("RUNNING","driver-test-1",Instant.now());
+            when(repository.active()).thenReturn(List.of(job));when(repository.claim()).thenReturn(Optional.empty());
+            when(storage.open(any())).thenThrow(new ExplorerException(ExplorerException.Code.STORAGE_UNAVAILABLE));
+            when(engine.state(job.submissionId())).thenReturn(state);
+            new JobDispatcher(repository,engine,storage,properties()).tick();
+            verify(repository,never()).failed(any(),any());verify(repository,never()).completed(any(),any());
+        }
+    }
+    @Test void simultaneousStorageAndSparkOutageKeepsJobUntilTimeout() {
+        var repository=mock(JobRepository.class);var engine=mock(JobEngine.class);var storage=mock(StorageService.class);var job=job("RUNNING","driver-test-1",Instant.now());
+        when(repository.active()).thenReturn(List.of(job));when(repository.claim()).thenReturn(Optional.empty());
+        when(storage.open(any())).thenThrow(new ExplorerException(ExplorerException.Code.STORAGE_UNAVAILABLE));
+        when(engine.state(job.submissionId())).thenThrow(new ExplorerException(ExplorerException.Code.JOB_ENGINE_UNAVAILABLE));
+        new JobDispatcher(repository,engine,storage,properties()).tick();
+        verify(repository,never()).failed(any(),any());verify(repository,never()).completed(any(),any());
+    }
     @Test void finishedDriverWithoutCommittedManifestFails() {
         var repository=mock(JobRepository.class);var engine=mock(JobEngine.class);var storage=mock(StorageService.class);var job=job("RUNNING","driver-test-1",Instant.now());
         when(repository.active()).thenReturn(List.of(job));when(repository.claim()).thenReturn(Optional.empty());
