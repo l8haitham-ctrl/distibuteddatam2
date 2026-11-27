@@ -444,3 +444,9 @@ Le fournisseur `feature/postgresql-connector` ajoute PostgreSQL comme deuxieme
 source metier. Le [guide PostgreSQL](docs/postgresql-connector.md) explique
 l'override Docker optionnel, les comptes lecteurs, TLS et les tests croises.
 SQL Server reste le cas de demonstration par defaut avec le Compose de base.
+
+## Skills du projet
+
+Les consignes par fonctionnalité, le workflow de maintenance et les contrats API
+sont accessibles dans [les skills Atlas](.agents/skills/README.md). Le contexte
+indique les fonctionnalités et routes présentes dans cette branche.
