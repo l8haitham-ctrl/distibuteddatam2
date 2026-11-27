@@ -439,3 +439,9 @@ Les sources sont selectionnees par identifiant de configuration ; les secrets
 restent dans l'environnement et ne passent jamais dans les arguments Spark.
 Voir [le contrat des plugins](docs/connector-plugins.md). Le connecteur SQL Server
 conserve ses routes et son schema par defaut dbo.
+
+## Skills du projet
+
+Les consignes par fonctionnalité, le workflow de maintenance et les contrats API
+sont accessibles dans [les skills Atlas](.agents/skills/README.md). Le contexte
+indique les fonctionnalités et routes présentes dans cette branche.
