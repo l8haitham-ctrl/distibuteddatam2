@@ -467,3 +467,9 @@ ajoute `/sources/native` : boutons de test/exploration des profils Docker,
 formulaire de connexion Redis/MinIO et structures conservees en session
 sans mots de passe. Le lien « Connecter Redis ou MinIO » est disponible
 dans Data Sources et dans le formulaire de connexion.
+
+## Skills du projet
+
+Les consignes par fonctionnalité, le workflow de maintenance et les contrats API
+sont accessibles dans [les skills Atlas](.agents/skills/README.md). Le contexte
+indique les fonctionnalités et routes présentes dans cette branche.
