@@ -1,5 +1,10 @@
 # Livraison locale reproductible
 
+> **Note après consolidation des branches :** ce guide conserve les preuves du
+> socle historique du 23 novembre. Ses commandes Git pointent désormais vers
+> `feature/atlas-platform`. Pour la stack complète actuelle, les six fichiers
+> Compose et les limites à jour, consulter d'abord le [README](../README.md).
+
 Version complete : `feature/release-readiness`, base `feature/data-quality-report`.
 La branche master n'est pas fusionnee automatiquement. Seuls Git, Docker
 Desktop avec conteneurs Linux et PowerShell sont necessaires sur Windows.
@@ -8,7 +13,7 @@ Java, Maven, Node et les tests de l'application s'executent dans Docker.
 ## Premiere installation
 
 ```powershell
-git clone --branch feature/release-readiness https://github.com/l8haitham-ctrl/distibuteddatam2.git atlas
+git clone --branch feature/atlas-platform https://github.com/l8haitham-ctrl/distibuteddatam2.git atlas
 cd atlas
 powershell -NoProfile -File scripts/setup-env.ps1
 docker compose up -d --build --wait --wait-timeout 300
@@ -35,7 +40,7 @@ la console SQL Angular passe par l'API et ne necessite pas de visite de son UI.
 
 ```powershell
 git fetch origin
-git switch feature/release-readiness
+git switch feature/atlas-platform
 powershell -NoProfile -File scripts/setup-env.ps1
 powershell -NoProfile -File scripts/setup-login.ps1
 docker compose up -d --build --wait --wait-timeout 300
