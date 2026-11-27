@@ -456,3 +456,9 @@ ajoute un test optionnel Redis -> Trino et une jointure SQL avec les factures
 Parquet dans MinIO. Redis reste distinct des plugins relationnels et des jobs
 Spark. Voir [le guide Redis et MinIO](docs/redis-analytics.md) pour le lancement,
 les requetes, les droits de lecture et les tests Docker.
+
+## Skills du projet
+
+Les consignes par fonctionnalité, le workflow de maintenance et les contrats API
+sont accessibles dans [les skills Atlas](.agents/skills/README.md). Le contexte
+indique les fonctionnalités et routes présentes dans cette branche.
