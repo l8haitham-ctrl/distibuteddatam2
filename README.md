@@ -461,3 +461,9 @@ les requetes, les droits de lecture et les tests Docker.
 les API de connexion et d'exploration Redis (cles/types/champs) et MinIO
 (bucket/fichiers/tailles), sans changer les API relationnelles. Voir
 [les sources natives](docs/native-sources.md).
+
+## Skills du projet
+
+Les consignes par fonctionnalité, le workflow de maintenance et les contrats API
+sont accessibles dans [les skills Atlas](.agents/skills/README.md). Le contexte
+indique les fonctionnalités et routes présentes dans cette branche.
