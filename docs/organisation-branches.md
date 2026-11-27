@@ -8,8 +8,11 @@
 Chaque fonctionnalité conserve sa branche sur GitHub. La branche de référence
 sert à exécuter et présenter l'ensemble du projet ; elle ne remplace pas les
 branches de fonctionnalités. Les 36 branches retirées lors du précédent
-nettoyage ont été restaurées à leurs commits exacts. Les tags restent des
-repères supplémentaires, sans remplacer les branches.
+nettoyage ont été restaurées à leurs commits exacts. Après cette restauration,
+le regroupement de trois branches de documentation et de livraison a été
+autorisé : leur contenu figure déjà dans `feature/atlas-platform` et leurs
+commits restent accessibles par les tags détaillés ci-dessous. Toutes les
+branches techniques sont conservées.
 
 L'optimisation porte sur le classement et la documentation. Aucune branche de
 fonctionnalité ne doit être supprimée ou regroupée sans demande explicite.
@@ -29,7 +32,7 @@ commit 9ee4f34 ; les changements d'organisation concernent la documentation.
 | Interface | `feature/wireframe-frontend`, `feature/angular-database-explorer`, `feature/angular-jobs-sql`, `feature/unified-source-explorer` |
 | Authentification | `feature/platform-authentication` |
 | Benchmarks | `feature/large-dataset`, `feature/reproducible-benchmarks` |
-| Déploiement et présentation | `feature/cloud-ready-containers`, `feature/release-readiness`, `feature/project-presentation` |
+| Déploiement et présentation | `feature/cloud-ready-containers`, `feature/atlas-platform` |
 
 Ce tableau sert à naviguer ; la liste complète des branches conservées figure
 ci-dessous. Les branches historiques représentent des étapes successives :
@@ -68,7 +71,6 @@ Git aux commits, sans créer de copies des fichiers du projet.
 | `feature/explicit-source-selection` | `13cad98` | `archive/2026-11-27/explicit-source-selection` |
 | `feature/hive-catalog-trino` | `783e2b2` | `archive/2026-11-27/hive-catalog-trino` |
 | `feature/jdbc-connector-plugins` | `4b99327` | `archive/2026-11-27/jdbc-connector-plugins` |
-| `feature/job-api-documentation` | `0ec9b3c` | `archive/2026-11-27/job-api-documentation` |
 | `feature/kaggle-soccer-source` | `a855677` | `archive/2026-11-27/kaggle-soccer-source` |
 | `feature/large-dataset` | `abef3df` | `archive/2026-11-27/large-dataset` |
 | `feature/minio-storage` | `45acddd` | `archive/2026-11-27/minio-storage` |
@@ -78,10 +80,8 @@ Git aux commits, sans créer de copies des fichiers du projet.
 | `feature/partitioning-csv` | `1562092` | `archive/2026-11-27/partitioning-csv` |
 | `feature/platform-authentication` | `f09ff01` | `archive/2026-11-27/platform-authentication` |
 | `feature/postgresql-connector` | `ba54c2b` | `archive/2026-11-27/postgresql-connector` |
-| `feature/project-presentation` | `9ee4f34` | `archive/2026-11-27/project-presentation` |
 | `feature/redis-analytics` | `20b2b18` | `archive/2026-11-27/redis-analytics` |
 | `feature/redis-hash-extraction` | `31047fd` | `archive/2026-11-27/redis-hash-extraction` |
-| `feature/release-readiness` | `a3e4b39` | `archive/2026-11-27/release-readiness` |
 | `feature/reproducible-benchmarks` | `a16a09a` | `archive/2026-11-27/reproducible-benchmarks` |
 | `feature/schema-exploration` | `7a00192` | `archive/2026-11-27/schema-exploration` |
 | `feature/source-test-progress` | `466c3e6` | `archive/2026-11-27/source-test-progress` |
@@ -90,6 +90,23 @@ Git aux commits, sans créer de copies des fichiers du projet.
 | `feature/unified-source-explorer` | `6130492` | `archive/2026-11-27/unified-source-explorer` |
 | `feature/unified-source-list` | `c44b03f` | `archive/2026-11-27/unified-source-list` |
 | `feature/wireframe-frontend` | `d79f35b` | `archive/2026-11-27/wireframe-frontend` |
+
+## Documentation et livraison regroupées
+
+Ces trois branches ne sont plus maintenues séparément. Leurs commits sont des
+ancêtres de `feature/atlas-platform` : aucun changement de code ni fusion
+supplémentaire n'est nécessaire pour conserver leur contenu. Leurs anciens
+noms de branches sont retirés localement et sur GitHub ; les tags restent.
+
+| Ancienne branche | Contenu conservé dans la version de référence | Tag immuable |
+|---|---|---|
+| `feature/job-api-documentation` | Documentation Swagger et corrections de validation de l'API jobs | `archive/2026-11-27/job-api-documentation` |
+| `feature/release-readiness` | Configuration, scripts, guides et preuves de vérification de livraison | `archive/2026-11-27/release-readiness` |
+| `feature/project-presentation` | Support de présentation pour le professeur | `archive/2026-11-27/project-presentation` |
+
+Les anciens liens GitHub vers ces trois noms doivent utiliser la branche de
+référence ou leur tag. Les autres branches de fonctionnalités restent disponibles,
+y compris `feature/native-source-interface`, conservée comme étape technique.
 
 ## Consulter une fonctionnalité ou reprendre son développement
 

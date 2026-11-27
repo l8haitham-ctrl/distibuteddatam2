@@ -6,7 +6,9 @@
 > `feature/atlas-platform`. Pour la stack complète actuelle, les six fichiers
 > Compose et les limites à jour, consulter d'abord le [README](../README.md).
 
-Version complete : `feature/release-readiness`, base `feature/data-quality-report`.
+Version historique de livraison : tag `archive/2026-11-27/release-readiness`,
+base `feature/data-quality-report`. La branche de livraison a été regroupée dans
+`feature/atlas-platform`.
 La branche master n'est pas fusionnee automatiquement. Seuls Git, Docker
 Desktop avec conteneurs Linux et PowerShell sont necessaires sur Windows.
 Java, Maven, Node et les tests de l'application s'executent dans Docker.

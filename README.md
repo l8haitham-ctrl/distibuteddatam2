@@ -19,6 +19,8 @@ exécuté localement avec **Docker Compose**. Le pipeline analytique associe
 > **Une branche par fonctionnalité est conservée sur GitHub.** La branche de
 > référence facilite la démonstration ; elle ne remplace pas les branches des
 > fonctionnalités. Leur classement est décrit dans l'organisation des branches.
+> Trois branches de documentation et de livraison ont été regroupées dans cette
+> version de référence ; leurs tags historiques restent disponibles.
 
 ## 1. Présentation du projet
 
