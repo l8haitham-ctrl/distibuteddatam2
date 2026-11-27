@@ -249,3 +249,9 @@ si la branche precedente n'est pas encore fusionnee, leur dependance sera
 indiquee pour permettre une revue dans le bon ordre.
 
 Depot distant : [distibuteddatam2](https://github.com/l8haitham-ctrl/distibuteddatam2).
+
+## Skills du projet
+
+Les consignes par fonctionnalité, le workflow de maintenance et les contrats API
+sont accessibles dans [les skills Atlas](.agents/skills/README.md). Le contexte
+indique les fonctionnalités et routes présentes dans cette branche.

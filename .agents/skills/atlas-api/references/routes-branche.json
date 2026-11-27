@@ -1,0 +1,42 @@
+{
+  "branch": "backend-modularization",
+  "base_commit": "d25179ed33be3fa6344af14024ba017c0a8dc199",
+  "global_contract_snapshot": "eee650a12f1895f44bcc61951babd0423cba95e1",
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/health",
+      "source": "backend/app/api/routes/health.py"
+    },
+    {
+      "method": "GET",
+      "path": "/sources",
+      "source": "backend/app/api/routes/sources.py"
+    },
+    {
+      "method": "GET",
+      "path": "/sources/{source_id}/tables",
+      "source": "backend/app/api/routes/exploration.py"
+    },
+    {
+      "method": "GET",
+      "path": "/sources/{source_id}/tables/{table}",
+      "source": "backend/app/api/routes/exploration.py"
+    },
+    {
+      "method": "POST",
+      "path": "/connections/explore",
+      "source": "backend/app/api/routes/connections.py"
+    },
+    {
+      "method": "POST",
+      "path": "/connections/test",
+      "source": "backend/app/api/routes/connections.py"
+    },
+    {
+      "method": "POST",
+      "path": "/sources/{source_id}/test",
+      "source": "backend/app/api/routes/sources.py"
+    }
+  ]
+}
