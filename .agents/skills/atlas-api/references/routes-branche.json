@@ -1,0 +1,27 @@
+{
+  "branch": "feature/database-connections",
+  "base_commit": "2596c9edb71937b2c76f8074cf3240d703f4ab9e",
+  "global_contract_snapshot": "eee650a12f1895f44bcc61951babd0423cba95e1",
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/health",
+      "source": "backend/src/main/java/com/atlas/explorer/features/health/HealthController.java"
+    },
+    {
+      "method": "GET",
+      "path": "/sources",
+      "source": "backend/src/main/java/com/atlas/explorer/features/connection/api/SourceController.java"
+    },
+    {
+      "method": "POST",
+      "path": "/connections/test",
+      "source": "backend/src/main/java/com/atlas/explorer/features/connection/api/ConnectionController.java"
+    },
+    {
+      "method": "POST",
+      "path": "/sources/{id}/test",
+      "source": "backend/src/main/java/com/atlas/explorer/features/connection/api/SourceController.java"
+    }
+  ]
+}
