@@ -419,3 +419,9 @@ Elle ajoute l'assistant d'extraction depuis une table, le suivi des jobs et
 la console Trino. Ouvrir [l'interface](http://localhost:3000/sources).
 Le [guide Angular](docs/angular-pipeline.md) detaille le parcours, les etats,
 les limites et les commandes de validation Docker. Aucune fusion dans master.
+
+## Skills du projet
+
+Les consignes par fonctionnalité, le workflow de maintenance et les contrats API
+sont accessibles dans [les skills Atlas](.agents/skills/README.md). Le contexte
+indique les fonctionnalités et routes présentes dans cette branche.
