@@ -450,3 +450,9 @@ les moteurs installes depuis `/connectors` : libelles, ports et disponibilite
 des pilotes. Le formulaire et l'explorateur utilisent ce registre ; l'ajout
 d'un moteur ne demande pas de modifier une liste TypeScript. Voir le
 [guide des plugins](docs/connector-plugins.md) et le [guide PostgreSQL](docs/postgresql-connector.md).
+
+## Skills du projet
+
+Les consignes par fonctionnalité, le workflow de maintenance et les contrats API
+sont accessibles dans [les skills Atlas](.agents/skills/README.md). Le contexte
+indique les fonctionnalités et routes présentes dans cette branche.
