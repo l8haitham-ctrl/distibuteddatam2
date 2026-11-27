@@ -1,0 +1,12 @@
+{
+  "branch": "feature/springboot-foundation",
+  "base_commit": "149d4060cae90db76978d3131a9d727627df4efe",
+  "global_contract_snapshot": "eee650a12f1895f44bcc61951babd0423cba95e1",
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/health",
+      "source": "backend/src/main/java/com/atlas/explorer/features/health/HealthController.java"
+    }
+  ]
+}
