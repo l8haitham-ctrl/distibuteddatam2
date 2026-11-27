@@ -1,6 +1,7 @@
 # Livraison locale reproductible
 
-> **Note après consolidation des branches :** ce guide conserve les preuves du
+> **Note sur les branches :** chaque fonctionnalité conserve sa branche GitHub.
+> Ce guide conserve les preuves du
 > socle historique du 23 novembre. Ses commandes Git pointent désormais vers
 > `feature/atlas-platform`. Pour la stack complète actuelle, les six fichiers
 > Compose et les limites à jour, consulter d'abord le [README](../README.md).

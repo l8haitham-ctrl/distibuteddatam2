@@ -5,9 +5,35 @@
 - `feature/atlas-platform` : version complète de référence et documentation de présentation.
 - `master` : socle historique, conservé sans fusion automatique.
 
-Cette organisation remplace les anciennes branches de progression par des tags
-d'archive. Les fichiers applicatifs de la branche complète restent identiques
-au commit 9ee4f34 ; la consolidation modifie seulement la documentation.
+Chaque fonctionnalité conserve sa branche sur GitHub. La branche de référence
+sert à exécuter et présenter l'ensemble du projet ; elle ne remplace pas les
+branches de fonctionnalités. Les 36 branches retirées lors du précédent
+nettoyage ont été restaurées à leurs commits exacts. Les tags restent des
+repères supplémentaires, sans remplacer les branches.
+
+L'optimisation porte sur le classement et la documentation. Aucune branche de
+fonctionnalité ne doit être supprimée ou regroupée sans demande explicite.
+Les fichiers applicatifs de la branche de référence restent identiques au
+commit 9ee4f34 ; les changements d'organisation concernent la documentation.
+
+## Repères par partie du projet
+
+| Partie | Branches principales à consulter |
+|---|---|
+| Socle backend | `feature/springboot-foundation`, `backend-modularization` |
+| Connexion et exploration | `feature/database-connections`, `feature/schema-exploration`, `feature/jdbc-connector-plugins` |
+| Connecteurs | `feature/postgresql-connector`, `feature/redis-analytics`, `feature/clickhouse-native-exploration`, `feature/native-source-connections` |
+| Extraction et stockage | `feature/storage-jobs`, `feature/minio-storage`, `feature/partitioning-csv`, `feature/redis-hash-extraction`, `feature/clickhouse-extraction` |
+| SQL et catalogue | `feature/hive-catalog-trino` |
+| Qualité et glossaire | `feature/data-quality-report`, `feature/business-glossary`, `feature/business-glossary-ui` |
+| Interface | `feature/wireframe-frontend`, `feature/angular-database-explorer`, `feature/angular-jobs-sql`, `feature/unified-source-explorer` |
+| Authentification | `feature/platform-authentication` |
+| Benchmarks | `feature/large-dataset`, `feature/reproducible-benchmarks` |
+| Déploiement et présentation | `feature/cloud-ready-containers`, `feature/release-readiness`, `feature/project-presentation` |
+
+Ce tableau sert à naviguer ; la liste complète des branches conservées figure
+ci-dessous. Les branches historiques représentent des étapes successives :
+leur présence ne signifie pas qu'elles contiennent toutes la plateforme complète.
 
 ## Conservation des travaux en cours
 
@@ -17,15 +43,16 @@ Les branches locales `feature/configurable-spark-execution`,
 sont sauvegardées séparément dans les stashes existants. Le prototype local
 d'architecture live reste local. Aucun stash ni volume Docker n'est supprimé.
 
-## Archives des anciennes branches
+## Branches de fonctionnalités conservées et repères d'archive
 
-Chaque tag pointe vers le commit exact de la branche avant son retrait.
+Chaque branche ci-dessous est disponible à nouveau, au commit indiqué.
+Chaque tag pointe vers ce même commit et reste un repère immuable.
 La branche `feature/database-connections` a un ancien correctif Compose exclusif :
-son commit 2596c9e est archivé sans être fusionné. Les autres références ci-dessous
+son commit 2596c9e est conservé sans être fusionné. Les autres références ci-dessous
 sont des ancêtres de la version complète. Les archives conservent des références
 Git aux commits, sans créer de copies des fichiers du projet.
 
-| Ancienne branche | Commit conservé | Tag d'archive |
+| Branche conservée | Commit de restauration | Tag d'archive |
 |---|---|---|
 | `backend-modularization` | `d25179e` | `archive/2026-11-27/backend-modularization` |
 | `feature/angular-database-explorer` | `43bee49` | `archive/2026-11-27/angular-database-explorer` |
@@ -64,19 +91,20 @@ Git aux commits, sans créer de copies des fichiers du projet.
 | `feature/unified-source-list` | `c44b03f` | `archive/2026-11-27/unified-source-list` |
 | `feature/wireframe-frontend` | `d79f35b` | `archive/2026-11-27/wireframe-frontend` |
 
-## Consulter ou restaurer une étape
+## Consulter une fonctionnalité ou reprendre son développement
 
 ```powershell
 git fetch origin --tags
+git switch feature/reproducible-benchmarks
 git show archive/2026-11-27/reproducible-benchmarks:docs/benchmark-report.md
 
 # Recréer une branche de travail si une ancienne étape doit être reprise :
 git switch -c feature/reprendre-benchmark archive/2026-11-27/reproducible-benchmarks
 ```
 
-Les anciens liens GitHub utilisant les noms de branches supprimées peuvent
-devenir invalides. Utiliser le tag correspondant ou un commit immuable. Les liens
-relatifs de la documentation de la branche de référence restent utilisables.
+Les liens GitHub utilisant les noms des branches restaurées sont de nouveau
+utilisables. Pour citer une version exacte dans un rapport, utiliser son tag ou
+son commit. Les liens relatifs de la branche de référence restent utilisables.
 
 Aucune fusion de code en cours n'a été effectuée dans master. La publication
 de la branche complète ne signifie pas que les bonus non validés sont livrés.

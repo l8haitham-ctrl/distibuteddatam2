@@ -15,6 +15,10 @@ exécuté localement avec **Docker Compose**. Le pipeline analytique associe
 > jusqu'à l'explorateur commun et le support de présentation. `master` conserve
 > le socle historique et n'a pas été fusionné automatiquement. Les travaux
 > Spark multicœur, timestamps, retry et Iceberg restent séparés et non validés.
+>
+> **Une branche par fonctionnalité est conservée sur GitHub.** La branche de
+> référence facilite la démonstration ; elle ne remplace pas les branches des
+> fonctionnalités. Leur classement est décrit dans l'organisation des branches.
 
 ## 1. Présentation du projet
 
