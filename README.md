@@ -513,3 +513,9 @@ mensuelles ne reduisent pas la latence du filtre sur ce petit jeu.
 la reconciliation Customer/Invoice/Payment entre les sources et les extractions
 Trino : completude, unicite, references, dates et soldes. Voir
 [les regles et limites du controle qualite](docs/data-quality.md).
+
+## Skills du projet
+
+Les consignes par fonctionnalité, le workflow de maintenance et les contrats API
+sont accessibles dans [les skills Atlas](.agents/skills/README.md). Le contexte
+indique les fonctionnalités et routes présentes dans cette branche.
